@@ -1,0 +1,18 @@
+# Sum of the five hard memory limits is exactly 2048 MiB. No container swap.
+# Test harness runs on the Windows host and is not application capacity.
+services:
+  backend:
+    mem_limit: 512m
+    memswap_limit: 512m
+  frontend:
+    mem_limit: 256m
+    memswap_limit: 256m
+  identity:
+    mem_limit: 64m
+    memswap_limit: 64m
+  gateway:
+    mem_limit: 32m
+    memswap_limit: 32m
+  ollama:
+    mem_limit: 1184m
+    memswap_limit: 1184m

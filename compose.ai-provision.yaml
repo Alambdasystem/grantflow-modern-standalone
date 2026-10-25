@@ -1,0 +1,4 @@
+# Used only to download model weights; return to base Compose for isolated runtime.
+services:
+  ollama:
+    networks: [isolated, edge]

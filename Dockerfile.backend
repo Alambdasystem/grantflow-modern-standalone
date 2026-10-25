@@ -1,0 +1,18 @@
+FROM python:3.12-slim-bookworm
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PIP_NO_CACHE_DIR=1 PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+WORKDIR /app
+COPY requirements-lab.txt /app/requirements-lab.txt
+RUN pip install --no-cache-dir -r requirements-lab.txt \
+    && python -m playwright install --with-deps chromium \
+    && useradd --create-home --uid 10001 lab \
+    && mkdir -p /data/uploads /data/private_documents /data/screenshots \
+    && chown -R lab:lab /data /ms-playwright
+COPY source/backend /app/backend
+COPY source/automation /app/automation
+COPY source/migration /app/migration
+COPY source/scripts /app/scripts
+COPY lab/smoke.py /lab/smoke.py
+WORKDIR /app/backend
+USER lab
+EXPOSE 8001
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--no-access-log"]

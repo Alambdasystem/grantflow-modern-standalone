@@ -1,0 +1,19 @@
+# Explicit disposable public-read test. No application or model volume mounts.
+services:
+  public-probe:
+    image: grantflow-lab-backend:local
+    profiles: [verify]
+    entrypoint: [python, /lab/public_integrations.py]
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:////tmp/public-probe.db
+      UPLOAD_DIR: /tmp/probe-uploads
+      SCREENSHOT_DIR: /tmp/probe-screenshots
+      GFM_BROWSER_PROFILE_DIR: /tmp/absent-profile
+      DEFAULT_ADMIN_USERNAME: ""
+      DEFAULT_ADMIN_PASSWORD: ""
+    volumes:
+      - ./lab:/lab:ro
+      - ./evidence:/evidence
+      - ./source/backend:/app/backend:ro
+    networks: [edge]
+    mem_limit: 512m

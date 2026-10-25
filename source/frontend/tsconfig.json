@@ -1,0 +1,62 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "incremental": true,
+    "module": "esnext",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    "strictNullChecks": true
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".next-coyf-v10/types/**/*.ts",
+    ".next-coyf-v2/types/**/*.ts",
+    ".next-coyf-v3/types/**/*.ts",
+    ".next-coyf-v4/types/**/*.ts",
+    ".next-coyf-v5/types/**/*.ts",
+    ".next-coyf-v6/types/**/*.ts",
+    ".next-coyf-v7/types/**/*.ts",
+    ".next-coyf-v8/types/**/*.ts",
+    ".next-coyf-v9/types/**/*.ts",
+    ".next-coyf/types/**/*.ts",
+    ".next-ingestion-v1/types/**/*.ts",
+    ".next-ingestion-v2/types/**/*.ts",
+    ".next-ingestion-v3/types/**/*.ts",
+    ".next-ingestion-v4/types/**/*.ts",
+    ".next-ingestion-v4a/types/**/*.ts",
+    ".next-readiness-v1/types/**/*.ts",
+    ".next-readiness-v2/types/**/*.ts",
+    ".next-readiness-v3/types/**/*.ts",
+    ".next/types/**/*.ts",
+    "next-env.d.ts",
+    ".next-readiness-v4/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "tests"
+  ]
+}
