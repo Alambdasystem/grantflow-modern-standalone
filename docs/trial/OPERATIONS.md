@@ -14,6 +14,12 @@ All commands below are for a new host and the separate `grantflow-trial` project
    [ANTHESIS.md](ANTHESIS.md). Review egress firewall rules. Supply secret files
    outside Git with restrictive permissions. Compose file secrets are mounted
    files, not an encrypted secret-management service. Do not put keys in images.
+   Verify the backend's UID 10001 can read its mounted key/CA/client-certificate
+   files without printing their contents. File-backed Compose secret ownership
+   depends on the host; a root-only source file can otherwise cause a deliberate
+   503/startup refusal. Keep private keys readable only by the intended service
+   identity. Review gateway TLS-key permissions separately. Never fix access by
+   making a secret world-readable or disabling TLS verification.
 3. Copy `deploy/.env.trial.example` to `deploy/.env.trial`. Replace every placeholder,
    set public origin/CORS to the exact HTTPS browser origin, and use immutable
    backend/frontend image references. The example intentionally cannot start a

@@ -38,6 +38,8 @@ Other checks:
 
 - Clean remote main clone at 4054e69: Compose validation and both image builds PASS.
 - Readiness branch: both image builds PASS (pinned base plus constrained Python/npm lock).
+- Independent remote readiness clone at `71e1afd`: both builds and lab/trial
+  configuration validation PASS, clean checkout afterward; see BASELINE-BUILD.md.
 - Trial local and remote Compose configuration and generated Nginx syntax: PASS
   with placeholders/throwaway certificates and dummy DNS, no deployment/traffic.
 - Real public unauthenticated provider reads: discovery PASS,
