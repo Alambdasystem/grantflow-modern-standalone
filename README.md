@@ -6,6 +6,14 @@ The default Compose project is a **synthetic local lab**, published only at `htt
 
 ## Build and reproduce
 
+Baseline `4054e69` was independently cloned and both images built before readiness
+changes: [build record](docs/BASELINE-BUILD.md). Separate-host review instructions,
+resource findings and open gates are in [trial readiness](docs/trial/READINESS.md),
+[Anthesis contracts](docs/trial/ANTHESIS.md) and [operations](docs/trial/OPERATIONS.md).
+The trial package does not authorize deployment or establish full functional parity.
+The [source file manifest](docs/FILE-MANIFEST.txt) lists every published path;
+runtime data, secrets, models and private evidence are deliberately excluded.
+
 Requires Docker with Linux containers and Compose. Package/browser/font/model downloads require build/provisioning internet access. All build COPY inputs are relative to this repository. No host Python/Node environment from the original is used.
 
 ```sh

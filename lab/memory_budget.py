@@ -1,8 +1,9 @@
-"""Host-driven 2048 MiB hard-limit test, with cgroup peaks/OOM events.
+"""Host-driven selected hard-limit test, with cgroup peaks/OOM events.
 
 Only the explicit grantflow-lab Compose project is touched. No WSL lifecycle
 commands, original endpoints, external integrations or real accounts are used.
 """
+import argparse
 import concurrent.futures
 import hashlib
 import json
@@ -14,11 +15,20 @@ import urllib.request
 import urllib.error
 import uuid
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--profile', choices=['2gb', 'candidate'], default='2gb')
+parser.add_argument('--run')
+parser.add_argument('--readiness-images', action='store_true')
+args = parser.parse_args()
+args.run = args.run or 'memory-' + args.profile
+budget_mib = 2048 if args.profile == '2gb' else 5824
 root = Path(__file__).resolve().parents[1]
 out = root / 'evidence/parity'
 base = 'http://127.0.0.1:5100'
 services = ['backend', 'frontend', 'identity', 'gateway', 'ollama']
-compose = ['docker', 'compose', '-f', 'compose.yaml', '-f', 'compose.memory-2gb.yaml']
+compose = ['docker', 'compose', '-f', 'compose.yaml', '-f', 'compose.memory-' + args.profile + '.yaml']
+if args.readiness_images:
+    compose += ['-f', 'compose.readiness-lab.yaml']
 checks, samples = [], []
 stop = threading.Event()
 
@@ -45,7 +55,7 @@ def telemetry():
 def monitor():
     while not stop.is_set():
         samples.append(telemetry())
-        (out / 'memory-2gb-samples.json').write_text(json.dumps(samples, indent=2))
+        (out / (args.run + '-samples.json')).write_text(json.dumps(samples, indent=2))
         stop.wait(2)
 
 
@@ -72,22 +82,29 @@ def check(name, fn):
     except Exception as exc:
         row = {'feature': name, 'result': 'FAIL', 'seconds': round(time.monotonic() - begin, 3), 'error_type': type(exc).__name__, 'detail': str(exc)[:160]}
     checks.append(row)
-    (out / 'memory-2gb-checks.json').write_text(json.dumps(checks, indent=2))
+    (out / (args.run + '-checks.json')).write_text(json.dumps(checks, indent=2))
     print(json.dumps(row), flush=True)
 
 
 started = time.monotonic()
 proc = subprocess.run(compose + ['up', '-d', '--force-recreate', '--wait', '--wait-timeout', '180'], cwd=root, capture_output=True, text=True)
-(out / 'memory-2gb-startup.log').write_text(proc.stdout + proc.stderr)
+(out / (args.run + '-startup.log')).write_text(proc.stdout + proc.stderr)
 initial = inspect()
 limits = {r['Name']: {'memory': r['HostConfig']['Memory'], 'memory_swap': r['HostConfig']['MemorySwap']} for r in initial}
-assert sum(v['memory'] for v in limits.values()) == 2048 * 1024 ** 2
+assert sum(v['memory'] for v in limits.values()) == budget_mib * 1024 ** 2
 assert all(v['memory'] == v['memory_swap'] for v in limits.values())
 checks.append({'feature': 'Container startup under hard limits', 'result': 'PASS' if proc.returncode == 0 else 'FAIL', 'seconds': round(time.monotonic() - started, 3)})
 thread = threading.Thread(target=monitor, daemon=True)
 thread.start()
 try:
     assert proc.returncode == 0, 'Container startup failed'
+    def readiness(expected):
+        code = "import urllib.request,urllib.error,json\ntry:\n r=urllib.request.urlopen('http://127.0.0.1:8001/ready'); print(json.dumps({'code':r.status,**json.load(r)}))\nexcept urllib.error.HTTPError as e:\n print(json.dumps({'code':e.code,**json.load(e)}))"
+        result = json.loads(subprocess.check_output(['docker','exec','grantflow-lab-backend-1','python','-c',code]))
+        assert result['code'] == (200 if expected else 503) and result['ready'] is expected
+        return result
+    if args.readiness_images:
+        check('Cold model prevents ready despite healthy containers', lambda: readiness(False))
     writer = call('POST', '/lab/session', payload={'role': 'grant_writer'})[1]['token']
     viewer = call('POST', '/lab/session', payload={'role': 'viewer'})[1]['token']
     state = json.loads((out / 'persistent-state.json').read_text())
@@ -133,25 +150,30 @@ try:
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
         futures = [executor.submit(check, 'Concurrent saved core workflow ' + str(i), lambda i=i: core(i)) for i in range(3)]
-        futures += [executor.submit(check, 'Upload, worker extraction and download during AI startup', upload), executor.submit(check, 'Cold AI inference under 2 GB aggregate budget', ai)]
+        futures += [executor.submit(check, 'Upload, worker extraction and download during AI startup', upload), executor.submit(check, 'Cold AI inference under selected aggregate budget', ai)]
         for future in futures:
             future.result()
     check('Existing persisted record remains readable', lambda: call('GET', f'/gfm-app/api/applications/{appid}', writer)[1]['notes'] == state['notes'])
+    check('Existing uploaded bytes survive container recreation', lambda: hashlib.sha256(
+        call('GET', f'/gfm-app/api/ingestion/documents/{state["document_id"]}/original', writer)[1]
+    ).hexdigest() == state['sha256'])
+    if args.readiness_images:
+        check('Exact loaded model and core report ready after actual inference', lambda: readiness(True))
 finally:
     stop.set()
     thread.join(timeout=30)
     samples.append(telemetry())
-    (out / 'memory-2gb-samples.json').write_text(json.dumps(samples, indent=2))
+    (out / (args.run + '-samples.json')).write_text(json.dumps(samples, indent=2))
     final = inspect()
     totals = [sum(c.get('current', 0) for c in s['containers']) for s in samples]
     peaks = {service: max(c.get('peak', 0) for s in samples for c in s['containers'] if c['service'] == service) for service in services}
     events = {service: {key: max(c.get('events', {}).get(key, 0) for s in samples for c in s['containers'] if c['service'] == service) for key in ['oom', 'oom_kill', 'max']} for service in services}
-    summary = {'budget_bytes': 2048 * 1024 ** 2, 'swap_disabled': True, 'limits': limits, 'checks': checks,
+    summary = {'budget_bytes': budget_mib * 1024 ** 2, 'swap_disabled': True, 'limits': limits, 'checks': checks,
         'sampled_peak_aggregate_bytes': max(totals, default=0), 'per_container_cgroup_peaks': peaks,
         'sum_noncoincident_peaks_bytes': sum(peaks.values()), 'memory_events': events,
         'containers': [{'name': r['Name'], 'restart_count': r['RestartCount'], 'oom_killed': r['State']['OOMKilled'], 'state': r['State']['Status']} for r in final],
         'result': 'PASS' if all(c['result'] == 'PASS' for c in checks) and not any(e['oom_kill'] for e in events.values()) else 'FAIL',
         'scope': 'Five application containers only; Windows client and Docker/WSL/kernel overhead excluded. Not an actual 2 GB WSL test.'}
-    (out / 'memory-2gb-summary.json').write_text(json.dumps(summary, indent=2))
+    (out / (args.run + '-summary.json')).write_text(json.dumps(summary, indent=2))
     print(json.dumps(summary), flush=True)
 raise SystemExit(0 if summary['result'] == 'PASS' else 1)

@@ -56,3 +56,5 @@
 /lab/build_parity_report.py
 /lab/build_followup_report.py
 /lab/sanitize_legacy_helpers.py
+
+!deploy/.env.trial.example

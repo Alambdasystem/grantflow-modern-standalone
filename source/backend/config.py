@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from pydantic import field_validator, Field
+from pydantic import field_validator, model_validator, Field
 from typing import Optional
 import os
 
@@ -28,6 +28,12 @@ class Settings(BaseSettings):
     ANTHESIS_GFM_INTROSPECTION_SECRET: str = ""
     ANTHESIS_IDENTITY_URL: str = "http://127.0.0.1:5000/api/gfm/introspect"
     ANTHESIS_REVOKE_URL: str = "http://127.0.0.1:5000/api/gfm/revoke"
+    ANTHESIS_GFM_INTROSPECTION_SECRET_FILE: str = ""
+    ANTHESIS_PLATFORM_ME_URL: str = ""
+    ANTHESIS_EMAIL_SAFETY_BASE_URL: str = ""
+    ANTHESIS_CA_BUNDLE: str = ""
+    ANTHESIS_ALLOWED_HOSTS: list[str] = []
+    PUBLIC_ORIGIN: str = ""
 
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./grantflow_modern.db")
@@ -41,6 +47,10 @@ class Settings(BaseSettings):
     AI_PRELOAD_MODEL: bool = False
     AI_LOAD_TIMEOUT_SECONDS: int = Field(default=120, ge=1, le=180)
     AI_INFERENCE_TIMEOUT_SECONDS: int = Field(default=120, ge=1, le=180)
+    EXPECTED_MODEL_DIGEST: str = ""
+    AI_CA_BUNDLE: str = ""
+    AI_CLIENT_CERT_FILE: str = ""
+    AI_CLIENT_KEY_FILE: str = ""
     OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
     OPENAI_BASE_URL: str = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
 
@@ -85,6 +95,42 @@ class Settings(BaseSettings):
     JUSTGRANTS_PASSWORD: Optional[str] = os.getenv("JUSTGRANTS_PASSWORD")
     FOUNDATION_CENTER_USERNAME: Optional[str] = os.getenv("FOUNDATION_CENTER_USERNAME")
     FOUNDATION_CENTER_PASSWORD: Optional[str] = os.getenv("FOUNDATION_CENTER_PASSWORD")
+
+    @model_validator(mode='after')
+    def validate_connected_trial(self):
+        if self.ENVIRONMENT not in {'standalone-trial', 'production'}:
+            return self
+        from urllib.parse import urlsplit
+        urls = [self.ANTHESIS_IDENTITY_URL, self.ANTHESIS_REVOKE_URL,
+                self.ANTHESIS_PLATFORM_ME_URL, self.ANTHESIS_EMAIL_SAFETY_BASE_URL]
+        for raw in urls:
+            url = urlsplit(raw)
+            if (url.scheme != 'https' or not url.hostname or url.hostname not in self.ANTHESIS_ALLOWED_HOSTS
+                    or url.hostname in {'localhost', '127.0.0.1', 'host.docker.internal'}
+                    or url.hostname.endswith('.invalid') or url.username or url.password or url.query or url.fragment):
+                raise ValueError('Configure explicit approved HTTPS Anthesis endpoints before a connected trial')
+        public = urlsplit(self.PUBLIC_ORIGIN)
+        if (public.scheme != 'https' or not public.hostname or public.path not in {'', '/'}
+                or public.query or public.fragment or public.username or public.password
+                or public.hostname.endswith('.invalid')):
+            raise ValueError('A public HTTPS origin is required')
+        if self.ALLOWED_ORIGINS != [self.PUBLIC_ORIGIN.rstrip('/')]:
+            raise ValueError('Trial CORS must contain only the explicit public origin')
+        if self.RUN_LEGACY_STARTUP_IMPORTS or self.DEBUG or self.DEFAULT_ADMIN_PASSWORD:
+            raise ValueError('Trial must disable legacy imports, debug and local credential seeding')
+        if not self.ANTHESIS_GFM_INTROSPECTION_SECRET_FILE or self.ANTHESIS_GFM_INTROSPECTION_SECRET:
+            raise ValueError('Trial identity service key must use a mounted secret file')
+        import re
+        if not re.fullmatch(r'[a-f0-9]{64}', self.EXPECTED_MODEL_DIGEST):
+            raise ValueError('An approved model digest is required')
+        model = urlsplit(self.OLLAMA_URL)
+        if model.username or model.password or model.query or model.fragment or model.path not in {'', '/', '/api/chat'}:
+            raise ValueError('Model URL must not contain credentials, query or an arbitrary path')
+        if model.scheme != 'https' and not (model.scheme == 'http' and model.hostname == 'ollama'):
+            raise ValueError('Use the private local model service or an HTTPS remote model endpoint')
+        if model.scheme == 'https' and not all([self.AI_CA_BUNDLE, self.AI_CLIENT_CERT_FILE, self.AI_CLIENT_KEY_FILE]):
+            raise ValueError('Remote model transport requires CA verification and mutual TLS')
+        return self
 
     class Config:
         env_file = ".env"

@@ -9,6 +9,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from auth.jwt_handler import require_admin
 from config import settings
+from services.secure_transport import anthesis_client
 
 router = APIRouter(prefix='/api/email-monitor/decision-dashboard', tags=['operator email safety'])
 
@@ -17,15 +18,17 @@ router = APIRouter(prefix='/api/email-monitor/decision-dashboard', tags=['operat
 async def read_dashboard(view: Literal['summary','recent','controls'], request: Request,
                          limit: int = Query(40,ge=1,le=500), token: dict = Depends(require_admin)):
     base = settings.ANTHESIS_IDENTITY_URL
+    platform_url = settings.ANTHESIS_PLATFORM_ME_URL or urljoin(base, '/api/auth/me')
+    operator_url = settings.ANTHESIS_EMAIL_SAFETY_BASE_URL or urljoin(base, '/api/email-monitor/decision-dashboard/')
     headers = {'Authorization': request.headers['Authorization']}
     try:
-        async with httpx.AsyncClient(timeout=8) as client:
-            identity = await client.get(urljoin(base,'/api/auth/me'),headers=headers)
+        async with anthesis_client(timeout=8) as client:
+            identity = await client.get(platform_url,headers=headers)
             if identity.status_code != 200 or identity.json().get('user',{}).get('role') != 'admin':
                 raise HTTPException(403,'Email Safety requires an Anthesis platform administrator')
-            response = await client.get(urljoin(base,f'/api/email-monitor/decision-dashboard/{view}'),
+            response = await client.get(operator_url.rstrip('/') + '/' + view,
                                         headers=headers,params={'limit':limit})
             response.raise_for_status()
             return response.json()
-    except (httpx.HTTPError, ValueError) as exc:
+    except (httpx.HTTPError, ValueError, OSError) as exc:
         raise HTTPException(503,'Anthesis Email Safety is unavailable; no email action was performed') from exc

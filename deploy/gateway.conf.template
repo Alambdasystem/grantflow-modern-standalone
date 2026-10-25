@@ -1,0 +1,34 @@
+# Template requires reviewed DNS/origin values. Never route arbitrary paths to Anthesis.
+server {
+  listen 8443 ssl;
+  server_name ${TRIAL_HOST};
+  ssl_certificate /run/tls/fullchain.pem;
+  ssl_certificate_key /run/tls/key.pem;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  client_max_body_size 21m;
+  access_log off;
+  proxy_read_timeout 420s;
+  location = /ready { proxy_pass http://backend:8001/ready; }
+  location = /health { proxy_pass http://backend:8001/health; }
+  location /gfm-app {
+    proxy_pass http://frontend:3002;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Forwarded-Host $http_host;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_buffering off;
+  }
+  # Central login must write authToken in this origin. Contract/assets/redirects
+  # must be validated in the approved sandbox before opening traffic.
+  location ~ ^/(auth/login|api/login|api/auth/login|api/refresh-token)$ {
+    proxy_pass ${ANTHESIS_LOGIN_ORIGIN};
+    proxy_ssl_verify on;
+    proxy_ssl_trusted_certificate /run/tls/anthesis-ca.pem;
+    proxy_ssl_server_name on;
+    proxy_ssl_name ${ANTHESIS_LOGIN_HOST};
+    proxy_set_header Host ${ANTHESIS_LOGIN_HOST};
+    proxy_set_header X-Forwarded-Host $http_host;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_redirect off;
+  }
+  location / { return 404; }
+}

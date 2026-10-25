@@ -9,6 +9,7 @@ import httpx
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from config import settings
+from services.secure_transport import service_key, anthesis_client
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -48,7 +49,7 @@ def decode_token(token: str) -> dict:
 
 async def validate_anthesis_identity(token: str) -> dict:
     identity_url = settings.ANTHESIS_IDENTITY_URL
-    service_secret = settings.ANTHESIS_GFM_INTROSPECTION_SECRET
+    service_secret = service_key()
     if not service_secret:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -56,7 +57,7 @@ async def validate_anthesis_identity(token: str) -> dict:
         )
 
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with anthesis_client(timeout=5.0) as client:
             response = await client.post(
                 identity_url,
                 headers={
@@ -69,7 +70,7 @@ async def validate_anthesis_identity(token: str) -> dict:
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Anthesis identity validation timed out",
         )
-    except httpx.HTTPError:
+    except (httpx.HTTPError, OSError):
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Anthesis identity validation is unavailable",
@@ -113,14 +114,14 @@ async def validate_anthesis_identity(token: str) -> dict:
 
 async def revoke_anthesis_identity(token: str) -> None:
     identity_url = settings.ANTHESIS_REVOKE_URL
-    service_secret = settings.ANTHESIS_GFM_INTROSPECTION_SECRET
+    service_secret = service_key()
     if not service_secret:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Anthesis identity validation is not configured",
         )
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with anthesis_client(timeout=5.0) as client:
             response = await client.post(
                 identity_url,
                 headers={
@@ -128,7 +129,7 @@ async def revoke_anthesis_identity(token: str) -> None:
                     "X-Anthesis-Service-Key": service_secret,
                 },
             )
-    except httpx.HTTPError:
+    except (httpx.HTTPError, OSError):
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Anthesis identity service is unavailable",

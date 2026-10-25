@@ -1,0 +1,263 @@
+{
+  "observed": "2026-10-25 America/Chicago",
+  "docker_vm": {
+    "available_cpus": 12,
+    "memory_bytes": 8280391680
+  },
+  "model": {
+    "name": "llama3.2:latest",
+    "digest": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+    "parameters": "3.2B",
+    "quantization": "Q4_K_M",
+    "context": 4096,
+    "parallelism": 1
+  },
+  "runs": [
+    {
+      "run": "memory-candidate-1",
+      "result": "PASS",
+      "budget_bytes": 6106906624,
+      "swap_disabled": true,
+      "sampled_peak_aggregate_bytes": 3427622912,
+      "per_container_cgroup_peaks": {
+        "backend": 122269696,
+        "frontend": 138031104,
+        "identity": 35971072,
+        "gateway": 17510400,
+        "ollama": 3153264640
+      },
+      "sum_noncoincident_peaks_bytes": 3467046912,
+      "memory_events": {
+        "backend": {
+          "oom": 0,
+          "oom_kill": 0,
+          "max": 0
+        },
+        "frontend": {
+          "oom": 0,
+          "oom_kill": 0,
+          "max": 0
+        },
+        "identity": {
+          "oom": 0,
+          "oom_kill": 0,
+          "max": 0
+        },
+        "gateway": {
+          "oom": 0,
+          "oom_kill": 0,
+          "max": 0
+        },
+        "ollama": {
+          "oom": 0,
+          "oom_kill": 0,
+          "max": 0
+        }
+      },
+      "containers": [
+        {
+          "name": "/grantflow-lab-backend-1",
+          "restart_count": 0,
+          "oom_killed": false,
+          "state": "running"
+        },
+        {
+          "name": "/grantflow-lab-frontend-1",
+          "restart_count": 0,
+          "oom_killed": false,
+          "state": "running"
+        },
+        {
+          "name": "/grantflow-lab-identity-1",
+          "restart_count": 0,
+          "oom_killed": false,
+          "state": "running"
+        },
+        {
+          "name": "/grantflow-lab-gateway-1",
+          "restart_count": 0,
+          "oom_killed": false,
+          "state": "running"
+        },
+        {
+          "name": "/grantflow-lab-ollama-1",
+          "restart_count": 0,
+          "oom_killed": false,
+          "state": "running"
+        }
+      ],
+      "scope": "Five application containers only; Windows client and Docker/WSL/kernel overhead excluded. Not an actual 2 GB WSL test.",
+      "checks": [
+        {
+          "feature": "Container startup under hard limits",
+          "result": "PASS",
+          "seconds": 29.594
+        },
+        {
+          "feature": "Concurrent saved core workflow 1",
+          "result": "PASS",
+          "seconds": 1.063
+        },
+        {
+          "feature": "Concurrent saved core workflow 0",
+          "result": "PASS",
+          "seconds": 1.203
+        },
+        {
+          "feature": "Concurrent saved core workflow 2",
+          "result": "PASS",
+          "seconds": 1.25
+        },
+        {
+          "feature": "Upload, worker extraction and download during AI startup",
+          "result": "PASS",
+          "seconds": 1.828
+        },
+        {
+          "feature": "Cold AI inference under selected aggregate budget",
+          "result": "PASS",
+          "seconds": 161.766
+        },
+        {
+          "feature": "Existing persisted record remains readable",
+          "result": "PASS",
+          "seconds": 0.265
+        }
+      ]
+    },
+    {
+      "run": "memory-candidate-2",
+      "result": "PASS",
+      "budget_bytes": 6106906624,
+      "swap_disabled": true,
+      "sampled_peak_aggregate_bytes": 3683676160,
+      "per_container_cgroup_peaks": {
+        "backend": 183013376,
+        "frontend": 243421184,
+        "identity": 36167680,
+        "gateway": 21671936,
+        "ollama": 3334451200
+      },
+      "sum_noncoincident_peaks_bytes": 3818725376,
+      "memory_events": {
+        "backend": {
+          "oom": 0,
+          "oom_kill": 0,
+          "max": 0
+        },
+        "frontend": {
+          "oom": 0,
+          "oom_kill": 0,
+          "max": 0
+        },
+        "identity": {
+          "oom": 0,
+          "oom_kill": 0,
+          "max": 0
+        },
+        "gateway": {
+          "oom": 0,
+          "oom_kill": 0,
+          "max": 0
+        },
+        "ollama": {
+          "oom": 0,
+          "oom_kill": 0,
+          "max": 0
+        }
+      },
+      "containers": [
+        {
+          "name": "/grantflow-lab-backend-1",
+          "restart_count": 0,
+          "oom_killed": false,
+          "state": "running"
+        },
+        {
+          "name": "/grantflow-lab-frontend-1",
+          "restart_count": 0,
+          "oom_killed": false,
+          "state": "running"
+        },
+        {
+          "name": "/grantflow-lab-identity-1",
+          "restart_count": 0,
+          "oom_killed": false,
+          "state": "running"
+        },
+        {
+          "name": "/grantflow-lab-gateway-1",
+          "restart_count": 0,
+          "oom_killed": false,
+          "state": "running"
+        },
+        {
+          "name": "/grantflow-lab-ollama-1",
+          "restart_count": 0,
+          "oom_killed": false,
+          "state": "running"
+        }
+      ],
+      "scope": "Five application containers only; Windows client and Docker/WSL/kernel overhead excluded. Not an actual 2 GB WSL test.",
+      "checks": [
+        {
+          "feature": "Container startup under hard limits",
+          "result": "PASS",
+          "seconds": 30.329
+        },
+        {
+          "feature": "Cold model prevents ready despite healthy containers",
+          "result": "PASS",
+          "seconds": 0.484
+        },
+        {
+          "feature": "Concurrent saved core workflow 2",
+          "result": "PASS",
+          "seconds": 0.844
+        },
+        {
+          "feature": "Concurrent saved core workflow 1",
+          "result": "PASS",
+          "seconds": 0.984
+        },
+        {
+          "feature": "Concurrent saved core workflow 0",
+          "result": "PASS",
+          "seconds": 0.984
+        },
+        {
+          "feature": "Upload, worker extraction and download during AI startup",
+          "result": "PASS",
+          "seconds": 2.704
+        },
+        {
+          "feature": "Cold AI inference under selected aggregate budget",
+          "result": "PASS",
+          "seconds": 88.969
+        },
+        {
+          "feature": "Existing persisted record remains readable",
+          "result": "PASS",
+          "seconds": 0.094
+        },
+        {
+          "feature": "Existing uploaded bytes survive container recreation",
+          "result": "PASS",
+          "seconds": 0.062
+        },
+        {
+          "feature": "Exact loaded model and core report ready after actual inference",
+          "result": "PASS",
+          "seconds": 0.344
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Bounded synthetic workload, not a sustained capacity/SLO certification.",
+    "No concurrent builds during measurements.",
+    "Application container allocation excludes Windows client, Docker daemon, WSL/kernel and other host overhead.",
+    "No actual 2 GB WSL or physical two-host model test.",
+    "Original processes were not capped or restarted."
+  ]
+}

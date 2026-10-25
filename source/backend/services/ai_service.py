@@ -6,6 +6,7 @@ from typing import AsyncIterator, Optional
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from config import settings
+from services.secure_transport import model_client
 
 
 class AIUnavailable(RuntimeError):
@@ -47,7 +48,7 @@ class AIService:
     def __init__(self):
         self.ollama_url = settings.OLLAMA_URL
         self.default_model = settings.DEFAULT_MODEL
-        self._client = httpx.AsyncClient(timeout=settings.AI_INFERENCE_TIMEOUT_SECONDS)
+        self._client = model_client(timeout=settings.AI_INFERENCE_TIMEOUT_SECONDS)
         self._model_load_lock = asyncio.Lock()
 
     async def _prepare_model(self, model: str) -> None:

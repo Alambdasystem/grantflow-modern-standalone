@@ -1,8 +1,8 @@
-FROM python:3.12-slim-bookworm
+FROM python:3.12-slim-bookworm@sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PIP_NO_CACHE_DIR=1 PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 WORKDIR /app
-COPY requirements-lab.txt /app/requirements-lab.txt
-RUN pip install --no-cache-dir -r requirements-lab.txt \
+COPY requirements-lab.txt requirements-linux.lock.txt /app/
+RUN pip install --no-cache-dir -r requirements-lab.txt -c requirements-linux.lock.txt \
     && python -m playwright install --with-deps chromium \
     && useradd --create-home --uid 10001 lab \
     && mkdir -p /data/uploads /data/private_documents /data/screenshots \

@@ -1,0 +1,20 @@
+# Use WITHOUT --profile local-model. Same reviewed model on an operator-owned host.
+x-remote: &remote
+  secrets:
+    - identity_key
+    - anthesis_ca
+    - model_ca
+    - model_client_cert
+    - model_client_key
+services:
+  backend:
+    <<: *remote
+  warm-model:
+    <<: *remote
+secrets:
+  model_ca:
+    file: ${MODEL_CA_FILE:?Set model CA file}
+  model_client_cert:
+    file: ${MODEL_CLIENT_CERT_FILE:?Set model client certificate}
+  model_client_key:
+    file: ${MODEL_CLIENT_KEY_FILE:?Set model client key}

@@ -1,0 +1,17 @@
+# Application allocation 5824 MiB; host/VM overhead is additional. No swap.
+services:
+  backend:
+    mem_limit: 1024m
+    memswap_limit: 1024m
+  frontend:
+    mem_limit: 512m
+    memswap_limit: 512m
+  identity:
+    mem_limit: 128m
+    memswap_limit: 128m
+  gateway:
+    mem_limit: 64m
+    memswap_limit: 64m
+  ollama:
+    mem_limit: 4096m
+    memswap_limit: 4096m

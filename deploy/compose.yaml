@@ -1,0 +1,115 @@
+name: grantflow-trial
+x-backend: &backend
+  image: ${BACKEND_IMAGE:?Set reviewed immutable backend image}
+  env_file: .env.trial
+  environment:
+    ENVIRONMENT: standalone-trial
+    DEBUG: 'false'
+    RUN_LEGACY_STARTUP_IMPORTS: 'false'
+    DEFAULT_ADMIN_PASSWORD: ''
+    ANTHESIS_GFM_INTROSPECTION_SECRET: ''
+    ANTHESIS_GFM_INTROSPECTION_SECRET_FILE: /run/secrets/identity_key
+    ANTHESIS_CA_BUNDLE: /run/secrets/anthesis_ca
+    DATABASE_URL: sqlite+aiosqlite:////data/grantflow.db
+    UPLOAD_DIR: /data/uploads
+    INGESTION_STORAGE_DIR: /data/private_documents
+    SCREENSHOT_DIR: /data/screenshots
+    GFM_BROWSER_PROFILE_DIR: /data/browser-profile
+    AI_PRELOAD_MODEL: 'true'
+    AI_LOAD_TIMEOUT_SECONDS: '180'
+    AI_INFERENCE_TIMEOUT_SECONDS: '180'
+  secrets: [identity_key, anthesis_ca]
+  volumes: [data:/data]
+  networks: [private, egress]
+  mem_limit: 1024m
+  memswap_limit: 1024m
+  security_opt: [no-new-privileges:true]
+services:
+  backend:
+    <<: *backend
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health',timeout=4)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+  warm-model:
+    <<: *backend
+    profiles: [ops]
+    entrypoint: [python, warm_model.py]
+    mem_limit: 128m
+    memswap_limit: 128m
+  storage:
+    image: ${BACKEND_IMAGE:?Set reviewed immutable backend image}
+    profiles: [ops]
+    user: '0:0'
+    entrypoint: [python, /ops/storage.py]
+    volumes: [data:/data, './storage.py:/ops/storage.py:ro', '${BACKUP_DIR:-../backups}:/backups']
+    network_mode: none
+    mem_limit: 256m
+  frontend:
+    image: ${FRONTEND_IMAGE:?Set reviewed immutable frontend image}
+    environment:
+      GFM_BACKEND_URL: http://backend:8001
+    networks: [private]
+    mem_limit: 512m
+    memswap_limit: 512m
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3002/gfm-app/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+  gateway:
+    image: nginx@sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236
+    ports: ['${TRIAL_BIND_IP:-127.0.0.1}:${TRIAL_TLS_PORT:-5443}:8443']
+    environment:
+      NGINX_ENVSUBST_FILTER: '^(TRIAL_HOST|ANTHESIS_LOGIN_HOST|ANTHESIS_LOGIN_ORIGIN)$$'
+      TRIAL_HOST: ${TRIAL_HOST:?Set trial DNS name}
+      ANTHESIS_LOGIN_HOST: ${ANTHESIS_LOGIN_HOST:?Set approved central login DNS name}
+      ANTHESIS_LOGIN_ORIGIN: ${ANTHESIS_LOGIN_ORIGIN:?Set approved HTTPS login origin}
+    volumes:
+      - ./gateway.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ${TLS_CERT_FILE:?Set mounted TLS certificate}:/run/tls/fullchain.pem:ro
+      - ${TLS_KEY_FILE:?Set mounted TLS key}:/run/tls/key.pem:ro
+      - ${ANTHESIS_CA_FILE:?Set trusted CA file}:/run/tls/anthesis-ca.pem:ro
+    networks: [private, egress]
+    mem_limit: 64m
+    memswap_limit: 64m
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, nginx, -t]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+  ollama:
+    profiles: [local-model]
+    image: ollama/ollama@sha256:dea72d1e22270fe095b68fdf756d2b489d615643c5a2eaebbc5f569181e322d8
+    environment:
+      OLLAMA_NUM_PARALLEL: '1'
+      OLLAMA_CONTEXT_LENGTH: '4096'
+    volumes: [models:/root/.ollama]
+    networks: [private]
+    mem_limit: 4096m
+    memswap_limit: 4096m
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, ollama, list]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+volumes:
+  data:
+    name: ${DATA_VOLUME:-grantflow-trial-data}
+  models:
+    name: ${MODEL_VOLUME:-grantflow-trial-models}
+networks:
+  private:
+    internal: true
+  egress: {}
+secrets:
+  identity_key:
+    file: ${IDENTITY_KEY_FILE:?Set service key file}
+  anthesis_ca:
+    file: ${ANTHESIS_CA_FILE:?Set trusted CA file}

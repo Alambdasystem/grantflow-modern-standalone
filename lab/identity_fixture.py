@@ -37,7 +37,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(200, '''<!doctype html><html><head><meta charset="utf-8"><title>Synthetic Grantflow Docker lab</title></head>
 <body style="font:18px system-ui;max-width:700px;margin:60px auto;padding:20px"><h1>Grantflow Docker lab</h1>
 <p><strong>Synthetic identity and fresh test data.</strong> This login does not use Anthesis accounts.</p>
-<p>The application containers have no external network access. Background jobs and live AI are disabled.</p>
+<p>The application containers have no external network access. Local workers and the local AI model use synthetic test data; this is not production integration access.</p>
 <button onclick="enter('admin')">Enter as synthetic administrator</button>
 <button onclick="enter('viewer')">Enter as synthetic viewer</button><p id="status"></p>
 <script>async function enter(role){const r=await fetch('/lab/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role})});

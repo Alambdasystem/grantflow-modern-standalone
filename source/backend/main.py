@@ -146,6 +146,16 @@ async def health():
 
 
 # ── 404 catch-all ─────────────────────────────────────────────────────────────
+@app.get('/ready')
+async def ready():
+    from services.model_readiness import model_status
+    core = await health()
+    model = await model_status()
+    ok = core.status_code == 200 and model['ready']
+    return JSONResponse(status_code=200 if ok else 503,
+                        content={'ready': ok, 'core_ready': core.status_code == 200, 'model': model})
+
+
 @app.exception_handler(404)
 async def not_found(request, exc):
     return JSONResponse(status_code=404, content={"detail": "Not found"})
