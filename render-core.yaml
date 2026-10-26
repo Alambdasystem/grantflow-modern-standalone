@@ -1,0 +1,62 @@
+# Durable core only; no model resource is created.
+services:
+- type: web
+  name: grantflow-modern-staging
+  runtime: docker
+  repo: https://github.com/Alambdasystem/grantflow-modern-standalone
+  branch: feat/render-staging
+  region: ohio
+  plan: 0.5c-512mb
+  dockerfilePath: ./Dockerfile.render-staging
+  dockerContext: .
+  autoDeployTrigger: 'off'
+  healthCheckPath: /health
+  disk:
+    name: grantflow-data
+    mountPath: /var/data
+    sizeGB: 1
+  envVars:
+  - key: AUTH_MODE
+    value: standalone
+  - key: ENVIRONMENT
+    value: render-standalone
+  - key: PUBLIC_ORIGIN
+    value: https://grantflow-modern-staging.onrender.com
+  - key: ALLOWED_ORIGINS
+    value: '["https://grantflow-modern-staging.onrender.com"]'
+  - key: GFM_BOOTSTRAP_TOKEN
+    generateValue: true
+  - key: SESSION_SECURE
+    value: 'true'
+  - key: GFM_DATA_ROOT
+    value: /var/data
+  - key: GFM_REQUIRE_PERSISTENT_STORAGE
+    value: 'true'
+  - key: DATABASE_URL
+    value: sqlite+aiosqlite:////var/data/grantflow.db
+  - key: UPLOAD_DIR
+    value: /var/data/uploads
+  - key: INGESTION_STORAGE_DIR
+    value: /var/data/private_documents
+  - key: SCREENSHOT_DIR
+    value: /var/data/screenshots
+  - key: GFM_BROWSER_PROFILE_DIR
+    value: /var/data/browser-profile
+  - key: DEBUG
+    value: 'false'
+  - key: RUN_LEGACY_STARTUP_IMPORTS
+    value: 'false'
+  - key: AUTOMATION_WORKER_ENABLED
+    value: 'true'
+  - key: INGESTION_LOCAL_WORKER_ENABLED
+    value: 'true'
+  - key: AI_ENABLED
+    value: 'true'
+  - key: AI_PROVIDER
+    value: alambda
+  - key: ALAMBDA_CHAT_URL
+    value: https://api.alambda.com/api/chat
+  - key: DEFAULT_MODEL
+    value: llama3.2:latest
+  - key: EXPECTED_MODEL_DIGEST
+    value: a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72

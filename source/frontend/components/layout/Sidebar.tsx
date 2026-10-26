@@ -36,6 +36,7 @@ const NAV = [
   { href: "/automation", label: "Automation", icon: Zap },
   { href: "/ai", label: "AI Assistant", icon: Bot },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/accounts", label: "Accounts", icon: ShieldCheck },
   { href: "/email-monitor", label: "Email Safety", icon: ShieldCheck },
   { href: "/gap-solutions", label: "Gap Solutions", icon: ShieldCheck },
   { href: "/docs", label: "Documentation", icon: BookOpen },
@@ -150,10 +151,11 @@ export function Sidebar() {
     setOpen(false);
     if (typeof window !== "undefined") {
       const token = window.localStorage.getItem("authToken");
+      const csrf=document.cookie.match(/(?:^|; )(__Host-gfm_csrf|gfm_csrf)=([^;]*)/);
       try {
         const response = await fetch("/gfm-app/api/auth/logout", {
           method: "POST",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: {...(token ? { Authorization: `Bearer ${token}` } : {}),...(csrf?{'X-CSRF-Token':decodeURIComponent(csrf[2])}:{})},
         });
         if (!response.ok) throw new Error("Central sign-out failed");
         logoutGrantFlowClient({
@@ -164,7 +166,7 @@ export function Sidebar() {
         });
       } catch {
         loggingOutRef.current = false;
-        window.alert("Anthesis could not confirm sign-out. Please try again.");
+        window.alert("Sign-out could not be confirmed. Please try again.");
       }
     }
   }

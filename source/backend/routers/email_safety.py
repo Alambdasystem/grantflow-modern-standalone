@@ -17,6 +17,8 @@ router = APIRouter(prefix='/api/email-monitor/decision-dashboard', tags=['operat
 @router.get('/{view}')
 async def read_dashboard(view: Literal['summary','recent','controls'], request: Request,
                          limit: int = Query(40,ge=1,le=500), token: dict = Depends(require_admin)):
+    if settings.AUTH_MODE=='standalone':
+        raise HTTPException(503,'Email Safety is not connected. Standalone sessions do not grant Anthesis operator access; no email action was performed.')
     base = settings.ANTHESIS_IDENTITY_URL
     platform_url = settings.ANTHESIS_PLATFORM_ME_URL or urljoin(base, '/api/auth/me')
     operator_url = settings.ANTHESIS_EMAIL_SAFETY_BASE_URL or urljoin(base, '/api/email-monitor/decision-dashboard/')

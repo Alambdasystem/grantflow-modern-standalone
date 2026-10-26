@@ -1,4 +1,4 @@
-# Infrastructure staging only; all API access remains closed until auth integration.
+# Independent authenticated GrantFlow; persistent disk is required before startup.
 FROM node:22-bookworm-slim@sha256:de170b39439eb0e5a3444ad7d60b015614a381e10fecae2e30ec9e735122f38d AS frontend
 ENV NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS=--max-old-space-size=2048 GFM_BACKEND_URL=http://127.0.0.1:8001 GFM_DIST_DIR=.next
 WORKDIR /frontend
@@ -16,7 +16,7 @@ RUN pip install --no-cache-dir -r requirements-lab.txt -c requirements-linux.loc
     && apt-get update && apt-get install -y --no-install-recommends nginx libstdc++6 \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --create-home --uid 10001 lab \
-    && mkdir -p /data && chown lab:lab /data /ms-playwright
+    && mkdir -p /var/data && chown lab:lab /var/data /ms-playwright
 COPY --from=frontend /usr/local/bin/node /usr/local/bin/node
 COPY --from=frontend --chown=lab:lab /frontend /frontend
 COPY source/backend /app/backend
@@ -25,10 +25,11 @@ COPY source/migration /app/migration
 COPY source/scripts /app/scripts
 COPY render-staging-supervise.py /opt/staging/supervise.py
 COPY render-staging-nginx.conf /opt/staging/nginx.conf
-COPY render-staging-login.html /opt/staging/login.html
-COPY render-staging-entry.py /app/backend/staging_entry.py
-ENV ENVIRONMENT=render-staging DEBUG=false RUN_LEGACY_STARTUP_IMPORTS=false AUTOMATION_WORKER_ENABLED=false INGESTION_LOCAL_WORKER_ENABLED=false \
-    DATABASE_URL=sqlite+aiosqlite:////data/grantflow-staging.db UPLOAD_DIR=/data/uploads INGESTION_STORAGE_DIR=/data/private_documents SCREENSHOT_DIR=/data/screenshots GFM_BROWSER_PROFILE_DIR=/data/browser-profile
-USER lab
+COPY deploy/storage.py /opt/grantflow/storage.py
+ENV ENVIRONMENT=render-standalone AUTH_MODE=standalone DEBUG=false RUN_LEGACY_STARTUP_IMPORTS=false AUTOMATION_WORKER_ENABLED=true INGESTION_LOCAL_WORKER_ENABLED=true \
+    GFM_DATA_ROOT=/var/data GFM_REQUIRE_PERSISTENT_STORAGE=true SESSION_SECURE=true AI_ENABLED=false \
+    DATABASE_URL=sqlite+aiosqlite:////var/data/grantflow.db UPLOAD_DIR=/var/data/uploads INGESTION_STORAGE_DIR=/var/data/private_documents SCREENSHOT_DIR=/var/data/screenshots GFM_BROWSER_PROFILE_DIR=/var/data/browser-profile
+# Supervisor initializes fresh disk ownership, then drops to UID/GID 10001.
+USER root
 EXPOSE 10000
 CMD ["python", "/opt/staging/supervise.py"]

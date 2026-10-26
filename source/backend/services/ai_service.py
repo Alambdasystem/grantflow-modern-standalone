@@ -59,6 +59,13 @@ class AIService:
         provider restart. Serialize it so concurrent callers do not stampede a
         cold provider. Normal request error handling remains fail-closed.
         """
+        if settings.AUTH_MODE=='standalone':
+            if not settings.AI_ENABLED:
+                raise AIUnavailable('AI is not configured. Your saved work remains available.')
+            from services.model_readiness import model_status
+            status=await model_status()
+            if status['reason'] not in {'ready','model_not_loaded'}:
+                raise AIUnavailable('The approved AI model is not available yet. Try again after model readiness is verified.')
         if not settings.AI_PRELOAD_MODEL:
             return
         base = self.ollama_url.rstrip('/')
@@ -163,6 +170,11 @@ class AIService:
         return "\n\n".join(parts)
 
     async def generate(self, task: str, context: dict, model: Optional[str] = None, payload=None) -> str:
+        if settings.AI_PROVIDER == 'alambda':
+            return await self.chat([
+                {'role': 'system', 'content': self._system_prompt(task)},
+                {'role': 'user', 'content': self._build_context_text(context) or 'Generate content for this task.'},
+            ], model=model)
         model = model or self.default_model
         system = self._system_prompt(task)
         user_text = self._build_context_text(context)
@@ -197,6 +209,9 @@ class AIService:
     async def stream_generate(
         self, task: str, context: dict, model: Optional[str] = None
     ) -> AsyncIterator[str]:
+        if settings.AI_PROVIDER == 'alambda':
+            yield await self.generate(task, context, model=model)
+            return
         model = model or self.default_model
         system = self._system_prompt(task)
         user_text = self._build_context_text(context)
@@ -245,6 +260,12 @@ class AIService:
             raise AIUnavailable("AI stream failed. Incomplete output must not be used as a finished draft.") from exc
 
     async def chat(self, messages: list[dict], model: Optional[str] = None) -> str:
+        if settings.AI_PROVIDER == 'alambda':
+            from services.alambda_chat import chat
+            try:
+                return await chat(messages, model=model)
+            except Exception:
+                raise AIUnavailable('Alambda chat unavailable. Please retry later.') from None
         model = model or self.default_model
         try:
             await self._prepare_model(model)
@@ -267,6 +288,9 @@ class AIService:
     async def stream_chat(
         self, messages: list[dict], model: Optional[str] = None
     ) -> AsyncIterator[str]:
+        if settings.AI_PROVIDER == 'alambda':
+            yield await self.chat(messages, model=model)
+            return
         model = model or self.default_model
         try:
             await self._prepare_model(model)

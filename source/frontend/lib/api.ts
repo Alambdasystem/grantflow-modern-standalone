@@ -14,7 +14,7 @@ export const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: false,
+  withCredentials: true,
 });
 
 // Keep older feature callers on the same central-token/interceptor path.
@@ -34,15 +34,28 @@ api.interceptors.request.use((config) => {
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    const csrf = document.cookie.match(/(?:^|; )(__Host-gfm_csrf|gfm_csrf)=([^;]*)/);
+    if (csrf) config.headers['X-CSRF-Token'] = decodeURIComponent(csrf[2]);
   }
   return config;
 });
 
 // Handle 401 → redirect to /login (Next applies the configured basePath)
+let refreshing: Promise<unknown> | null = null;
 api.interceptors.response.use(
   (res) => res,
-  (err) => {
+  async (err) => {
     if (err.response?.status === 401 && typeof window !== "undefined") {
+      const config=err.config;
+      if (localStorage.getItem('gfm_session_hint') && !config?._gfmRetried && !String(config?.url).startsWith('/api/auth/')) {
+        const csrf=document.cookie.match(/(?:^|; )(__Host-gfm_csrf|gfm_csrf)=([^;]*)/);
+        config._gfmRetried=true;
+        try {
+          if (!refreshing) refreshing=axios.post('/gfm-app/api/auth/refresh',{}, {withCredentials:true,headers:{'X-CSRF-Token':csrf?decodeURIComponent(csrf[2]):''}}).finally(()=>{refreshing=null;});
+          await refreshing;
+          return api.request(config);
+        } catch { /* Clear the UI hint; server remains authoritative. */ }
+      }
       clearGrantFlowBrowserState({
         localStorage: window.localStorage,
         sessionStorage: window.sessionStorage,

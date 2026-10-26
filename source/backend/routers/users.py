@@ -1,5 +1,6 @@
 """Users & Auth router."""
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
+from config import settings
 from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -19,7 +20,11 @@ auth_router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 @auth_router.post("/login")
-async def login():
+async def login(request:Request,response:Response,payload:LoginRequest|None=None):
+    if settings.AUTH_MODE=='standalone':
+        from auth.standalone import login as standalone_login
+        if not payload: raise HTTPException(422,'Username and password are required')
+        return await standalone_login(payload,request,response)
     raise HTTPException(
         status_code=status.HTTP_410_GONE,
         detail="GrantFlow sign-in moved to Anthesis. Open /auth/login?next=/gfm-app/dashboard",
@@ -28,8 +33,12 @@ async def login():
 
 @auth_router.post("/logout")
 async def logout(
+    request:Request,response:Response,
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ):
+    if settings.AUTH_MODE=='standalone':
+        from auth.standalone import logout as standalone_logout
+        return await standalone_logout(request,response)
     if not credentials:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     await validate_anthesis_identity(credentials.credentials)

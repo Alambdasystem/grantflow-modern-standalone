@@ -2,7 +2,15 @@
 
 Independent source-only repository for the isolated Modern application. It has no inherited project history, production database, real account store, uploads, credentials, model cache or private audit evidence. The original installation is outside this repository and is not a build dependency.
 
-The default Compose project is a **synthetic local lab**, published only at `http://127.0.0.1:5100/auth/login`. Its identity fixture is deliberately not production authentication. No connected deployment or original traffic cutover is authorized by these files.
+For the actual independently authenticated Render application, use
+[Render standalone deployment](docs/RENDER-STANDALONE-DEPLOYMENT.md) and root
+`render.yaml`. This runs real password/session authentication, the original
+Modern frontend/backend and workers, SQLite/uploads on a required persistent
+disk, and server-side Alambda chat. It creates no separate paid model service.
+An existing Render service must have its plan, disk, environment and health
+check configured explicitly; committing a Blueprint alone does not apply it.
+
+The default Compose project is a **synthetic local lab**, published only at `http://127.0.0.1:5100/auth/login`. Its identity fixture is deliberately not production authentication. Use the separate Render configuration for live authentication. No original traffic cutover is performed by these files.
 
 ## Build and reproduce
 

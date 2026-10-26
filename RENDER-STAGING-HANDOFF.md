@@ -1,5 +1,12 @@
 # Render staging and remaining integration work
 
+**Superseded implementation:** the current branch replaces this historical
+scaffold with independently authenticated GrantFlow Modern. See
+[standalone deployment](docs/RENDER-STANDALONE-DEPLOYMENT.md) for the required
+persistent disk, secure provisioning, Alambda chat, operations and release
+gates. The paragraphs below describe the earlier staging placeholder, not the
+current Dockerfile. A code change alone does not establish a live deployment.
+
 The `feat/render-staging` branch adds `Dockerfile.render-staging`: the existing Next.js frontend and FastAPI backend behind an Nginx listener. It initializes a fresh SQLite schema at `/data/grantflow-staging.db`. It does not import existing data, accounts, uploads, or model files. Staging workers are disabled and every backend route except `/health` returns 503. The public `/auth/login` page explains that sign-in is pending; it never collects credentials. `/ready` deliberately returns 503 until a connected deployment replaces this scaffold.
 
 Without an attached Render persistent disk, `/data` is ephemeral. This scaffold cannot accept user records and must not be described as a usable or durable grant-management deployment. Attach a paid persistent disk and verify UID 10001 write access before enabling live operations. Startup recreates the empty schema on ephemeral storage; this is not data recovery.

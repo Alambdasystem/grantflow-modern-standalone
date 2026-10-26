@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // CPU inference can take longer than Next's default rewrite timeout.
-  experimental: { proxyTimeout: 420_000, middlewareClientMaxBodySize: 21 * 1024 * 1024 },
+  experimental: { proxyTimeout: 1_260_000, middlewareClientMaxBodySize: 21 * 1024 * 1024 },
   distDir: process.env.GFM_DIST_DIR || ".next",
   basePath: "/gfm-app",
   assetPrefix: "/gfm-app",

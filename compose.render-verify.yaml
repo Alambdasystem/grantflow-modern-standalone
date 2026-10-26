@@ -1,0 +1,36 @@
+# Local acceptance only. The public service uses render.yaml.
+name: grantflow-render-verify
+services:
+  app:
+    image: gfm-render-standalone:local
+    env_file: .private/render-verify.env
+    ports: ['127.0.0.1:5200:5200']
+    volumes:
+      - data:/var/data
+      - ./.private/render-verify-nginx.conf:/opt/staging/nginx.conf:ro
+      - ./.private/tls-check:/test-certs:ro
+    networks: [test, lab-model]
+    mem_limit: 512m
+    memswap_limit: 512m
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request,ssl; urllib.request.urlopen('https://localhost:5200/health',timeout=4,context=ssl._create_unverified_context())"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  browser:
+    image: grantflow-lab-backend:local
+    profiles: [verify]
+    entrypoint: [python, /lab/render_acceptance.py]
+    network_mode: service:app
+    volumes:
+      - ./lab:/lab:ro
+      - ./.private:/private
+      - ./evidence:/evidence
+    mem_limit: 768m
+volumes:
+  data:
+networks:
+  test: {}
+  lab-model:
+    external: true
+    name: grantflow-lab_isolated

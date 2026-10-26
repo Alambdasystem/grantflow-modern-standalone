@@ -1,6 +1,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { NextActions } from "@/components/NextActions";
+import RuntimeNotice from '@/components/RuntimeNotice';
 import { motion } from "framer-motion";
 import {
   DashboardStats,
@@ -50,6 +51,7 @@ export default function DashboardPage() {
   return (
     <div className="p-4 sm:p-6 space-y-6">
       <NextActions />
+      <RuntimeNotice />
       <motion.section
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}

@@ -9,6 +9,21 @@ class Settings(BaseSettings):
     APP_VERSION: str = "2.0.0"
     DEBUG: bool = False
     ENVIRONMENT: str = "development"
+    AUTH_MODE: str = "anthesis"
+    SESSION_SECURE: bool = True
+    SESSION_ACCESS_SECONDS: int = Field(default=900, ge=60, le=3600)
+    SESSION_ABSOLUTE_SECONDS: int = Field(default=604800, ge=3600, le=604800)
+    GFM_BOOTSTRAP_TOKEN: str = ""
+    GFM_BOOTSTRAP_TOKEN_FILE: str = ""
+    GFM_DATA_ROOT: str = "/var/data"
+    GFM_REQUIRE_PERSISTENT_STORAGE: bool = True
+    AI_ENABLED: bool = False
+    AI_PROVIDER: str = 'ollama'
+    ALAMBDA_CHAT_URL: str = 'https://api.alambda.com/api/chat'
+    ALAMBDA_API_TOKEN: str = ''
+    ALAMBDA_API_TOKEN_FILE: str = ''
+    ALAMBDA_MODEL: str = ''
+    GFM_MODEL_HOST: str = ""
     RUN_LEGACY_STARTUP_IMPORTS: bool = False
     AUTOMATION_WORKER_ENABLED: bool = True
     AUTOMATION_CONCURRENCY: int = Field(default=2, ge=1, le=16)
@@ -45,8 +60,8 @@ class Settings(BaseSettings):
     DEFAULT_MODEL: str = os.getenv("DEFAULT_MODEL", "llama3.2")
     # Lab opt-in: load a cold model before starting the inference deadline.
     AI_PRELOAD_MODEL: bool = False
-    AI_LOAD_TIMEOUT_SECONDS: int = Field(default=120, ge=1, le=180)
-    AI_INFERENCE_TIMEOUT_SECONDS: int = Field(default=120, ge=1, le=180)
+    AI_LOAD_TIMEOUT_SECONDS: int = Field(default=120, ge=1, le=600)
+    AI_INFERENCE_TIMEOUT_SECONDS: int = Field(default=120, ge=1, le=600)
     EXPECTED_MODEL_DIGEST: str = ""
     AI_CA_BUNDLE: str = ""
     AI_CLIENT_CERT_FILE: str = ""
@@ -98,6 +113,38 @@ class Settings(BaseSettings):
 
     @model_validator(mode='after')
     def validate_connected_trial(self):
+        if self.AI_PROVIDER not in {'ollama', 'alambda'}:
+            raise ValueError('Unknown AI provider')
+        if self.AI_PROVIDER == 'alambda':
+            from urllib.parse import urlsplit
+            remote = urlsplit(self.ALAMBDA_CHAT_URL)
+            if (remote.scheme != 'https' or remote.hostname != 'api.alambda.com'
+                    or remote.port not in {None, 443} or remote.path != '/api/chat'
+                    or remote.username or remote.password or remote.query or remote.fragment):
+                raise ValueError('Alambda chat requires the approved HTTPS endpoint')
+        if self.AUTH_MODE not in {'anthesis', 'standalone'}:
+            raise ValueError('Unknown authentication mode')
+        if self.AUTH_MODE == 'standalone':
+            if not self.DATABASE_URL.startswith('sqlite+aiosqlite:///'):
+                raise ValueError('Standalone sessions currently require the reviewed SQLite storage configuration')
+            import re
+            if self.GFM_MODEL_HOST:
+                if not re.fullmatch(r'[A-Za-z0-9.-]+',self.GFM_MODEL_HOST):
+                    raise ValueError('Invalid private model host')
+                self.OLLAMA_URL='http://'+self.GFM_MODEL_HOST+':11434'
+            if self.AI_ENABLED and self.AI_PROVIDER == 'ollama' and not re.fullmatch(r'[a-f0-9]{64}',self.EXPECTED_MODEL_DIGEST):
+                raise ValueError('Approve an exact model digest before enabling AI')
+            from urllib.parse import urlsplit
+            public = urlsplit(self.PUBLIC_ORIGIN)
+            if (not public.hostname or public.username or public.password or public.query or public.fragment
+                    or public.path not in {'', '/'} or public.scheme not in {'http', 'https'}):
+                raise ValueError('An explicit standalone public origin is required')
+            if self.ENVIRONMENT == 'render-standalone' and (public.scheme != 'https' or not self.SESSION_SECURE
+                    or self.DEBUG or self.RUN_LEGACY_STARTUP_IMPORTS or self.DEFAULT_ADMIN_PASSWORD or not self.GFM_REQUIRE_PERSISTENT_STORAGE):
+                raise ValueError('Render requires secure standalone sessions and no legacy seeding')
+            if self.ALLOWED_ORIGINS != [self.PUBLIC_ORIGIN.rstrip('/')]:
+                raise ValueError('Standalone CORS must match its public origin')
+            return self
         if self.ENVIRONMENT not in {'standalone-trial', 'production'}:
             return self
         from urllib.parse import urlsplit
@@ -136,6 +183,7 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = True
         extra = "ignore"
+        hide_input_in_errors = True
 
 
 settings = Settings()

@@ -40,7 +40,7 @@ export function isGrantFlowLoginPath(pathname?: string | null): boolean {
 
 export function hasGrantFlowToken(storage?: StorageLike | null): boolean {
   storage?.removeItem("gfm_token");
-  return Boolean(storage?.getItem(GRANTFLOW_TOKEN_KEY));
+  return Boolean(storage?.getItem(GRANTFLOW_TOKEN_KEY) || storage?.getItem('gfm_session_hint'));
 }
 
 export function clearGrantFlowBrowserState(options: {

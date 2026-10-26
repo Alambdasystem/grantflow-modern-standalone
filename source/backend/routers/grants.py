@@ -11,10 +11,27 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from db.database import get_db, AsyncSessionLocal
 from models.models import Grant, GrantStatus, Organization, User, OrganizationRecord
 from schemas.schemas import GrantOut, GrantSearch
-from auth.jwt_handler import get_current_user_token
+from auth.jwt_handler import get_current_user_token, require_admin
+from pydantic import BaseModel, Field, HttpUrl
 from automation.agents.grant_scraper import GrantScraperAgent
 
 router = APIRouter(prefix="/api/grants", tags=["grants"])
+
+
+class ManualOpportunity(BaseModel):
+    title: str = Field(min_length=3,max_length=500)
+    funding_agency: str = Field(default='',max_length=255)
+    description: str = Field(default='',max_length=20000)
+    source_url: HttpUrl | None = None
+    amount: float | None = Field(default=None,ge=0,allow_inf_nan=False)
+
+
+@router.post('/',response_model=GrantOut,status_code=201)
+async def create_opportunity(payload:ManualOpportunity,db:AsyncSession=Depends(get_db),identity:dict=Depends(require_admin)):
+    record=Grant(**payload.model_dump(exclude={'source_url'}),source_url=str(payload.source_url) if payload.source_url else None,
+                 status=GrantStatus.active,category='General',tags=[])
+    db.add(record);await db.commit();await db.refresh(record)
+    return record
 
 
 @router.get('/{grant_id}/workspace')

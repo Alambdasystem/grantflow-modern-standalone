@@ -4,6 +4,9 @@ from services.secure_transport import model_client
 
 
 async def model_status():
+    if settings.AI_PROVIDER == 'alambda':
+        from services.alambda_chat import status
+        return status()
     base = settings.OLLAMA_URL.rstrip('/').removesuffix('/api/chat')
     name = settings.DEFAULT_MODEL
     if ':' not in name:

@@ -145,17 +145,17 @@ async def get_current_user_token(
     request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme),
 ) -> dict:
-    if not credentials:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    identity = await validate_anthesis_identity(credentials.credentials)
+    if settings.AUTH_MODE == 'standalone':
+        from auth.standalone import authorize
+        identity = await authorize(request)
+    else:
+        if not credentials:
+            raise HTTPException(status_code=401, detail='Not authenticated',headers={'WWW-Authenticate':'Bearer'})
+        identity = await validate_anthesis_identity(credentials.credentials)
     read_only_post = request.method.upper() == 'POST' and request.url.path in {'/api/grants/search', '/api/ai/match-grants'}
     if request.method.upper() in {"POST", "PUT", "PATCH", "DELETE"} and not read_only_post:
         if identity.get('role') == 'viewer':
-            raise HTTPException(status_code=403, detail='Read-only GrantFlow role; ask a Rubix administrator for writer access')
+            raise HTTPException(status_code=403, detail='Read-only GrantFlow role; ask an administrator for writer access')
         access = identity["grantflow_access"]
         if "write" not in access and "all" not in access:
             raise HTTPException(

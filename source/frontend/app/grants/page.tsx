@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Search, ExternalLink, Sparkles, RefreshCw, Building2, DollarSign, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import GrantDetails from "@/components/GrantDetails";
+import { FormEvent } from 'react';
 
 export default function GrantsPage() {
   const queryClient = useQueryClient();
@@ -20,6 +21,14 @@ export default function GrantsPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [applyingId, setApplyingId] = useState<number | null>(null);
+  const me=useQuery<{role:string}>({queryKey:['me'],queryFn:()=>api.get('/api/auth/me').then(r=>r.data)});
+  const [showManual,setShowManual]=useState(false);
+  const [manualError,setManualError]=useState('');
+  async function saveOpportunity(e:FormEvent<HTMLFormElement>){
+    e.preventDefault();setManualError('');const f=new FormData(e.currentTarget);
+    try{await api.post('/api/grants/',{title:f.get('title'),funding_agency:f.get('funding_agency'),description:f.get('description'),source_url:f.get('source_url')||null});setShowManual(false);await queryClient.invalidateQueries({queryKey:['grants']});}
+    catch{setManualError('Opportunity could not be saved. Check the fields and your administrator access.');}
+  }
 
   const {
     data: grants = [],
@@ -106,6 +115,16 @@ export default function GrantsPage() {
                   <Badge variant="outline" className="border-emerald-300/40 bg-emerald-500/10 text-emerald-100">Live Public Feeds</Badge>
                 </div>
                 <h1 className="text-3xl font-semibold text-zinc-50">Grant Discovery Engine</h1>
+                {me.data?.role==='admin'&&<Button type="button" onClick={()=>setShowManual(!showManual)}>Add opportunity</Button>}
+                {showManual&&<form onSubmit={saveOpportunity} className="space-y-3 rounded border border-slate-700 p-4">
+                  <label className="block">Opportunity title<Input name="title" required minLength={3} maxLength={500}/></label>
+                  <label className="block">Funding agency<Input name="funding_agency" maxLength={255}/></label>
+                  <label className="block">Source URL<Input name="source_url" type="url"/></label>
+                  <label className="block">Description<textarea name="description" maxLength={20000} className="block w-full bg-slate-900 p-2"/></label>
+                  <p className="text-xs text-slate-300">Opportunities are shared catalog records. Keep private proposal details in an application.</p>
+                  {manualError&&<p role="alert">{manualError}</p>}
+                  <Button type="submit">Save opportunity</Button>
+                </form>}
                 <p className="text-zinc-200 text-sm max-w-2xl">
                   Search sourced opportunities, queue fresh listings, and compare evidence against your organization profile.
                 </p>

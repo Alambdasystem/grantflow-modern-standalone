@@ -13,7 +13,8 @@ for _stream in (sys.stdout, sys.stderr):
         _stream.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
         pass
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from auth.jwt_handler import get_current_user_token
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
@@ -50,6 +51,16 @@ from routers.email_safety import router as email_safety_router
 async def lifespan(app: FastAPI):
     # ── Startup ──────────────────────────────────────────────────────────────
     await init_db()
+    if settings.AUTH_MODE=='standalone':
+        from db.database import AsyncSessionLocal
+        from models.auth_models import AuthControl
+        from pathlib import Path
+        async with AsyncSessionLocal() as db:
+            control=await db.get(AuthControl,1)
+            if not control or not control.bootstrapped:
+                secret=Path(settings.GFM_BOOTSTRAP_TOKEN_FILE).read_text().strip() if settings.GFM_BOOTSTRAP_TOKEN_FILE else settings.GFM_BOOTSTRAP_TOKEN
+                if len(secret)<32:
+                    raise RuntimeError('Set a private one-time GFM_BOOTSTRAP_TOKEN of at least 32 characters before first startup')
 
     # Seed admin user + portal credentials from env vars
     try:
@@ -103,6 +114,8 @@ app.add_middleware(
 
 # ── Routers ───────────────────────────────────────────────────────────────────
 app.include_router(auth_router)
+from auth.standalone import router as standalone_auth_router
+app.include_router(standalone_auth_router)
 app.include_router(users_router)
 app.include_router(grants_router)
 app.include_router(applications_router)
@@ -150,10 +163,17 @@ async def health():
 async def ready():
     from services.model_readiness import model_status
     core = await health()
-    model = await model_status()
+    model = await model_status() if settings.AUTH_MODE!='standalone' or settings.AI_ENABLED else {'ready':False,'reason':'not_configured'}
     ok = core.status_code == 200 and model['ready']
     return JSONResponse(status_code=200 if ok else 503,
                         content={'ready': ok, 'core_ready': core.status_code == 200, 'model': model})
+
+
+@app.get('/api/runtime')
+async def runtime(identity:dict=Depends(get_current_user_token)):
+    from services.model_readiness import model_status
+    model=await model_status() if settings.AI_ENABLED else {'ready':False,'reason':'not_configured'}
+    return {'authentication':settings.AUTH_MODE,'ai':model,'email_safety_connected':settings.AUTH_MODE=='anthesis'}
 
 
 @app.exception_handler(404)
