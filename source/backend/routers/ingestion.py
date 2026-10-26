@@ -19,6 +19,29 @@ import difflib
 router=APIRouter(prefix='/api/ingestion',tags=['document ingestion'])
 
 
+@router.get('/legacy-documents')
+async def legacy_documents(db:AsyncSession=Depends(get_db),token:dict=Depends(get_current_user_token)):
+    # Request-local ownership filtering applies to Document, including historical
+    # organization evidence that predates the ingestion worker/index.
+    rows=(await db.execute(select(Document).where(~Document.id.in_(select(Item.document_id).where(Item.document_id.is_not(None))))
+        .order_by(Document.id))).scalars().all()
+    return [{'id':d.id,'name':d.original_filename or d.filename,'application_id':d.application_id,
+        'document_type':d.document_type,'size':d.file_size,'extracted_text':d.extracted_text,
+        'ai_summary':d.ai_summary,'created_at':d.created_at} for d in rows]
+
+
+@router.get('/legacy-documents/{id}/original')
+async def legacy_original(id:int,db:AsyncSession=Depends(get_db),token:dict=Depends(get_current_user_token)):
+    from pathlib import Path
+    from config import settings
+    doc=await db.get(Document,id)
+    if not doc or not doc.file_path: raise HTTPException(404,'Document not found')
+    root=Path(settings.UPLOAD_DIR).resolve();path=Path(doc.file_path).resolve()
+    if root not in path.parents or not path.is_file(): raise HTTPException(404,'Original unavailable')
+    return FileResponse(path,filename=doc.original_filename or doc.filename,media_type='application/octet-stream',
+        headers={'X-Content-Type-Options':'nosniff','Cache-Control':'no-store'})
+
+
 async def owned(db,token,id):
     user,org=await scope(db,token)
     item=(await db.execute(select(Item).where(Item.id==id,Item.organization_id==org.id))).scalar_one_or_none()

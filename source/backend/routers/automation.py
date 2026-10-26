@@ -42,6 +42,13 @@ async def queue_status(db: AsyncSession = Depends(get_db), token: dict = Depends
 
 async def _run_automation_job(job_id: int):
     """Background task that imports and runs the Playwright orchestrator."""
+    from db.database import AsyncSessionLocal
+    from services.migration_safety import held
+    async with AsyncSessionLocal() as safety_db:
+        if await held(safety_db):
+            await safety_db.execute(update(AutomationJob).where(AutomationJob.id==job_id).values(status=AutomationJobStatus.paused))
+            await safety_db.commit()
+            return
     try:
         # Lazy import to keep startup fast
         backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))

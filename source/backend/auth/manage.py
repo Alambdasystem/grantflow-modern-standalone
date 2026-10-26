@@ -17,12 +17,13 @@ async def run(username,enable):
         raise RuntimeError('Recovery is restricted to the standalone data root')
     from db.database import AsyncSessionLocal
     from models.models import User
-    from models.auth_models import AuthSession,AuthRate
+    from models.auth_models import AuthSession,AuthRate,MigratedAccount
     from auth.standalone import password_hash,digest
     from sqlalchemy import select,delete
     async with AsyncSessionLocal() as db:
-        user=await db.scalar(select(User).where(User.username==username,User.identity_id.like('standalone:%')))
-        if not user: raise RuntimeError('Standalone user not found')
+        user=await db.scalar(select(User).where(User.username==username))
+        if not user or not ((user.identity_id or '').startswith('standalone:') or await db.get(MigratedAccount,user.id)):
+            raise RuntimeError('Standalone or explicitly migrated user not found')
         password=getpass.getpass('New password: ')
         if password!=getpass.getpass('Confirm password: '): raise RuntimeError('Passwords differ')
         user.hashed_password=await asyncio.to_thread(password_hash,password)

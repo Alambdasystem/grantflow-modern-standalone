@@ -22,6 +22,11 @@ async def run_job(job_id: int, events: dict) -> None:
     Writes progress events to the shared `events` dict used by the SSE stream.
     """
     async with AsyncSessionLocal() as db:
+        from services.migration_safety import held
+        if await held(db):
+            await db.execute(update(AutomationJob).where(AutomationJob.id==job_id).values(status=AutomationJobStatus.paused))
+            await db.commit()
+            return
         result = await db.execute(select(AutomationJob).where(AutomationJob.id == job_id))
         job = result.scalar_one_or_none()
         if not job:

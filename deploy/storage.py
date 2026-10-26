@@ -11,6 +11,7 @@ import shutil
 import sqlite3
 import tempfile
 import zipfile
+from contextlib import closing
 
 
 def digest(path):
@@ -31,7 +32,7 @@ def backup(data, archive, database='grantflow.db'):
         raise ValueError('Symlinks are not supported')
     with tempfile.TemporaryDirectory() as temp:
         snap = Path(temp) / 'snapshot.db'
-        with sqlite3.connect(f'file:{(data / database).resolve().as_posix()}?mode=ro', uri=True) as src, sqlite3.connect(snap) as dst:
+        with closing(sqlite3.connect(f'file:{(data / database).resolve().as_posix()}?mode=ro', uri=True)) as src, closing(sqlite3.connect(snap)) as dst:
             src.backup(dst)
             if dst.execute('PRAGMA integrity_check').fetchone()[0] != 'ok':
                 raise ValueError('Database integrity check failed')
@@ -71,7 +72,7 @@ def restore(archive, target):
         db = Path(temp) / manifest['database']
         if manifest['database'] not in hashes:
             raise ValueError('Missing database')
-        with sqlite3.connect(db) as conn:
+        with closing(sqlite3.connect(db)) as conn:
             if conn.execute('PRAGMA integrity_check').fetchone()[0] != 'ok' or conn.execute('PRAGMA foreign_key_check').fetchall():
                 raise ValueError('Database integrity/foreign key failure')
         target.mkdir(parents=True, exist_ok=True)

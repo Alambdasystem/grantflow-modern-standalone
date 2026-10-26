@@ -1,5 +1,5 @@
 """Standalone identities use existing User/Organization; credentials never leave the server."""
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON
 from db.database import Base
 
 
@@ -39,3 +39,22 @@ class SchemaVersion(Base):
     __tablename__ = 'schema_versions'
     version = Column(Integer, primary_key=True)
     applied_at = Column(Integer, nullable=False)
+
+
+class MigratedAccount(Base):
+    """Explicit source-ID mapping; never infer an account link during login."""
+    __tablename__ = 'auth_migrated_accounts'
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    source_identity = Column(String(255), nullable=False)
+    credential_source = Column(String(100), nullable=False)
+    login_alias = Column(String(255), unique=True, nullable=True)
+    permitted = Column(Boolean, nullable=False, default=False)
+    role_ceiling = Column(String(20), nullable=False)
+    scopes = Column(JSON, nullable=False, default=list)
+
+
+class MigrationSafety(Base):
+    __tablename__ = 'migration_safety'
+    id = Column(Integer, primary_key=True)
+    external_jobs_paused = Column(Boolean, nullable=False, default=True)
+    source_cutoff = Column(String(100), nullable=False)

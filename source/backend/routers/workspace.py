@@ -16,7 +16,11 @@ from models.models import (
 )
 from auth.jwt_handler import get_current_user_token, require_admin
 
-router = APIRouter(prefix="/api/workspace", tags=["workspace"], dependencies=[Depends(require_admin)])
+async def migration_guard(db:AsyncSession=Depends(get_db)):
+    from services.migration_safety import require_released
+    await require_released(db)
+
+router = APIRouter(prefix="/api/workspace", tags=["workspace"], dependencies=[Depends(require_admin),Depends(migration_guard)])
 
 _AUTOMATION_PATH = os.path.normpath(
     os.path.join(os.path.dirname(__file__), "..", "..", "automation")

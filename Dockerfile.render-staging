@@ -26,6 +26,9 @@ COPY source/scripts /app/scripts
 COPY render-staging-supervise.py /opt/staging/supervise.py
 COPY render-staging-nginx.conf /opt/staging/nginx.conf
 COPY deploy/storage.py /opt/grantflow/storage.py
+COPY deploy/import_existing.py /opt/grantflow/import_existing.py
+COPY deploy/install_existing.py /opt/grantflow/install_existing.py
+RUN mkdir -p /root/.ssh /home/lab/.ssh && chmod 0700 /root/.ssh /home/lab/.ssh && chown lab:lab /home/lab/.ssh
 ENV ENVIRONMENT=render-standalone AUTH_MODE=standalone DEBUG=false RUN_LEGACY_STARTUP_IMPORTS=false AUTOMATION_WORKER_ENABLED=true INGESTION_LOCAL_WORKER_ENABLED=true \
     GFM_DATA_ROOT=/var/data GFM_REQUIRE_PERSISTENT_STORAGE=true SESSION_SECURE=true AI_ENABLED=false \
     DATABASE_URL=sqlite+aiosqlite:////var/data/grantflow.db UPLOAD_DIR=/var/data/uploads INGESTION_STORAGE_DIR=/var/data/private_documents SCREENSHOT_DIR=/var/data/screenshots GFM_BROWSER_PROFILE_DIR=/var/data/browser-profile

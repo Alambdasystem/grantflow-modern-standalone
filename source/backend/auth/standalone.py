@@ -15,7 +15,7 @@ import time
 import uuid
 from fastapi import APIRouter, HTTPException, Request, Response, Depends
 from pydantic import BaseModel, EmailStr, Field
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, func, or_
 from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy.exc import IntegrityError
 from config import settings
@@ -83,16 +83,20 @@ async def rate_limit(request, account=''):
         await db.commit()
 
 
-def identity(user):
+def identity(user,migrated=None):
+    role=user.role.value
+    scopes=['read'] if role=='viewer' else ['read','write']
+    if migrated:
+        role='viewer' if 'viewer' in {role,migrated.role_ceiling} else role if migrated.role_ceiling=='admin' else migrated.role_ceiling
+        scopes=[s for s in scopes if s in migrated.scopes]
     return {'sub':user.identity_id,'identity_id':user.identity_id,'username':user.username,
-            'email':user.email,'role':user.role.value,
-            'grantflow_access':['read'] if user.role.value=='viewer' else ['read','write']}
+            'email':user.email,'role':role,'grantflow_access':scopes}
 
 
 async def session_record(request, allow_refresh=False):
     enabled()
     from db.database import AsyncSessionLocal
-    from models.auth_models import AuthSession
+    from models.auth_models import AuthSession,MigratedAccount
     from models.models import User
     raw=request.cookies.get(cookie_name(),'')
     if not 30 <= len(raw) <= 128:
@@ -103,7 +107,10 @@ async def session_record(request, allow_refresh=False):
         if not session or session.absolute_until<=now or (not allow_refresh and session.access_until<=now):
             raise HTTPException(401,'Session expired or revoked')
         user=await db.get(User,session.user_id)
-        if not user or not user.is_active or not user.is_approved or not (user.identity_id or '').startswith('standalone:'):
+        migrated=await db.get(MigratedAccount,session.user_id)
+        if (not user or not user.is_active or not user.is_approved
+                or not ((user.identity_id or '').startswith('standalone:') or migrated)
+                or (migrated and (not migrated.permitted or 'read' not in migrated.scopes))):
             raise HTTPException(401,'Session expired or revoked')
         if request.method.upper() not in {'GET','HEAD','OPTIONS'}:
             origin(request)
@@ -115,7 +122,10 @@ async def session_record(request, allow_refresh=False):
 
 async def authorize(request):
     _,user=await session_record(request)
-    return identity(user)
+    from db.database import AsyncSessionLocal
+    from models.auth_models import MigratedAccount
+    async with AsyncSessionLocal() as db:
+        return identity(user,await db.get(MigratedAccount,user.id))
 
 
 def set_cookies(response, raw, csrf, until):
@@ -135,7 +145,9 @@ async def issue_session(db,user,response,absolute=None):
                        access_until=min(until,now+settings.SESSION_ACCESS_SECONDS),absolute_until=until))
     await db.commit()
     set_cookies(response,raw,csrf,until)
-    return {'username':user.username,'role':user.role.value,'expires_in':settings.SESSION_ACCESS_SECONDS}
+    from models.auth_models import MigratedAccount
+    who=identity(user,await db.get(MigratedAccount,user.id))
+    return {'username':user.username,'role':who['role'],'expires_in':settings.SESSION_ACCESS_SECONDS}
 
 
 class Credentials(BaseModel):
@@ -210,14 +222,35 @@ async def login(payload:Credentials,request:Request,response:Response):
     name=payload.username.strip().lower(); await rate_limit(request,name)
     from db.database import AsyncSessionLocal
     from models.models import User
+    from models.auth_models import MigratedAccount
     async with AsyncSessionLocal() as db:
-        user=await db.scalar(select(User).where(User.username==name,User.identity_id.like('standalone:%')))
+        user=await db.scalar(select(User).where(func.lower(User.username)==name))
+        if not user:
+            alias=await db.scalar(select(MigratedAccount).where(MigratedAccount.login_alias==name))
+            if alias: user=await db.get(User,alias.user_id)
+        migrated=await db.get(MigratedAccount,user.id) if user else None
+        allowed=bool(user and ((user.identity_id or '').startswith('standalone:') or migrated))
         # An unknown identity still pays the same scrypt cost; errors do not enumerate accounts.
         candidate=user.hashed_password if user else 'scrypt32768$MDAwMDAwMDAwMDAwMDAwMA==$MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA='
-        valid=await asyncio.to_thread(password_matches,payload.password,candidate)
-        if not valid or not user or not user.is_active or not user.is_approved:
+        if migrated and not candidate.startswith('scrypt32768$'):
+            from auth.legacy_passwords import verify
+            valid=await asyncio.to_thread(verify,payload.password,candidate)
+        else:
+            valid=await asyncio.to_thread(password_matches,payload.password,candidate)
+        if (not valid or not allowed or not user.is_active or not user.is_approved
+                or (migrated and (not migrated.permitted or 'read' not in migrated.scopes))):
             raise HTTPException(401,'Invalid username or password')
+        if migrated and not candidate.startswith('scrypt32768$'):
+            # Legacy passwords may be shorter than the new-account policy; a
+            # successful existing password must not be silently changed.
+            user.hashed_password=await asyncio.to_thread(_rehash_legacy,payload.password)
         return await issue_session(db,user,response)
+
+
+def _rehash_legacy(password):
+    salt=secrets.token_bytes(16)
+    value=hashlib.scrypt(password.encode(),salt=salt,n=32768,r=8,p=1,dklen=32,maxmem=128*1024*1024)
+    return 'scrypt32768$'+base64.urlsafe_b64encode(salt).decode()+'$'+base64.urlsafe_b64encode(value).decode()
 
 
 @router.post('/refresh')
@@ -252,14 +285,14 @@ async def admin(request:Request):
 @router.post('/invitations',dependencies=[Depends(admin)])
 async def invite(payload:Invitation,response:Response):
     from db.database import AsyncSessionLocal
-    from models.auth_models import AuthInvitation
+    from models.auth_models import AuthInvitation,MigratedAccount
     from models.models import Organization,User
     if payload.role not in {'admin','grant_writer','reviewer','viewer'}: raise HTTPException(422,'Invalid role')
     async with AsyncSessionLocal() as db:
         if not await db.get(Organization,payload.organization_id): raise HTTPException(404,'Organization not found')
         if payload.reset_user_id:
             user=await db.get(User,payload.reset_user_id)
-            if (not user or not (user.identity_id or '').startswith('standalone:')
+            if (not user or not ((user.identity_id or '').startswith('standalone:') or await db.get(MigratedAccount,user.id))
                     or user.email.lower()!=str(payload.email).lower() or user.organization_id!=payload.organization_id):
                 raise HTTPException(409,'Recovery must explicitly match an existing standalone identity and organization')
         raw=secrets.token_urlsafe(32)
@@ -305,15 +338,20 @@ class AccountState(BaseModel):
 @router.patch('/accounts/{user_id}',dependencies=[Depends(admin)])
 async def account_state(user_id:int,payload:AccountState,request:Request):
     from db.database import AsyncSessionLocal
-    from models.auth_models import AuthSession
+    from models.auth_models import AuthSession,MigratedAccount
     from models.models import User,UserRole
     if payload.role not in {'admin','grant_writer','reviewer','viewer'}: raise HTTPException(422,'Invalid role')
     current=await authorize(request)
     async with AsyncSessionLocal() as db:
         user=await db.get(User,user_id)
-        if not user or not (user.identity_id or '').startswith('standalone:'): raise HTTPException(404,'Standalone account not found')
+        migrated=await db.get(MigratedAccount,user_id)
+        if not user or not ((user.identity_id or '').startswith('standalone:') or migrated): raise HTTPException(404,'Standalone account not found')
         if user.identity_id==current['identity_id'] and (not payload.is_active or payload.role!='admin'):
             raise HTTPException(409,'Use another administrator to change your own administrator access')
         user.is_active=payload.is_active; user.role=UserRole(payload.role)
+        if migrated:
+            # Explicit destination-administrator decision, never automatic linking.
+            migrated.role_ceiling=payload.role; migrated.permitted=payload.is_active
+            migrated.scopes=['read'] if payload.role=='viewer' else ['read','write']
         await db.execute(delete(AuthSession).where(AuthSession.user_id==user.id)); await db.commit()
         return {'success':True}

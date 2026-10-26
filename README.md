@@ -10,6 +10,9 @@ disk, and server-side Alambda chat. It creates no separate paid model service.
 An existing Render service must have its plan, disk, environment and health
 check configured explicitly; committing a Blueprint alone does not apply it.
 
+For existing users and history, follow [existing-data migration](docs/EXISTING-DATA-MIGRATION.md).
+Do not create replacement accounts through the fresh-install setup flow.
+
 The default Compose project is a **synthetic local lab**, published only at `http://127.0.0.1:5100/auth/login`. Its identity fixture is deliberately not production authentication. Use the separate Render configuration for live authentication. No original traffic cutover is performed by these files.
 
 ## Build and reproduce

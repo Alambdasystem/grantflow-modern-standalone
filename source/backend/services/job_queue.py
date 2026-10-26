@@ -17,6 +17,8 @@ async def schedule_renewals():
     from fastapi import HTTPException
     async with _enqueue_lock:
         async with AsyncSessionLocal() as db:
+            from services.migration_safety import held
+            if await held(db): return
             policies = (await db.execute(select(OrganizationRecord).where(OrganizationRecord.kind == 'configuration'))).scalars().all()
             for policy in policies:
                 if not policy.data.get('auto_renew'):
@@ -45,6 +47,8 @@ async def schedule_renewals():
 
 async def recover():
     async with AsyncSessionLocal() as db:
+        from services.migration_safety import held
+        if await held(db): return
         await db.execute(update(AutomationJob).where(AutomationJob.status == Status.running,
             AutomationJob.result['lease_token'].as_string().is_(None), AutomationJob.result["managed_queue"].as_boolean() == True).values(
             status=Status.paused, error_message='Interrupted by service restart. Review before retrying.',
@@ -89,7 +93,9 @@ async def worker():
                 from services.document_ingestion import schedule
                 last_schedule = now
                 try:
-                    await schedule()
+                    async with AsyncSessionLocal() as safety_db:
+                        from services.migration_safety import held
+                        if not await held(safety_db): await schedule()
                 except Exception:
                     import logging
                     logging.getLogger(__name__).exception('Document source scheduling failed; queued work continues')
@@ -99,6 +105,8 @@ async def worker():
                     AutomationJob.job_type.in_(['scrape', 'renew', 'ingest'] if settings.INGESTION_LOCAL_WORKER_ENABLED else ['scrape', 'renew']),
                     AutomationJob.result['managed_queue'].as_boolean() == True).order_by(AutomationJob.id).limit(20))).scalars().all()
                 for row in rows:
+                    from services.migration_safety import held
+                    if row.job_type!='ingest' and await held(db): continue
                     if len(active) >= settings.AUTOMATION_CONCURRENCY:
                         break
                     # Only jobs explicitly created through the persistent queue are dispatched.

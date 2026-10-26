@@ -248,6 +248,8 @@ async def connect_provider(
     _: dict = Depends(get_current_user_token),
 ):
     """Trigger an OpenClaw (Playwright) login job through the automation orchestrator."""
+    from services.migration_safety import require_released
+    await require_released(db)
     result = await db.execute(
         select(PortalCredential).where(PortalCredential.portal_key == portal_key)
     )

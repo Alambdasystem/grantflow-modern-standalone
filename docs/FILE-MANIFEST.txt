@@ -22,10 +22,13 @@ deploy/compose.remote-model.yaml
 deploy/compose.yaml
 deploy/connectivity.py
 deploy/gateway.conf.template
+deploy/import_existing.py
+deploy/install_existing.py
 deploy/render-ollama-optional.yaml
 deploy/storage.py
 docs/ALAMBDA-CHAT-CONFIGURATION.md
 docs/BASELINE-BUILD.md
+docs/EXISTING-DATA-MIGRATION.md
 docs/FILE-MANIFEST.txt
 docs/RENDER-STANDALONE-DEPLOYMENT.md
 docs/WYF-REPAIR-REVIEW.md
@@ -85,6 +88,7 @@ source/backend/.env.example
 source/backend/__init__.py
 source/backend/auth/__init__.py
 source/backend/auth/jwt_handler.py
+source/backend/auth/legacy_passwords.py
 source/backend/auth/manage.py
 source/backend/auth/ownership.py
 source/backend/auth/standalone.py
@@ -128,6 +132,7 @@ source/backend/services/document_extract.py
 source/backend/services/document_ingestion.py
 source/backend/services/ingestion_review.py
 source/backend/services/job_queue.py
+source/backend/services/migration_safety.py
 source/backend/services/model_readiness.py
 source/backend/services/secure_transport.py
 source/backend/startup_seed.py
@@ -147,6 +152,7 @@ source/backend/tests/test_ingestion_extensions.py
 source/backend/tests/test_ingestion_review_tools.py
 source/backend/tests/test_ingestion_workers.py
 source/backend/tests/test_integration_audit.py
+source/backend/tests/test_migrated_auth.py
 source/backend/tests/test_standalone_readiness.py
 source/backend/tests/test_transport_tls.py
 source/backend/warm_model.py

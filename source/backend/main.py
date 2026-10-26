@@ -173,7 +173,12 @@ async def ready():
 async def runtime(identity:dict=Depends(get_current_user_token)):
     from services.model_readiness import model_status
     model=await model_status() if settings.AI_ENABLED else {'ready':False,'reason':'not_configured'}
-    return {'authentication':settings.AUTH_MODE,'ai':model,'email_safety_connected':settings.AUTH_MODE=='anthesis'}
+    from models.auth_models import MigrationSafety
+    from db.database import AsyncSessionLocal
+    async with AsyncSessionLocal() as db:
+        migration=await db.get(MigrationSafety,1)
+        state={'external_jobs_paused':migration.external_jobs_paused,'source_cutoff':migration.source_cutoff} if migration else None
+    return {'authentication':settings.AUTH_MODE,'ai':model,'email_safety_connected':settings.AUTH_MODE=='anthesis','migration':state}
 
 
 @app.exception_handler(404)

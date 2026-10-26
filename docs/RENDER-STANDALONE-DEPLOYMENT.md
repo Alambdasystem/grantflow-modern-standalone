@@ -46,6 +46,10 @@ Do not disable persistent-storage enforcement to make a free service start.
 
 ## Secure first login and account recovery
 
+For a migration of existing users/history, use [existing-data migration](EXISTING-DATA-MIGRATION.md)
+instead of the fresh-install procedure below. It preserves owner IDs and
+compatible existing passwords and closes bootstrap without replacement accounts.
+
 1. Open /auth/login over HTTPS after the authenticated image is live.
 2. Retrieve the setup code privately from Render's GFM_BOOTSTRAP_TOKEN.
 3. Enter the code, intended email and organization, username wyf_admin, and a
