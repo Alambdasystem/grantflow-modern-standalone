@@ -22,6 +22,7 @@ from models.models import (
 from schemas.schemas import AIGenerateRequest, AIChatRequest
 from auth.jwt_handler import get_current_user_token
 from services.ai_service import AIService, AIUnavailable
+from services.grant_integrity import requirement_error
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
 _ai = AIService()
@@ -48,6 +49,11 @@ async def _build_rag_context(
     if application_id and await db.get(GrantApplication, application_id) is None:
         raise HTTPException(404, 'Application not found')
 
+    if application_id:
+        focused = await db.get(GrantApplication, application_id)
+        if grant_id is not None and grant_id != focused.grant_id:
+            raise HTTPException(422, 'The requested grant does not match the saved application.')
+        grant_id = focused.grant_id
     # Focus grant
     if grant_id:
         grant = await db.get(Grant, grant_id)
@@ -55,7 +61,7 @@ async def _build_rag_context(
             context_data["grant"] = {
                 "title": grant.title,
                 "description": grant.description,
-                "eligibility": grant.eligibility,
+                "eligibility": None if requirement_error(grant) else grant.eligibility,
                 "amount": grant.amount,
                 "funding_agency": grant.funding_agency,
                 "source_url": grant.source_url,
@@ -137,7 +143,7 @@ async def _build_rag_context(
             .order_by(GrantApplication.updated_at.desc())
             .limit(10)
         )
-        context_data["recent_applications"] = [
+        context_data["recent_applications"] = [] if application_id else [
             {
                 "id": a.id,
                 "title": a.title,
@@ -163,7 +169,7 @@ async def _build_rag_context(
         .order_by(Grant.created_at.desc())
         .limit(10)
     )
-    context_data["recent_grants"] = [
+    context_data["recent_grants"] = [] if application_id or grant_id else [
         {
             "id": g.id,
             "title": g.title,
@@ -218,6 +224,8 @@ async def generate(
 
     try:
         result = await _ai.generate(payload.task, context_data, payload.model)
+        from services.draft_validation import validate_draft
+        validate_draft(result, context_data, payload.task)
     except AIUnavailable as exc:
         raise HTTPException(503, str(exc)) from exc
 

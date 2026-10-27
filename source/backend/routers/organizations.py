@@ -13,13 +13,18 @@ from auth.jwt_handler import get_current_user_token, require_admin
 router = APIRouter(prefix="/api/organizations", tags=["organizations"])
 
 
+def profile_output(organization):
+    complete = all(str(getattr(organization, field) or '').strip() for field in ('name','mission','email','ein','org_type')) and bool(organization.categories)
+    return OrganizationOut.model_validate(organization).model_copy(update={'profile_complete': bool(complete)})
+
+
 @router.get("/", response_model=list[OrganizationOut])
 async def list_organizations(
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(get_current_user_token),
 ):
     result = await db.execute(select(Organization).order_by(Organization.id))
-    return result.scalars().all()
+    return [profile_output(row) for row in result.scalars().all()]
 
 
 @router.get("/me", response_model=OrganizationOut)
@@ -35,7 +40,7 @@ async def get_my_organization(
     organization = await db.get(Organization, user.organization_id)
     if not organization:
         raise HTTPException(status_code=404, detail="Organization not found")
-    return organization
+    return profile_output(organization)
 
 
 @router.patch("/me", response_model=OrganizationOut)
@@ -55,10 +60,10 @@ async def update_my_organization(
 
     for field, value in payload.model_dump().items():
         setattr(organization, field, value)
-    organization.profile_complete = True
+    organization.profile_complete = profile_output(organization).profile_complete
     await db.commit()
     await db.refresh(organization)
-    return organization
+    return profile_output(organization)
 
 
 @router.get("/{org_id}", response_model=OrganizationOut)
@@ -70,7 +75,7 @@ async def get_organization_by_id(
     organization = await db.get(Organization, org_id)
     if not organization:
         raise HTTPException(status_code=404, detail="Organization not found")
-    return organization
+    return profile_output(organization)
 
 
 @router.post("/", response_model=OrganizationOut, status_code=201)
@@ -83,8 +88,8 @@ async def create_organization(
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Organization already exists")
 
-    organization = Organization(**payload.model_dump(), profile_complete=True)
+    organization = Organization(**payload.model_dump(), profile_complete=False)
     db.add(organization)
     await db.commit()
     await db.refresh(organization)
-    return organization
+    return profile_output(organization)

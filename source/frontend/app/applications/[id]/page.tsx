@@ -178,7 +178,7 @@ const STAGE_HINTS: Record<string, string> = {
 // Static links per stage. Submission gets the grant source_url injected at render time.
 const STAGE_LINKS: Record<string, { label: string; href: string; external?: boolean }> = {
   "Organization Setup":       { label: "Edit Org Profile", href: "/settings" },
-  "Document Upload":          { label: "Upload Documents", href: "#documents" },
+  "Document Upload":          { label: "Upload Documents", href: "/documents" },
   "Grant Matching":           { label: "Browse Grants", href: "/grants" },
   "Application Draft":        { label: "AI Gap Analysis", href: "/gap-solutions" },
   "Review & Collaboration":   { label: "Gap Solutions", href: "/gap-solutions" },
@@ -1027,7 +1027,7 @@ export default function ApplicationDetailPage() {
                           {linkDef && (
                             linkDef.external ? (
                               <a
-                                href={linkDef.href}
+                                href={stage.stage === "Document Upload" ? `/documents?application_id=${appId}` : linkDef.href}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 title={linkDef.label}
@@ -1037,7 +1037,7 @@ export default function ApplicationDetailPage() {
                               </a>
                             ) : (
                               <Link
-                                href={linkDef.href}
+                                href={stage.stage === "Document Upload" ? `/documents?application_id=${appId}` : linkDef.href}
                                 title={linkDef.label}
                                 className="p-1.5 rounded-md text-zinc-500 hover:text-cyan-200 hover:bg-cyan-500/10 transition shrink-0"
                               >

@@ -465,8 +465,10 @@ function ProviderCard({ entry, onRefresh }: { entry: ProviderEntry; onRefresh: (
 
 export default function ProvidersPage() {
   const qc = useQueryClient();
+  const me = useQuery<{role:string}>({queryKey:["me"],queryFn:()=>api.get("/api/auth/me").then(r=>r.data)});
 
   const { data: providers = [], isLoading, isError, refetch } = useQuery<ProviderEntry[]>({
+    enabled: me.data?.role === "admin",
     queryKey: ["providers"],
     queryFn: () => api.get("/api/providers").then((r) => r.data),
     retry: 1,
@@ -475,6 +477,8 @@ export default function ProvidersPage() {
   const connected = providers.filter((p) => p.credential?.is_connected).length;
   const configured = providers.filter((p) => p.credential?.has_credentials).length;
 
+  if (me.isLoading) return <p className="p-6">Checking account permissions...</p>;
+  if (me.data?.role !== "admin") return <p role="alert" className="p-6">Provider management requires administrator access. Your current role does not permit viewing or changing provider credentials.</p>;
   return (
     <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}

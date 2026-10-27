@@ -137,16 +137,18 @@ async def list_foundations(
             or_(Foundation.name.ilike(like), Foundation.description.ilike(like),
                 Foundation.geographic_focus.ilike(like))
         )
-    stmt = stmt.order_by(desc(Foundation.created_at)).offset(offset).limit(limit)
+    stmt = stmt.order_by(Foundation.id.asc())
     result = await db.execute(stmt)
-    foundations = result.scalars().all()
-
-    count_stmt = select(func.count()).select_from(Foundation)
-    if is_active is not None:
-        count_stmt = count_stmt.where(Foundation.is_active == is_active)
-    total = (await db.execute(count_stmt)).scalar() or 0
-
-    return {"items": [_serialize(f) for f in foundations], "total": total}
+    from services.grant_integrity import normalized, source_key
+    foundations, seen = [], set()
+    for row in result.scalars().all():
+        key = (normalized(row.name), source_key(row.website))
+        if row.website and key in seen:
+            continue
+        if row.website:
+            seen.add(key)
+        foundations.append(row)
+    return {"items": [_serialize(f) for f in foundations[offset:offset+limit]], "total": len(foundations)}
 
 
 @router.post("", status_code=201)

@@ -16,6 +16,26 @@ from pydantic import BaseModel, Field, HttpUrl
 from automation.agents.grant_scraper import GrantScraperAgent
 
 router = APIRouter(prefix="/api/grants", tags=["grants"])
+from services.grant_integrity import deduplicate, catalog_state, requirement_error, safe_requirements, opportunity_id
+
+
+async def personalized(db, token, grants):
+    from routers.operations import alignment, organization_evidence
+    user = (await db.execute(select(User).where(User.identity_id == token['identity_id']).limit(1))).scalar_one_or_none()
+    org = await db.get(Organization, user.organization_id) if user and user.organization_id else None
+    records, documents = await organization_evidence(db, org.id) if org else ([], [])
+    results = []
+    for grant in grants:
+        item = GrantOut.model_validate(grant)
+        item.catalog_state = catalog_state(grant)
+        item.requirements_warning = requirement_error(grant)
+        if item.requirements_warning:
+            item.eligibility = None
+        match = alignment(org, grant, records, documents) if org else None
+        item.ai_match_score = match['score'] if match else None
+        item.ai_summary = ('Evidence alignment, not award probability. Missing: ' + ', '.join(match['missing_information'])) if match else 'Assign an organization before calculating personalized alignment.'
+        results.append(item)
+    return results
 
 
 class ManualOpportunity(BaseModel):
@@ -50,8 +70,9 @@ async def grant_workspace(grant_id: int, db: AsyncSession = Depends(get_db), tok
     workflows = (await db.execute(select(Workflow).where(Workflow.application_id.in_(ids)))).scalars().all() if ids else []
     app_documents = (await db.execute(select(Document).where(Document.application_id.in_(ids)))).scalars().all() if ids else []
     all_docs = {d.id:d for d in [*documents,*app_documents]}
-    return {'grant':GrantOut.model_validate(grant), 'alignment':alignment(org,grant,records,documents),
-        'requirements':grant.requirements_detail or grant.requirements or [],
+    return {'grant':(await personalized(db,token,[grant]))[0], 'alignment':alignment(org,grant,records,documents),
+        'requirements':safe_requirements(grant) or ([] if requirement_error(grant) else grant.requirements or []),
+        'requirements_warning':requirement_error(grant),
         'requirements_fetched_at':grant.requirements_fetched_at,
         'applications':[{'id':a.id,'title':a.title,'status':a.status.value,'updated_at':a.updated_at,
                          'renewal_due_date':a.renewal_due_date} for a in apps],
@@ -137,61 +158,39 @@ async def search_grants(
         q = q.where(Grant.amount <= body.max_amount)
     if body.is_renewable is not None:
         q = q.where(Grant.is_renewable == body.is_renewable)
-    q = q.order_by(Grant.deadline.asc().nullslast(), Grant.created_at.desc())
-    q = q.offset(body.offset).limit(body.limit)
+    q = q.order_by(Grant.deadline.asc().nullslast(), Grant.id.asc())
     result = await db.execute(q)
     grants = result.scalars().all()
 
-    # Compute live match scores using the caller's org profile
-    user_result = await db.execute(select(User).where(User.identity_id == token["identity_id"]).limit(1))
-    user = user_result.scalar_one_or_none()
-    organization = None
-    if user and user.organization_id:
-        organization = await db.get(Organization, user.organization_id)
+    return await personalized(db, token, deduplicate(grants)[body.offset:body.offset + body.limit])
 
-    from routers.operations import alignment, organization_evidence
-    records, documents = await organization_evidence(db, organization.id) if organization else ([], [])
-    results = []
-    for grant in grants:
-        # Personalized scoring belongs in the response, never the shared catalog row.
-        item = GrantOut.model_validate(grant)
-        if organization:
-            match = alignment(organization, grant, records, documents)
-            item.ai_match_score = match['score']
-            item.ai_summary = 'Evidence alignment, not probability. ' + '; '.join(
-                f"{f['name']}: {f['score']}/{f['weight']}" for f in match['factors']) + '. Missing: ' + ', '.join(match['missing_information'])
-        else:
-            item.ai_match_score = None
-            item.ai_summary = 'Assign an organization before calculating personalized alignment.'
-        results.append(item)
-    return results
 
 
 @router.get("/", response_model=list[GrantOut])
 async def list_grants(
-    limit: int = Query(50, le=200),
-    offset: int = 0,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
     status: str = "active",
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_user_token),
+    token: dict = Depends(get_current_user_token),
 ):
     q = select(Grant).where(Grant.status == status)
-    q = q.order_by(Grant.deadline.asc().nullslast()).offset(offset).limit(limit)
+    q = q.order_by(Grant.deadline.asc().nullslast(), Grant.id.asc())
     result = await db.execute(q)
-    return result.scalars().all()
+    return await personalized(db, token, deduplicate(result.scalars().all())[offset:offset + limit])
 
 
 @router.get("/{grant_id}", response_model=GrantOut)
 async def get_grant(
     grant_id: int,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_user_token),
+    token: dict = Depends(get_current_user_token),
 ):
     result = await db.execute(select(Grant).where(Grant.id == grant_id))
     grant = result.scalar_one_or_none()
     if not grant:
         raise HTTPException(status_code=404, detail="Grant not found")
-    return grant
+    return (await personalized(db, token, [grant]))[0]
 
 
 @router.get("/categories/list")
@@ -367,8 +366,13 @@ async def _run_requirements_job(grant_id: int):
         g3 = await db3.get(Grant, grant_id)
         if g3:
             m3 = dict(g3.meta or {})
-            m3["requirements_status"] = "done"
+            m3["requirements_status"] = "done" if result.get('success') and not requirement_error(type('Candidate', (), {'requirements_detail':result, 'source_url':g3.source_url})()) else "error"
             m3.pop("requirements_error", None)
+            if m3['requirements_status'] == 'error':
+                m3['requirements_error'] = result.get('error') or 'No verified package for this opportunity.'
+                g3.meta = m3
+                await db3.commit()
+                return
             g3.meta = m3
             g3.requirements_detail = result
             g3.requirements_fetched_at = datetime.now(timezone.utc)
@@ -411,6 +415,8 @@ async def fetch_grant_requirements(
     if not grant:
         raise HTTPException(status_code=404, detail="Grant not found")
 
+    if not opportunity_id(grant.source_url):
+        raise HTTPException(422, 'No exact Grants.gov opportunity ID is available for this funder source. Open the original funder page; a keyword search cannot verify its requirements.')
     status = (grant.meta or {}).get("requirements_status")
     if status == "running":
         return {"status": "running", "message": "Requirements fetch already in progress"}
@@ -437,8 +443,8 @@ async def get_grant_requirements(
     status = (grant.meta or {}).get("requirements_status", "none")
     return {
         "grant_id": grant_id,
-        "status": status,
+        "status": "error" if requirement_error(grant) else status,
         "fetched_at": grant.requirements_fetched_at.isoformat() if grant.requirements_fetched_at else None,
-        "requirements": grant.requirements_detail or {},
-        "error": (grant.meta or {}).get("requirements_error"),
+        "requirements": safe_requirements(grant),
+        "error": requirement_error(grant) or (grant.meta or {}).get("requirements_error"),
     }

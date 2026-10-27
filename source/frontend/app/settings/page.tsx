@@ -159,12 +159,12 @@ export default function SettingsPage() {
             </div>
             <h1 className="text-3xl font-semibold text-white">Organization Profile</h1>
             <p className="text-zinc-200 text-sm mt-1 max-w-2xl">
-              Edit the profile your AI uses for grant matching, autofill, and narrative generation.
+              Edit the profile your AI uses for grant matching, autofill, and narrative generation. Core completion requires name, mission, contact email, EIN, organization type and categories; it does not certify eligibility or compliance.
             </p>
           </div>
           <div className="inline-flex items-center gap-3">
             <Badge variant="outline" className={data?.profile_complete ? "border-emerald-300/50 bg-emerald-500/10 text-emerald-100" : "border-amber-300/50 bg-amber-500/10 text-amber-100"}>
-              {data?.profile_complete ? "Profile Complete" : "Profile Incomplete"}
+              {data?.profile_complete ? "Core Profile Fields Complete" : "Core Profile Fields Incomplete"}
             </Badge>
             <Button
               onClick={onSave}

@@ -81,7 +81,8 @@ def test_readiness_uses_saved_package_and_reviewed_checklist(api):
     async def package():
         async with database.AsyncSessionLocal() as db:
             g=await db.get(Grant,1)
-            g.requirements_detail={'required_forms':[{'name':'SF-424','is_mandatory':True}], 'required_attachments':None}
+            g.source_url='https://www.grants.gov/search-results-detail/999999'
+            g.requirements_detail={'opp_id':'999999','required_forms':[{'name':'SF-424','is_mandatory':True}], 'required_attachments':None}
             await db.commit()
     asyncio.run(package())
     checks=api.get('/api/applications/1/readiness',headers=headers()).json()['checks']

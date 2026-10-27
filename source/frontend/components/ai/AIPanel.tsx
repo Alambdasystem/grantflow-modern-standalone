@@ -36,7 +36,7 @@ export function AIPanel() {
       );
     } catch {
       setAiError(
-        "AI service is unavailable. Make sure Ollama is running on the backend."
+        "AI service is unavailable. Your saved work is unchanged; retry after the configured provider is available."
       );
     } finally {
       setIsGenerating(false);
@@ -58,7 +58,7 @@ export function AIPanel() {
         <div>
           <h2 className="text-zinc-100 font-semibold text-sm">AI Quick Actions</h2>
           <p className="text-zinc-300 text-[11px]">
-            Powered by your local Ollama model
+            Alambda remote chat - review all generated facts and figures
           </p>
         </div>
       </div>

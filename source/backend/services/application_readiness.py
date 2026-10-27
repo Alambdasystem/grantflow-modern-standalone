@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from models.models import Grant, Organization, Review, OrganizationRecord, Document, IngestionDocument
 from services.ingestion_review import freshness
+from services.grant_integrity import safe_requirements, requirement_error, catalog_state
 
 
 def draft_revision(app):
@@ -24,7 +25,7 @@ async def readiness(db,app):
     records=(await db.execute(select(OrganizationRecord).where(OrganizationRecord.organization_id==app.organization_id))).scalars().all()
     checks=[]
     def add(key,label,passed,detail):checks.append({'key':key,'label':label,'passed':bool(passed),'detail':detail})
-    add('opportunity','Opportunity active',grant and getattr(grant.status,'value',grant.status)=='active','Confirm that the funder is still accepting applications.')
+    add('opportunity','Opportunity active',grant and getattr(grant.status,'value',grant.status)=='active' and catalog_state(grant)=='current','Confirm a current opportunity and deadline with the funder; historical announcements are not an open funding round.')
     add('mission','Organizational mission',org and (org.mission or '').strip(),'Save the organization mission to ground matching and drafting.')
     add('proposal','Saved proposal',bool((app.proposal_text or '').strip()),'Save the narrative before requesting review.')
     add('budget','Saved budget narrative',bool((app.budget_narrative or '').strip()),'Explain the requested costs and funding use.')
@@ -37,18 +38,18 @@ async def readiness(db,app):
         add('deadline','Application deadline',deadline>=datetime.now(timezone.utc),f'Saved deadline: {deadline.isoformat()}. Verify against the funder source.')
     else:add('deadline','Application deadline confirmed',False,'No structured deadline is saved. Confirm rolling applications or the actual due date.')
     requirements=[]
-    for requirement in (grant.requirements or []) if grant else []:
+    for requirement in (grant.requirements or []) if grant and not requirement_error(grant) else []:
         label=requirement if isinstance(requirement,str) else requirement.get('name') or requirement.get('title') if isinstance(requirement,dict) else None
         if label:requirements.append(label)
     if grant:
-        detail=grant.requirements_detail if isinstance(grant.requirements_detail,dict) else {}
+        detail=safe_requirements(grant)
         for form in (detail.get('required_forms') or [])+(detail.get('required_attachments') or []):
             if isinstance(form,dict) and form.get('is_mandatory') and form.get('name'):requirements.append(form['name'])
     accepted_checklist={str(c.get('label','')).strip().casefold():{'record_id':r.id,'revision':r.revision,'evidence':c['evidence'],'owner':c['owner']}
         for r in records if r.kind=='audit' and r.data.get('application_id')==app.id and r.data.get('status')=='accepted'
         and (not r.data.get('due_date') or r.data['due_date']>=datetime.now(timezone.utc).date().isoformat())
         for c in r.data.get('checklist',[]) if c.get('done') and c.get('evidence') and c.get('owner')}
-    add('requirements_known','Funder requirements available',bool(requirements),'Saved requirements are a checklist, not proof that the funder package is complete.')
+    add('requirements_known','Funder requirements available',bool(requirements),requirement_error(grant) if grant and requirement_error(grant) else 'Saved requirements are a checklist, not proof that the funder package is complete.')
     for index,label in enumerate(dict.fromkeys(requirements)):
         evidence=accepted_checklist.get(label.strip().casefold())
         add(f'requirement_{index}',label,bool(evidence),evidence or 'Record an accepted application audit checklist item with this label, evidence and owner in Organization Workspace.')
@@ -60,6 +61,9 @@ async def readiness(db,app):
         IngestionDocument.organization_id==app.organization_id,IngestionDocument.current==True,IngestionDocument.status!='deleted',
         (Document.application_id==app.id)|(Document.application_id.is_(None))))).all()
     warnings=[]
+    from services.draft_validation import draft_issues
+    warnings.extend(draft_issues((app.proposal_text or '')+'\n'+(app.budget_narrative or ''),
+        {'application':{'amount_requested':app.amount_requested}},'proposal'))
     from decimal import Decimal, InvalidOperation
     total=(((app.form_data or {}).get('grant_planning') or {}).get('summary') or {}).get('budget_total')
     if total is not None and app.amount_requested is not None:

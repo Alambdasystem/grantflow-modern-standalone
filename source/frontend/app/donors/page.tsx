@@ -6,7 +6,7 @@ import {
   ExternalLink, Copy, Check, X, Edit2, Mail, Phone,
   Calendar, Target, BarChart2,
 } from "lucide-react";
-import { apiFetch } from "@/lib/api";
+import { api, apiFetch } from "@/lib/api";
 
 interface Donor {
   id: number;
@@ -85,6 +85,7 @@ function fmtDate(s?: string) {
 
 export default function DonorsPage() {
   const qc = useQueryClient();
+  const me=useQuery<{role:string}>({queryKey:["me"],queryFn:()=>api.get("/api/auth/me").then(r=>r.data)});
   const [tab, setTab] = useState<Tab>("donors");
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Donor | Campaign | null>(null);
@@ -117,14 +118,14 @@ export default function DonorsPage() {
   const donorsQuery = useQuery({
     queryKey: ["donors", q],
     queryFn: () => apiFetch(`/api/donors?q=${encodeURIComponent(q)}&limit=100`),
-    enabled: tab === "donors",
+    enabled: me.data?.role === "admin" && tab === "donors",
   });
 
   // Campaigns data
   const campaignsQuery = useQuery({
     queryKey: ["campaigns"],
     queryFn: () => apiFetch("/api/donors/campaigns/list?limit=100"),
-    enabled: tab === "campaigns",
+    enabled: me.data?.role === "admin" && tab === "campaigns",
   });
 
   const createDonorMutation = useMutation({
@@ -168,6 +169,9 @@ export default function DonorsPage() {
   const campaigns: Campaign[] = campaignsQuery.data?.items || [];
   const totalRaised: number = donorsQuery.data?.total_raised || 0;
 
+  if(me.isLoading) return <p className="p-6">Checking account permissions...</p>;
+  if(me.data?.role!=="admin") return <p role="alert" className="p-6">Donor and campaign management requires administrator access. Your current role cannot view these private records.</p>;
+  if(donorsQuery.isError || campaignsQuery.isError) return <p role="alert" className="p-6">Donor or campaign records could not be loaded. This is an error, not an empty directory. Please retry.</p>;
   return (
     <div className="flex h-full min-h-screen bg-[#06121b] text-zinc-100">
       {/* Left panel */}

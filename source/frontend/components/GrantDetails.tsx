@@ -7,7 +7,7 @@ import {api} from '@/lib/api';
 type Detail = {
  grant:{description:string|null;eligibility:string|null;deadline:string|null;deadline_str:string|null;amount:number|null;amount_max:number|null;source_url:string|null};
  alignment:{score:number;scoring_version:string;missing_information:string[];factors:{name:string;score:number;weight:number;evidence:unknown}[]};
- requirements:unknown;requirements_fetched_at:string|null;
+ requirements:unknown;requirements_fetched_at:string|null;requirements_warning?:string|null;
  applications:{id:number;title:string;status:string;updated_at:string}[];
  reviews:{id:number;application_id:number;status:string;feedback:string;created_at:string}[];
  workflows:{application_id:number;stage:string;status:string}[];
@@ -30,6 +30,7 @@ export default function GrantDetails({id}:{id:number}) {
    {d.alignment.factors.map(f=><p key={f.name}>{f.name}: {f.score}/{f.weight}. Evidence: {JSON.stringify(f.evidence)}</p>)}
    <p>Missing evidence: {d.alignment.missing_information.join(', ')||'None recorded'}</p>
    <h4 className="font-semibold">Submission requirements</h4>
+   {d.requirements_warning&&<p role="alert" className="text-amber-300">{d.requirements_warning}</p>}
    <p>Last retrieved: {d.requirements_fetched_at||'Not yet retrieved; verify the funder source.'}</p>
    <pre className="whitespace-pre-wrap break-words text-xs">{JSON.stringify(d.requirements,null,2)}</pre>
    {d.grant.source_url&&/^https?:\/\//.test(d.grant.source_url)&&<a className="underline" href={d.grant.source_url} target="_blank" rel="noreferrer">Verify funder source</a>}

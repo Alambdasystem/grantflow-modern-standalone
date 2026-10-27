@@ -12,6 +12,8 @@ export interface GrantListItem {
   source_url?: string;
   ai_summary?: string;
   eligibility?: string;
+  catalog_state?: string;
+  requirements_warning?: string;
 }
 
 export function parseGrantList(payload: unknown): GrantListItem[] {
@@ -34,6 +36,8 @@ export function parseGrantList(payload: unknown): GrantListItem[] {
       source_url: item.source_url ? String(item.source_url) : undefined,
       ai_summary: item.ai_summary ? String(item.ai_summary) : undefined,
       eligibility: item.eligibility ? String(item.eligibility) : undefined,
+      catalog_state: item.catalog_state ? String(item.catalog_state) : undefined,
+      requirements_warning: item.requirements_warning ? String(item.requirements_warning) : undefined,
     }))
     .filter((grant) => grant.id > 0);
 }
@@ -41,6 +45,10 @@ export function parseGrantList(payload: unknown): GrantListItem[] {
 export interface GrantOption {
   id: number;
   title: string;
+}
+
+export function topGrants(grants: GrantListItem[], count = 3): GrantListItem[] {
+  return [...grants].sort((a,b)=>(b.ai_match_score ?? -1)-(a.ai_match_score ?? -1)).slice(0,count);
 }
 
 export function parseGrantOptions(payload: unknown): GrantOption[] {

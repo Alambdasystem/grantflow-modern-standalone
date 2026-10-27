@@ -13,6 +13,12 @@ from auth.jwt_handler import get_current_user_token
 router = APIRouter(prefix="/api/analytics", tags=["analytics"])
 
 
+def without_qa(statement):
+    # Explicitly labelled non-submittable QA drafts remain accessible but do not
+    # count as real portfolio performance. Never delete or rewrite the draft.
+    return statement.where(~(func.coalesce(GrantApplication.title,'').ilike('QA TEST%') & func.coalesce(GrantApplication.title,'').ilike('%DO NOT SUBMIT%')))
+
+
 def calculate_success_rate(*, approved_count: int, rejected_count: int) -> float | None:
     decided_count = approved_count + rejected_count
     if decided_count <= 0:
@@ -25,42 +31,42 @@ async def dashboard_stats(
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(get_current_user_token),
 ):
-    total_grants = (await db.execute(select(func.count(Grant.id)))).scalar_one()
+    from services.grant_integrity import deduplicate, catalog_state
+    catalog = deduplicate((await db.execute(select(Grant).order_by(Grant.id))).scalars().all())
+    total_grants = len(catalog)
     # compare against the GrantStatus enum to ensure correct SQLAlchemy enum comparison
-    active_grants = (await db.execute(
-        select(func.count(Grant.id)).where(Grant.status == GrantStatus.active)
-    )).scalar_one()
-    total_apps = (await db.execute(select(func.count(GrantApplication.id)))).scalar_one()
-    submitted = (await db.execute(
+    active_grants = sum(g.status == GrantStatus.active and catalog_state(g) not in {'expired','historical_announcement'} for g in catalog)
+    total_apps = (await db.execute(without_qa(select(func.count(GrantApplication.id))))).scalar_one()
+    submitted = (await db.execute(without_qa(
         select(func.count(GrantApplication.id)).where(
             GrantApplication.status == ApplicationStatus.submitted
         )
-    )).scalar_one()
-    approved = (await db.execute(
+    ))).scalar_one()
+    approved = (await db.execute(without_qa(
         select(func.count(GrantApplication.id)).where(
             GrantApplication.status == ApplicationStatus.approved
         )
-    )).scalar_one()
-    rejected = (await db.execute(
+    ))).scalar_one()
+    rejected = (await db.execute(without_qa(
         select(func.count(GrantApplication.id)).where(
             GrantApplication.status == ApplicationStatus.rejected
         )
-    )).scalar_one()
-    renewals = (await db.execute(
+    ))).scalar_one()
+    renewals = (await db.execute(without_qa(
         select(func.count(GrantApplication.id)).where(
             GrantApplication.status == ApplicationStatus.renewal_due
         )
-    )).scalar_one()
+    ))).scalar_one()
     running_jobs = (await db.execute(
         select(func.count(AutomationJob.id)).where(
             AutomationJob.status == AutomationJobStatus.running
         )
     )).scalar_one()
-    total_awarded_row = (await db.execute(
+    total_awarded_row = (await db.execute(without_qa(
         select(func.coalesce(func.sum(GrantApplication.amount_awarded), 0.0)).where(
             GrantApplication.status == ApplicationStatus.approved
         )
-    )).scalar_one()
+    ))).scalar_one()
 
     success_rate = calculate_success_rate(
         approved_count=approved,
@@ -86,7 +92,7 @@ async def grant_pipeline(
     _: dict = Depends(get_current_user_token),
 ):
     result = await db.execute(
-        select(GrantApplication.status, func.count(GrantApplication.id).label("count"))
+        without_qa(select(GrantApplication.status, func.count(GrantApplication.id).label("count")))
         .group_by(GrantApplication.status)
     )
     rows = result.all()

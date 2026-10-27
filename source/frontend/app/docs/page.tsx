@@ -34,7 +34,7 @@ const sections: Section[] = [
           </li>
           <li className="flex gap-2">
             <ChevronRight className="w-4 h-4 text-cyan-400 mt-0.5 shrink-0" />
-            <span>Click <strong className="text-zinc-100">Sign in</strong>. A JWT token is securely stored in your browser and used for all subsequent API calls.</span>
+            <span>Click <strong className="text-zinc-100">Sign in</strong>. The standalone service creates a secure HttpOnly session cookie. Logout revokes the session; passwords and session tokens are not stored in browser localStorage.</span>
           </li>
           <li className="flex gap-2">
             <ChevronRight className="w-4 h-4 text-cyan-400 mt-0.5 shrink-0" />
@@ -94,7 +94,7 @@ const sections: Section[] = [
           </li>
           <li className="flex gap-2">
             <ChevronRight className="w-4 h-4 text-cyan-400 mt-0.5 shrink-0" />
-            <span>The <strong className="text-zinc-100">AI Quick Actions</strong> panel on the right lets you ask the local AI model anything — use the quick-prompts or type a custom question in the chat input.</span>
+            <span>The <strong className="text-zinc-100">AI Quick Actions</strong> panel on the right lets you ask the configured AI service a question — use the quick-prompts or type a custom question in the chat input.</span>
           </li>
           <li className="flex gap-2">
             <ChevronRight className="w-4 h-4 text-cyan-400 mt-0.5 shrink-0" />
@@ -191,7 +191,7 @@ const sections: Section[] = [
           </li>
           <li className="flex gap-2">
             <ChevronRight className="w-4 h-4 text-cyan-400 mt-0.5 shrink-0" />
-            <span>Move cards between columns to update their status. The change is saved to the server immediately.</span>
+            <span>Open an application to edit and save it. Status changes require the applicable readiness checks and review; creating a draft does not submit it.</span>
           </li>
         </ul>
       </div>
@@ -273,7 +273,7 @@ const sections: Section[] = [
           </li>
           <li className="flex gap-2">
             <ChevronRight className="w-4 h-4 text-cyan-400 mt-0.5 shrink-0" />
-            <span>Jobs are created automatically when you click <em>Apply with AI</em>, <em>Discover New Grants</em>, or <em>Auto-Renew</em>.</span>
+            <span>Local drafting and background jobs are separate. Inspect Automation for actual job status after using <em>Apply with AI</em>, <em>Discover New Grants</em>, or <em>Auto-Renew</em>.</span>
           </li>
         </ul>
       </div>
@@ -288,7 +288,7 @@ const sections: Section[] = [
     content: (
       <div className="space-y-3 text-zinc-300 text-sm leading-relaxed">
         <p>
-          The AI Assistant gives you a direct conversational interface to the local Ollama language model powering GrantFlow Modern.
+          The AI Assistant gives you a direct conversational interface to the configured Alambda remote chat service.
         </p>
         <ul className="space-y-2 pl-4">
           <li className="flex gap-2">
@@ -301,7 +301,7 @@ const sections: Section[] = [
           </li>
           <li className="flex gap-2">
             <ChevronRight className="w-4 h-4 text-cyan-400 mt-0.5 shrink-0" />
-            <span>Chat history is maintained for the duration of your session — scroll up to review earlier responses.</span>
+            <span>Chat history is saved on the server; reopen a saved conversation or export it — scroll up to review earlier responses.</span>
           </li>
           <li className="flex gap-2">
             <ChevronRight className="w-4 h-4 text-cyan-400 mt-0.5 shrink-0" />
@@ -393,7 +393,7 @@ const sections: Section[] = [
         <ul className="space-y-2 pl-4">
           <li className="flex gap-2">
             <ChevronRight className="w-4 h-4 text-cyan-400 mt-0.5 shrink-0" />
-            <span>Click <strong className="text-zinc-100">Generate with AI</strong> to have the local model draft your mission, description, and capabilities based on your organization name and type.</span>
+            <span>Click <strong className="text-zinc-100">Generate with AI</strong> to have the configured remote AI draft your mission, description, and capabilities based on your organization name and type.</span>
           </li>
           <li className="flex gap-2">
             <ChevronRight className="w-4 h-4 text-cyan-400 mt-0.5 shrink-0" />
@@ -452,7 +452,7 @@ export default function DocsPage() {
 
             <div className="p-6 grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
               {/* Text content */}
-              <div>{section.content}</div>
+              <div>{section.content}<p className="mt-3 text-sm text-amber-200">Standalone beta: AI candidates require review before applying. Saved conversations can be reopened and exported. Imported external automation is paused; email and external submissions are not configured. Screenshots illustrate navigation and may show an earlier interface.</p></div>
 
               {/* Screenshot */}
               <div className="rounded-xl overflow-hidden border border-cyan-900/40 shadow-[0_0_40px_rgba(0,0,0,0.5)]">

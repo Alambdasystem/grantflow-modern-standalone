@@ -87,77 +87,30 @@ const partnerStatuses: Partner["status"][] = ["target", "engaged", "confirmed"];
 const complianceStatuses: ComplianceItem["status"][] = ["todo", "reviewing", "ready"];
 
 const defaultPriorities = (): Priority[] => [
-  {
-    id: "mission",
-    label: "Mission alignment",
-    weight: 5,
-    score: 4,
-    rationale: "The opportunity directly supports the organization's long-term program strategy.",
-  },
-  {
-    id: "eligibility",
-    label: "Eligibility clarity",
-    weight: 4,
-    score: 3,
-    rationale: "Eligibility appears viable, but interpretation still needs legal or grants review.",
-  },
-  {
-    id: "funder",
-    label: "Funder priority overlap",
-    weight: 5,
-    score: 5,
-    rationale: "Funder language strongly matches the target outcomes and service geography.",
-  },
-  {
-    id: "capacity",
-    label: "Operational readiness",
-    weight: 3,
-    score: 2,
-    rationale: "Partnership staffing and reporting workflow would need to be tightened before submission.",
-  },
+ {id:"mission",label:"Mission alignment",weight:5,score:0,rationale:"Review required; enter your own assessment."},
+ {id:"eligibility",label:"Eligibility",weight:5,score:0,rationale:"Verify with the funder source."},
 ];
-
-const defaultPartners = (): Partner[] => [
-  {
-    id: "1",
-    name: "Civic Workforce Alliance",
-    role: "Employer pipeline",
-    contribution: "Provide placement commitments and employer letters.",
-    status: "engaged",
-  },
-  {
-    id: "2",
-    name: "Northside Learning Hub",
-    role: "Program delivery",
-    contribution: "Host after-school service cohort and collect attendance data.",
-    status: "confirmed",
-  },
-];
-
-const defaultBudgetLines = (): BudgetLine[] => [
-  { id: "1", category: "Personnel", item: "Program manager", quantity: 12, unitCost: 6400 },
-  { id: "2", category: "Fringe", item: "Benefits allocation", quantity: 12, unitCost: 1800 },
-  { id: "3", category: "Supplies", item: "Participant toolkits", quantity: 75, unitCost: 120 },
-];
+const defaultPartners = (): Partner[] => [];
+const defaultBudgetLines = (): BudgetLine[] => [];
 
 const complianceTemplates: Record<string, ComplianceItem[]> = {
   federal: [
-    { id: "sam", title: "SAM.gov registration current", owner: "Operations", status: "ready" },
-    { id: "uei", title: "UEI verified on application profile", owner: "Finance", status: "reviewing" },
+    { id: "sam", title: "SAM.gov registration current", owner: "Operations", status: "todo" },
+    { id: "uei", title: "UEI verified on application profile", owner: "Finance", status: "todo" },
     { id: "subrecipient", title: "Subrecipient monitoring plan attached", owner: "Programs", status: "todo" },
     { id: "cost-principles", title: "Uniform guidance cost principles mapped to budget", owner: "Finance", status: "todo" },
   ],
   foundation: [
-    { id: "board", title: "Board roster and term dates updated", owner: "Executive", status: "ready" },
-    { id: "logic-model", title: "Program logic model tailored to funder priorities", owner: "Programs", status: "reviewing" },
+    { id: "board", title: "Board roster and term dates updated", owner: "Executive", status: "todo" },
+    { id: "logic-model", title: "Program logic model tailored to funder priorities", owner: "Programs", status: "todo" },
     { id: "impact", title: "Outcome measurement narrative drafted", owner: "Evaluation", status: "todo" },
     { id: "attachments", title: "Attachment checklist reconciled with portal rules", owner: "Grants", status: "todo" },
   ],
   state: [
-    { id: "state-reg", title: "State vendor registration active", owner: "Operations", status: "reviewing" },
+    { id: "state-reg", title: "State vendor registration active", owner: "Operations", status: "todo" },
     { id: "audit", title: "Single audit packet prepared", owner: "Finance", status: "todo" },
     { id: "match", title: "Match documentation assembled", owner: "Development", status: "todo" },
-    { id: "narrative", title: "Required state narrative headings mapped", owner: "Grants", status: "ready" },
+    { id: "narrative", title: "Required state narrative headings mapped", owner: "Grants", status: "todo" },
   ],
 };
 
@@ -178,7 +131,7 @@ export default function GapSolutionsClient() {
   const [savedProfileId, setSavedProfileId] = useState<number | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [northStar, setNorthStar] = useState(
-    "Prioritize youth-serving, workforce, and community resilience grants that can scale within 12 months.",
+    "",
   );
   const [priorities, setPriorities] = useState<Priority[]>(defaultPriorities);
   const [partners, setPartners] = useState<Partner[]>(defaultPartners);
@@ -220,7 +173,7 @@ export default function GapSolutionsClient() {
     }
 
     if (!profileQuery.data) {
-      setNorthStar("Prioritize youth-serving, workforce, and community resilience grants that can scale within 12 months.");
+      setNorthStar("");
       setPriorities(defaultPriorities());
       setPartners(defaultPartners());
       setBudgetLines(defaultBudgetLines());
@@ -479,7 +432,7 @@ export default function GapSolutionsClient() {
                 onChange={(event) => setSelectedGrantId(Number(event.target.value) || null)}
                 className="mt-2 h-11 w-full rounded-xl border border-cyan-900/40 bg-[#081c29]/85 px-3 text-sm text-zinc-100"
               >
-                <option value="">Select active grant</option>
+                <option value="">Select catalog grant ? verify current availability</option>
                 {(grantsQuery.data || []).map((grant) => (
                   <option key={grant.id} value={grant.id}>
                     {grant.id} - {grant.title}
@@ -489,7 +442,7 @@ export default function GapSolutionsClient() {
               {selectedGrant && (
                 <p className="mt-2 text-xs text-zinc-400">
                   {selectedGrant.funding_agency || "Unknown agency"}
-                  {selectedGrant.ai_match_score ? ` · ${Math.round(selectedGrant.ai_match_score)}% current AI match` : ""}
+                  {selectedGrant.ai_match_score !== undefined && selectedGrant.ai_match_score !== null ? ` · ${Math.round(selectedGrant.ai_match_score)}/100 evidence alignment` : ""}
                 </p>
               )}
             </div>
@@ -512,9 +465,9 @@ export default function GapSolutionsClient() {
             </Button>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <p className="text-sm text-amber-200">Planning templates are suggestions, not verified organizational facts. Confirm partners, costs and compliance evidence before saving. Your planning assessment is separate from the shared evidence alignment score.</p><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             {[
-              { label: "Strategic Fit Score", value: `${strategicFitScore}%`, icon: Target, tone: "text-cyan-100" },
+              { label: "Your planning assessment (not catalog alignment)", value: `${strategicFitScore}%`, icon: Target, tone: "text-cyan-100" },
               { label: "Partner Pipeline", value: `${partners.length} active`, icon: Handshake, tone: "text-amber-100" },
               { label: "Budget Draft", value: `$${budgetTotal.toLocaleString()}`, icon: DollarSign, tone: "text-emerald-100" },
               { label: "Compliance Ready", value: `${readyCompliance}/${complianceItems.length}`, icon: ShieldCheck, tone: "text-sky-100" },
@@ -547,7 +500,7 @@ export default function GapSolutionsClient() {
           <CardHeader>
             <CardTitle className="text-zinc-100 flex items-center gap-2">
               <Target className="w-4 h-4 text-cyan-200" />
-              Strategic Fit Score Workbench
+              Your Planning Assessment Workbench
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">

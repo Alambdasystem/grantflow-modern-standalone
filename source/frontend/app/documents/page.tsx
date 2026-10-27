@@ -11,7 +11,7 @@ const categories=['general','financials','mission','priorities','successful_gran
 function errorMessage(e:unknown){return (e as {response?:{data?:{detail?:string}}}).response?.data?.detail||'Request failed. Please retry.';}
 export default function Documents(){
  const qc=useQueryClient();const [notice,setNotice]=useState('');const [busy,setBusy]=useState(false);const [selected,setSelected]=useState<number|null>(null);const [category,setCategory]=useState('general');const [file,setFile]=useState<File|null>(null);const [query,setQuery]=useState('');const [search,setSearch]=useState('');const [confirmed,setConfirmed]=useState(false);const [appId,setAppId]=useState('');
- useEffect(()=>{const id=Number(new URLSearchParams(window.location.search).get('document'));if(id>0)setSelected(id);},[]);
+ useEffect(()=>{const id=Number(new URLSearchParams(window.location.search).get('document'));if(id>0)setSelected(id);const application=Number(new URLSearchParams(window.location.search).get('application_id'));if(Number.isInteger(application)&&application>0)setAppId(String(application));},[]);
  const me=useQuery<{role:string}>({queryKey:['me'],queryFn:()=>api.get('/api/auth/me').then(r=>r.data)});
  const docs=useQuery<Item[]>({queryKey:['ingestion'],queryFn:()=>api.get('/api/ingestion/documents').then(r=>r.data),refetchInterval:5000});
  const historical=useQuery<{id:number;name:string;size:number|null;extracted_text:string|null;ai_summary:string|null}[]>({queryKey:['historical-documents'],queryFn:()=>api.get('/api/ingestion/legacy-documents').then(r=>r.data)});

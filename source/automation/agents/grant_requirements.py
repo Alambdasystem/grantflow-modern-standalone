@@ -91,6 +91,13 @@ class GrantRequirementsAgent:
             "source": "api",
             "error": None,
         }
+        from services.grant_integrity import opportunity_id
+        exact_id = opportunity_id(source_url)
+        if source_url and (not exact_id or (opp_id and str(opp_id) != exact_id)):
+            result['error'] = 'An exact matching Grants.gov source is required; keyword results are not verified requirements.'
+            return result
+        if exact_id:
+            opp_id = result['opp_id'] = exact_id
 
         if progress_cb:
             await progress_cb(5, "Resolving opportunity ID from grants.gov API")
@@ -125,6 +132,9 @@ class GrantRequirementsAgent:
                 opp_number=result.get("opp_number"),
                 progress_cb=progress_cb,
             )
+            if browser_data.get('success') and opportunity_id(browser_data.get('application_url')) != opp_id:
+                result['error'] = 'The browser did not confirm the requested opportunity ID; requirements were withheld.'
+                return result
             if browser_data.get("success"):
                 self._merge_browser_data(result, browser_data)
                 result["source"] = "api+browser" if hit_data else "browser"
@@ -145,7 +155,7 @@ class GrantRequirementsAgent:
         keyword: Optional[str] = None,
     ) -> tuple[Optional[str], Optional[dict]]:
         """Search grants.gov for an opportunity. Returns (opp_id, hit_dict)."""
-        body: dict = {"rows": 1, "startRecordNum": 0}
+        body: dict = {"rows": 20, "startRecordNum": 0}
         if opp_number:
             body["oppNumber"] = opp_number
         elif keyword:
@@ -159,8 +169,12 @@ class GrantRequirementsAgent:
                 if r.status_code == 200:
                     data = r.json()
                     hits = data.get("oppHits") or []
-                    if hits:
-                        hit = hits[0]
+                    from services.grant_integrity import normalized
+                    matches = [h for h in hits if
+                        (opp_number and normalized(h.get('number') or h.get('opportunityNumber')) == normalized(opp_number)) or
+                        (not opp_number and keyword and normalized(h.get('title')) == normalized(keyword))]
+                    if len(matches) == 1:
+                        hit = matches[0]
                         opp_id = str(hit.get("id") or hit.get("oppId") or "")
                         return opp_id or None, hit
         except Exception:

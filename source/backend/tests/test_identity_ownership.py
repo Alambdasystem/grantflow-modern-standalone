@@ -12,6 +12,7 @@ os.environ['DEBUG'] = 'false'
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from db import database
 from models.models import User, UserRole, Grant, GrantApplication, Organization
+from models.auth_models import MigrationSafety  # Register before disposable schema creation.
 from routers import applications, organizations, users
 from auth import jwt_handler
 

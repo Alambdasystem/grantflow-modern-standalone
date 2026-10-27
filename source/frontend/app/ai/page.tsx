@@ -86,7 +86,7 @@ export default function AIPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold gradient-text">AI Assistant</h1>
-          <p className="text-zinc-500 text-xs">Powered by Ollama · llama3.2</p>
+          <p className="text-zinc-500 text-xs">Alambda chat - remote AI - verify generated facts and figures</p>
         </div>
       </div>
 

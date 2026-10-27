@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { postGrantFlowQuery } from "@/lib/query";
-import { GrantListItem, parseGrantList } from "@/lib/grants";
+import { GrantListItem, parseGrantList, topGrants } from "@/lib/grants";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -99,7 +99,7 @@ export default function GrantsPage() {
     onSettled: () => setApplyingId(null),
   });
 
-  const featured = grants?.slice(0, 3) ?? [];
+  const featured = topGrants(grants);
   const sourcedCount = grants?.filter((grant) => !!grant.source_url).length ?? 0;
 
   return (
@@ -194,11 +194,12 @@ export default function GrantsPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between gap-3">
                     <Badge variant="outline" className="border-emerald-300/40 bg-emerald-500/10 text-emerald-100">
-                      {grant.ai_match_score ? `${Math.round(grant.ai_match_score)}/100 alignment` : "New"}
+                      {grant.ai_match_score !== undefined ? `${Math.round(grant.ai_match_score)}/100 alignment` : "New"}
                     </Badge>
                     {grant.source_url && <ExternalLink className="w-4 h-4 text-zinc-400" />}
                   </div>
                   <CardTitle className="text-lg font-semibold text-zinc-50 line-clamp-2 mt-2">{grant.title}</CardTitle>
+                    {grant.catalog_state && grant.catalog_state!=="current" && <p className="text-amber-300 text-xs">{grant.catalog_state.replaceAll("_"," ")} - verify the current funding round.</p>}
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="flex items-center gap-2 text-sm text-zinc-300">
@@ -273,6 +274,7 @@ export default function GrantsPage() {
                       )}
                     </div>
                     <h3 className="text-zinc-100 font-medium text-sm truncate">{grant.title}</h3>
+                    {grant.catalog_state && grant.catalog_state!=="current" && <p className="text-amber-300 text-xs">{grant.catalog_state.replaceAll("_"," ")} - verify the current funding round.</p>}
                     <p className="text-zinc-300 text-xs mt-0.5">
                       {grant.funding_agency || "Unknown Agency"} · {grant.amount ? `$${grant.amount.toLocaleString()}` : "Amount TBD"} · {grant.deadline_str || "No deadline"}
                     </p>

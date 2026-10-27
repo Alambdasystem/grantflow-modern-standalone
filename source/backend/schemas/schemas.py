@@ -133,6 +133,8 @@ class GrantOut(BaseModel):
     is_renewable: bool
     ai_summary: Optional[str]
     ai_match_score: Optional[float]
+    catalog_state: str = 'deadline_unconfirmed'
+    requirements_warning: Optional[str] = None
     tags: list[str]
     created_at: Optional[datetime]
 

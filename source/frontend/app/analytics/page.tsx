@@ -34,7 +34,7 @@ export default function AnalyticsPage() {
   ];
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-6 space-y-8"><p className="text-sm text-zinc-300">Explicitly labelled QA TEST / DO NOT SUBMIT applications are excluded from portfolio metrics. Catalog counts group exact duplicate opportunities.</p>
       <div>
         <h1 className="text-3xl font-bold gradient-text">Analytics</h1>
         <p className="text-zinc-400 text-sm">Grant performance and pipeline metrics</p>
