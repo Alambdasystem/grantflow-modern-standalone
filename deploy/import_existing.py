@@ -8,13 +8,46 @@ import argparse
 import asyncio
 import hashlib
 import json
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import sqlite3
+import ntpath
 
 
 def rows_digest(db,table):
     rows=db.execute('SELECT * FROM "'+table+'" ORDER BY rowid').fetchall()
     return hashlib.sha256(json.dumps([list(r) for r in rows],default=str,separators=(',',':')).encode()).hexdigest()
+
+
+def canonical_asset(reference,files):
+    """Normalize Windows separator/case variants using explicit copied assets.
+
+    A relative reference must match a full directory suffix, never a filename
+    alone. Ambiguous or missing screenshot references require operator review.
+    """
+    if reference.startswith('/var/data/'):
+        rel=reference.removeprefix('/var/data/')
+        if rel not in files: raise ValueError('Destination asset absent from verified file manifest')
+        return reference
+    original=PureWindowsPath(reference)
+    if not original.is_absolute() and '..' in original.parts: raise ValueError('Unreviewed relative traversal')
+    value=PureWindowsPath(ntpath.normpath(reference))
+    if len(value.parts)<2: raise ValueError('Unreviewed asset reference')
+    normalized=str(value).casefold()
+    matches=[]
+    for rel,item in files.items():
+        source=str(PureWindowsPath(ntpath.normpath(item['source']))).casefold()
+        if source==normalized or (not value.is_absolute() and source.endswith('\\'+normalized)):
+            matches.append('/var/data/'+rel)
+    if len(matches)!=1: raise ValueError('Missing or ambiguous original asset reference')
+    return matches[0]
+
+
+def normalize_screenshots(db,files,change):
+    for id,raw in db.execute('SELECT id,screenshots FROM automation_jobs').fetchall():
+        before=json.loads(raw or '[]')
+        after=[canonical_asset(value,files) for value in before]
+        if after!=before:
+            change('automation_jobs',id,'screenshots',raw,json.dumps(after),'Canonicalize verified Windows screenshot references')
 
 
 def convert(database,central_file,plan_file,source_tag,cutoff):
@@ -78,6 +111,7 @@ def convert(database,central_file,plan_file,source_tag,cutoff):
             before=db.execute(f'SELECT "{item["column"]}" FROM "{item["table"]}" WHERE id=?',(item['id'],)).fetchone()
             if not before or before[0]!=item['before']: raise ValueError('Source changed after file-reference planning')
             change(item['table'],item['id'],item['column'],item['before'],item['after'],'Relocate source file reference beneath persistent disk')
+        normalize_screenshots(db,plan.get('files',{}),change)
         # Preserve orphan records; detach only missing nullable references and
         # retain the exact old FK in a reversible, private conversion journal.
         for table,rowid,parent,fkid in db.execute('PRAGMA foreign_key_check').fetchall():

@@ -47,6 +47,10 @@ Existing users see normal sign-in. An empty replacement account is not created.
    Build a private file plan with files (relative path, bytes, SHA-256) and
    cell_changes (table, id, column, before, after). Destination references use
    /var/data. Required path transformations are allowlisted in the converter.
+   The converter also normalizes historical Windows screenshot references,
+   including repeated separators and absolute parent-directory components,
+   against the exact verified asset manifest. Ambiguous matches, bare filenames,
+   unknown assets and relative traversal fail closed; never substitute by name.
 3. In the release image, with networking disabled, set AUTH_MODE=standalone,
    DATABASE_URL to the explicit isolated database and a matching public origin/
    CORS. Run /opt/grantflow/import_existing.py with --database, --central,

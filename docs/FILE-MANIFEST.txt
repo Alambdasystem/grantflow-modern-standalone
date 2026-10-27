@@ -153,6 +153,7 @@ source/backend/tests/test_ingestion_review_tools.py
 source/backend/tests/test_ingestion_workers.py
 source/backend/tests/test_integration_audit.py
 source/backend/tests/test_migrated_auth.py
+source/backend/tests/test_migration_paths.py
 source/backend/tests/test_standalone_readiness.py
 source/backend/tests/test_transport_tls.py
 source/backend/warm_model.py
