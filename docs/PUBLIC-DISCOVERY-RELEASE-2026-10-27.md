@@ -33,3 +33,20 @@ No database migration or existing-record repair is needed. Code rollback to
 9ab1a6d disables this exception; it leaves any legitimately imported grants
 and new job history intact. Do not restore a database over later user edits.
 Original local Anthesis and GrantFlow installations remain unchanged.
+
+## Live result
+
+Render deploy `dep-dbgh52egekts738ocu20` reached live at 2026-10-27
+21:08:22 UTC, commit `6d407b1f89ee923c2d40482c9322185404a7c74a`.
+An isolated native writer signed in through the visible browser, entered
+`youth education`, and clicked Discover New Grants. Job 62 completed actual
+public HTTP discovery: 33 source results, 33 grants added. Progress recorded
+Grants.gov API, Federal Register API and Grants.gov RSS requests without
+reported source errors. No fixture substituted these live requests.
+
+Runtime still reported `external_jobs_paused: true`; every older non-ingestion,
+non-public-discovery job returned the same status before and after the test.
+Public search requires no portal credentials, emails, payments or submissions.
+New listings remain source leads, not verified current submission packages.
+The initial paused job 61 is retained as failed-release diagnostic history;
+it was not replayed. Genuine public catalog imports are retained for research.
