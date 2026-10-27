@@ -15,7 +15,11 @@ router = APIRouter(prefix="/api/organizations", tags=["organizations"])
 
 def profile_output(organization):
     complete = all(str(getattr(organization, field) or '').strip() for field in ('name','mission','email','ein','org_type')) and bool(organization.categories)
-    return OrganizationOut.model_validate(organization).model_copy(update={'profile_complete': bool(complete)})
+    values = {name:getattr(organization,name,None) for name in OrganizationOut.model_fields}
+    # Legacy SQLite rows may predate ORM defaults; normalize at the boundary,
+    # without writing to a profile merely because someone opens Settings.
+    values.update(categories=organization.categories or [], eligibility_tags=organization.eligibility_tags or [], profile_complete=bool(complete))
+    return OrganizationOut.model_validate(values)
 
 
 @router.get("/", response_model=list[OrganizationOut])

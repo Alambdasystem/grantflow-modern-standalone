@@ -13,7 +13,7 @@ payments or imported external automation are enabled by this release.
 | Match score changes between screens | Use the same caller-specific evidence calculation for catalog search, list, detail and workspace. Select the highest visible score for Top Match. Label manual planning assessment separately. | API consistency and frontend selection tests. Alignment is not award probability. |
 | Broken Upload Documents shortcut | Open Document Ingestion with application_id in the URL and preselect that application. | Browser acceptance verifies both navigation and selection. Backend authorization still controls upload ownership. |
 | Permission failures look like empty donor lists or provider outages | Explain the administrator requirement and avoid making forbidden requests for restricted roles. Distinguish actual loading failures from an empty directory. | Backend role tests and restricted-account browser checks. No role elevation. |
-| Profile Complete is unconditional | Calculate completion from name, mission, email, EIN, organization type and categories instead of trusting the old Boolean flag. | Fixture with an incorrectly true legacy flag now reports incomplete. Core-field completion does not certify eligibility or compliance. |
+| Profile Complete is unconditional | Calculate completion from name, mission, email, EIN, organization type and categories instead of trusting the old Boolean flag. | Fixture with an incorrectly true legacy flag now reports incomplete. Nullable legacy lists/flags are normalized in responses without rewriting stored values. Core-field completion does not certify eligibility or compliance. |
 | Prefilled planning facts | Start new partner/budget lists empty; initialize planning assessments at zero and suggested compliance checks at todo. Label templates as suggestions. | Build and UI checks. Existing saved planning profiles are retained for review, not silently rewritten. |
 | Duplicate foundation directory entries | Group exact normalized name and website identities; preserve distinct entries and stored relationships. | Existing foundation lifecycle and pagination contracts. Legacy/test entries without provable identity are not deleted or treated as verified funders. |
 | QA draft inflates portfolio reporting | Exclude only applications explicitly labelled both QA TEST and DO NOT SUBMIT from analytics counts and totals. | Synthetic API check proves the draft remains accessible while excluded from counts. No deletion of the user's QA artifacts. |
@@ -36,3 +36,11 @@ Release uses feat/render-staging on the existing service. A private consistent
 database/file backup is taken off-host before deployment. No schema or data
 rewrite is required. Code rollback uses the prior compatible build; restoring
 a data backup is a separate operation and must preserve any later user writes.
+
+Live catalog audit: all 38 stored grants were inspected. All 24 cached packages
+lacked verifiable source identity and are withheld pending source review; this
+does not assert that every package is factually wrong or that a current package
+has been obtained. The verified current-package gate remains explicit.
+
+Follow-up validation: 27 profile, ownership, readiness and beta regression tests
+passed, including a SQL-null legacy profile case discovered by live log review.

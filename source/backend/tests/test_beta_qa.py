@@ -124,6 +124,25 @@ def test_profile_complete_is_computed_not_trusted_from_legacy_flag(api):
     assert not api.get('/api/organizations/me',headers=headers()).json()['profile_complete']
 
 
+def test_nullable_legacy_profile_fields_are_readable_without_mutating_them(api):
+    from db import database
+    from models.models import Organization
+    async def setup():
+        async with database.AsyncSessionLocal() as db:
+            row=await db.get(Organization,1)
+            row.categories=None;row.eligibility_tags=None;row.profile_complete=None
+            await db.commit()
+    asyncio.run(setup())
+    response=api.get('/api/organizations/me',headers=headers())
+    assert response.status_code==200,response.text
+    assert response.json()['categories']==[] and not response.json()['profile_complete']
+    async def unchanged():
+        async with database.AsyncSessionLocal() as db:
+            row=await db.get(Organization,1)
+            assert row.categories is None and row.eligibility_tags is None and row.profile_complete is None
+    asyncio.run(unchanged())
+
+
 def test_explicit_qa_drafts_excluded_from_metrics_not_deleted(api):
     from routers import analytics
     api.app.include_router(analytics.router)
