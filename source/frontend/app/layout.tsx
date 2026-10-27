@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="absolute bottom-[-9rem] left-[35%] h-72 w-72 rounded-full bg-emerald-300/14 blur-3xl ambient-float" />
             </div>
             <Sidebar />
-            <main className="relative z-10 flex-1 overflow-y-auto bg-transparent scanline">
+            <main className="relative z-10 min-w-0 flex-1 overflow-y-auto pt-14 lg:pt-0 bg-transparent scanline">
               <div className="mx-auto w-full max-w-[1600px]">{children}</div>
             </main>
           </div>

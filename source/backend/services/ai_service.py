@@ -172,8 +172,18 @@ class AIService:
         return "\n\n".join(parts)
 
     async def generate(self, task: str, context: dict, model: Optional[str] = None, payload=None) -> str:
-        from services.draft_validation import validate_draft
-        return validate_draft(await self._generate(task, context, model, payload), context, task)
+        from services.draft_validation import validate_draft, draft_issues
+        content=await self._generate(task,context,model,payload)
+        issues=draft_issues(content,context,task)
+        if issues:
+            # One bounded correction call. Neither rejected output is exposed or saved.
+            # Missing evidence must become an explicit placeholder, never a fabricated cost.
+            corrected_context={**context,'prompt':(context.get('prompt') or '')+'\n\nCORRECTION REQUIRED: The previous response was withheld. '+
+                ' '.join(issues)+' Return a short review draft using only the saved requested amount and information-needed placeholders. '+
+                'Do not include unverified line-item amounts, historical outcomes, percentages, awards or eligibility assertions. '+
+                'If costs are missing, write [information needed] instead of making them up.'}
+            content=await self._generate(task,corrected_context,model,payload)
+        return validate_draft(content,context,task)
 
     async def _generate(self, task: str, context: dict, model: Optional[str] = None, payload=None) -> str:
         if settings.AI_PROVIDER == 'alambda':

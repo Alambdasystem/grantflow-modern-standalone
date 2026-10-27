@@ -873,7 +873,7 @@
     "schema": "gfm.source-review.v1",
     "grant_id": 35,
     "fingerprint": "798bf9137b8904ac2d461d65611e692cd2c8e6501d45f1221c2adec055bddd0f",
-    "retrieved_at": "2026-10-27T03:14:19.364711+00:00",
+    "retrieved_at": "2026-10-27T04:01:23.142642+00:00",
     "source_url": "https://www.federalregister.gov/documents/2025/11/12/2025-19843/applications-for-new-awards-fund-for-the-improvement-of-postsecondary-education-special-projects",
     "catalog_title": "Applications for New Awards; Fund for the Improvement of Postsecondary Education-Special Projects (FIPSE-SP)",
     "status": "verified",
@@ -898,9 +898,16 @@
         "opportunity_id": 360851,
         "retrieved_at": "2026-10-27T03:14:19.364711+00:00",
         "sha256": "693e019f5fbdb0ed1fda2b7bfa91f8eb60317c52c8e5924fb9ae24c6400119c4"
+      },
+      {
+        "url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf",
+        "retrieved_at": "2026-10-27T04:01:23.142642+00:00",
+        "sha256": "1e9843d9b3d39730debbcf75a1a2b40bb039d32157d43ae88e5399ec1d9887d6",
+        "pages": "Printed pages 61-64 and 69 (PDF pages 63-66 and 71), 72-page official instructions",
+        "http_status": 200
       }
     ],
-    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package. Exact 72-page PKG00291645 instructions retrieved: eight mandatory forms and two conditional/ambiguous entries are recorded. SF-LLL is optional on page 63 but appears on the all-required page 69 checklist; clarify applicability before submission.",
     "requirements": {
       "success": true,
       "opp_id": 360851,
@@ -911,11 +918,91 @@
       "eligibility": "Institutions of higher education (as defined in section 101 of the HEA), consortia of such institutions, and other public and private nonprofit institutions and agencies including State higher education agencies as defined in 20 U.S.C. 1003(22). An eligible entity may submit only one (1) grant application under an area of national need as the lead applicant. An entity can be included as a partner in multiple applications.Note: The eligible entity may apply to all four (4) areas of national need as the lead applicant but must submit a separate grant application for each area of national need.Note: An applicant that is a nonprofit organization may, under 34 CFR 75.51, demonstrate its nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant's certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
       "application_url": "https://www.grants.gov/search-results-detail/360851",
       "source": "official-source-review",
-      "required_forms": [],
-      "required_attachments": [],
+      "required_forms": [
+        {
+          "name": "Application for Federal Assistance (SF-424)",
+          "is_mandatory": true,
+          "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf",
+          "source_pages": "61-63, 69"
+        },
+        {
+          "name": "Department of Education Supplemental Information for SF-424",
+          "is_mandatory": true,
+          "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf",
+          "source_pages": "61-63, 69"
+        },
+        {
+          "name": "Department of Education Budget Summary (ED-524), Sections A, B and C",
+          "is_mandatory": true,
+          "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf",
+          "source_pages": "61-63, 69"
+        },
+        {
+          "name": "Budget Narrative Attachment Form",
+          "is_mandatory": true,
+          "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf",
+          "source_pages": "61-63, 69"
+        },
+        {
+          "name": "ED Abstract Form",
+          "is_mandatory": true,
+          "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf",
+          "source_pages": "61-63, 69"
+        },
+        {
+          "name": "Project Narrative Attachment Form",
+          "is_mandatory": true,
+          "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf",
+          "source_pages": "61-63, 69"
+        },
+        {
+          "name": "GEPA Section 427 Form (integrated in Grants.gov; no separate PDF upload)",
+          "is_mandatory": true,
+          "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf",
+          "source_pages": "61-63, 69"
+        },
+        {
+          "name": "Grants.gov Lobbying Form (ED 80-0013)",
+          "is_mandatory": true,
+          "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf",
+          "source_pages": "61-63, 69"
+        },
+        {
+          "name": "Other Attachments Form",
+          "is_mandatory": false,
+          "condition": "Additional appendices if applicable: CVs, partner commitment/support letters and bibliography.",
+          "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf"
+        },
+        {
+          "name": "Disclosure of Lobbying Activities (SF-LLL)",
+          "is_mandatory": false,
+          "condition": "Printed page 63 labels this optional, while the page 69 checklist says all listed items required. Resolve applicability with the funder; do not infer that no disclosure is needed.",
+          "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf"
+        }
+      ],
+      "required_attachments": [
+        {
+          "name": "Budget narrative for each year of the four-year performance period",
+          "is_mandatory": true,
+          "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf",
+          "format": "Read-only, non-modifiable, non-password-protected PDF"
+        },
+        {
+          "name": "Project abstract addressing selected priorities, partners, activities and anticipated results",
+          "is_mandatory": true,
+          "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf",
+          "format": "Read-only, non-modifiable, non-password-protected PDF"
+        },
+        {
+          "name": "Project narrative addressing selection criteria and absolute priorities",
+          "is_mandatory": true,
+          "source_url": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf",
+          "format": "Read-only, non-modifiable, non-password-protected PDF"
+        }
+      ],
       "package_complete": false,
-      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
-      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+      "package_instructions": "https://apply07.grants.gov/apply/opportunities/instructions/PKG00291645-instructions.pdf",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package. Exact 72-page PKG00291645 instructions retrieved: eight mandatory forms and two conditional/ambiguous entries are recorded. SF-LLL is optional on page 63 but appears on the all-required page 69 checklist; clarify applicability before submission."
     }
   },
   {

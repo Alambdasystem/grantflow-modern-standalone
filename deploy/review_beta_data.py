@@ -25,7 +25,7 @@ def fingerprint(row):
     return hashlib.sha256(json.dumps([row['title'],row['funding_agency'],row['source_url']],ensure_ascii=True,separators=(',',':')).encode()).hexdigest()
 
 
-def review(database, manifest, backup, journal, *, apply=False):
+def review(database, manifest, backup, journal, *, apply=False, sources_only=False):
     # Imports the exact server checks, never a weaker repair-only validator.
     from services.draft_validation import draft_issues, MONEY
     from services.grant_integrity import source_review
@@ -55,7 +55,7 @@ def review(database, manifest, backup, journal, *, apply=False):
                 changes.append({'table':'grants','id':row['id'],'old':{'meta':row['meta']},'new':{'meta':new}})
                 stats['verified' if r['status']=='verified' else 'withheld']+=1
             # Every existing candidate is assessed. Human application columns are never written.
-            rows=db.execute("select * from organization_records where kind='draft' order by id").fetchall()
+            rows=[] if sources_only else db.execute("select * from organization_records where kind='draft' order by id").fetchall()
             for row in rows:
                 before=prior.execute('select * from organization_records where id=?',(row['id'],)).fetchone()
                 if not before or dict(row)!=dict(before):raise ValueError('Candidate changed since backup; do not overwrite user work')
@@ -117,7 +117,7 @@ def rollback(database,journal):
 
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('database');parser.add_argument('--manifest');parser.add_argument('--backup');parser.add_argument('--journal',required=True);parser.add_argument('--apply',action='store_true');parser.add_argument('--rollback',action='store_true');parser.add_argument('--writers-stopped',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('database');parser.add_argument('--manifest');parser.add_argument('--backup');parser.add_argument('--journal',required=True);parser.add_argument('--apply',action='store_true');parser.add_argument('--rollback',action='store_true');parser.add_argument('--writers-stopped',action='store_true');parser.add_argument('--sources-only',action='store_true');args=parser.parse_args()
     if (args.apply or args.rollback)and not args.writers_stopped:parser.error('Stop writers and acknowledge --writers-stopped')
     if args.rollback:print(json.dumps(rollback(args.database,args.journal)))
-    else:print(json.dumps(review(args.database,args.manifest,args.backup,args.journal,apply=args.apply)))
+    else:print(json.dumps(review(args.database,args.manifest,args.backup,args.journal,apply=args.apply,sources_only=args.sources_only)))

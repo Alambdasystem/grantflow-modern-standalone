@@ -13,6 +13,25 @@ def test_total_requested_is_both_total_and_request():
     assert any('26,000' in x for x in issues) and any('100.00' in x for x in issues)
 
 
+@pytest.mark.parametrize('corrected', [True,False])
+def test_ai_correction_is_bounded_and_never_accepts_invalid_retry(monkeypatch,corrected):
+    from services.ai_service import AIService,AIUnavailable
+    async def run():
+        service=AIService();calls=[]
+        async def response(task,context,*args):
+            calls.append(context)
+            if corrected and len(calls)==2:return 'Total Requested: $100.00\n[information needed] Verified costs and outcome evidence.'
+            return 'Total Requested: $200.00'
+        monkeypatch.setattr(service,'_generate',response)
+        try:
+            if corrected:assert '$100.00' in await service.generate('budget',{'application':{'amount_requested':100}})
+            else:
+                with pytest.raises(AIUnavailable):await service.generate('budget',{'application':{'amount_requested':100}})
+            assert len(calls)==2 and 'CORRECTION REQUIRED' in calls[-1]['prompt']
+        finally:await service._client.aclose()
+    asyncio.run(run())
+
+
 def test_source_review_is_bound_to_exact_source_and_six_fields():
     g=SimpleNamespace(title='Synthetic source',funding_agency='Synthetic agency',source_url='https://agency.example/round-1',meta={},requirements_detail={'opp_id':'wrong'})
     review={'status':'verified','fingerprint':source_fingerprint(g),'fields':dict.fromkeys(['identifier','funder','title','eligibility','deadline','application_url'],'synthetic'),'evidence':[{'url':g.source_url}],'requirements':{'opp_id':'exact'}}
@@ -44,6 +63,23 @@ def test_unverified_candidate_can_be_drafted_but_not_accepted(client):
     assert draft['data']['quality_review']['warnings']
     ok(client.put('/api/operations/records/'+str(draft['id']),json={**body,'revision':draft['revision'],'status':'accepted'},headers=headers()),422)
     assert ok(client.get('/api/operations/records?kind=draft',headers=headers()))[0]['body']==body['body']
+
+
+def test_verified_source_is_not_a_complete_package_and_audit_warnings_survive_reads(client):
+    from db import database
+    from models.models import Grant,OrganizationRecord
+    app=create_application(client)
+    async def seed():
+        async with database.AsyncSessionLocal()as db:
+            grant=await db.get(Grant,1)
+            grant.meta={'source_review':{'status':'verified','fingerprint':source_fingerprint(grant),'fields':dict.fromkeys(['identifier','funder','title','eligibility','deadline','application_url'],'synthetic'),'evidence':[{'url':'https://agency.example'}],'requirements':{'package_complete':False}}}
+            db.add(OrganizationRecord(organization_id=1,created_by_id=1,kind='draft',title='Synthetic audited candidate',body='[information needed] Confirm eligibility.',revision=1,history=[],data={'application_id':app['id'],'quality_review':{'reviewed_at':'2026-10-27','warnings':['Bank eligibility evidence is missing.']}}))
+            await db.commit()
+    asyncio.run(seed())
+    row=ok(client.get('/api/operations/records?kind=draft',headers=headers()))[0]
+    assert 'Bank eligibility evidence is missing.' in row['data']['quality_review']['warnings']
+    assert any('Requirements review incomplete' in x for x in row['data']['quality_review']['warnings'])
+    ok(client.put('/api/operations/records/'+str(row['id']),json={'kind':'draft','title':row['title'],'body':row['body'],'application_id':app['id'],'revision':1,'status':'accepted'},headers=headers()),422)
 
 
 def test_internal_renewal_schedule_create_deduplicate_review_complete(client):

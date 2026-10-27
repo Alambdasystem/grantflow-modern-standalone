@@ -106,7 +106,13 @@ async def records(kind: Kind | None = None, db: AsyncSession = Depends(get_db), 
         if row.kind=='draft':
             from services.candidate_quality import assess
             application=await db.get(GrantApplication,row.data.get('application_id')) if row.data.get('application_id') else None
-            item['data']={**row.data,'quality_review':await assess(db,application,row.body,row.data.get('category','proposal'))}
+            quality=await assess(db,application,row.body,row.data.get('category','proposal'))
+            previous=row.data.get('quality_review')or{}
+            if previous.get('reviewed_at'):
+                quality['warnings']=list(dict.fromkeys(previous.get('warnings',[])+quality['warnings']))
+                quality['reviewed_at']=previous['reviewed_at']
+                if quality['warnings']:quality['status']='needs_review'
+            item['data']={**row.data,'quality_review':quality}
         result.append(item)
     return result
 

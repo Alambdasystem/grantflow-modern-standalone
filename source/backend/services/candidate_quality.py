@@ -27,6 +27,9 @@ async def assess(db, application, body, category='proposal'):
     grant=await db.get(Grant,application.grant_id) if application else None
     if not grant or requirement_error(grant) or (not source_review(grant) and not grant.requirements_detail):
         warnings.append('Needs source verification: confirm the opportunity requirements before asserting compliance or submission readiness.')
+    review=source_review(grant) if grant else None
+    if review and review.get('status')=='verified' and (review.get('requirements')or{}).get('package_complete') is not True:
+        warnings.append('Requirements review incomplete: the source association is verified, but mandatory forms, conditional applicability and package completeness still require human confirmation. This candidate is not submission-ready.')
     return {'issues':issues,'warnings':warnings,'status':'needs_review' if issues or warnings else 'content_checks_passed',
             'note':'Automated checks do not certify evidence truth, eligibility or readiness to submit.'}
 
