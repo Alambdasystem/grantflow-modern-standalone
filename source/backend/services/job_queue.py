@@ -1,7 +1,7 @@
 """Persistent single-service dispatcher. Interrupted jobs require an explicit retry."""
 import asyncio
 from datetime import datetime, timezone, timedelta
-from sqlalchemy import select, update
+from sqlalchemy import select, update, or_, and_
 from db.database import AsyncSessionLocal
 from models.models import AutomationJob, AutomationJobStatus as Status, OrganizationRecord, GrantApplication
 from config import settings
@@ -51,7 +51,8 @@ async def recover():
         external_hold=await held(db)
         interrupted=update(AutomationJob).where(AutomationJob.status == Status.running,
             AutomationJob.result['lease_token'].as_string().is_(None), AutomationJob.result["managed_queue"].as_boolean() == True)
-        if external_hold:interrupted=interrupted.where(AutomationJob.job_type=='ingest')
+        if external_hold:interrupted=interrupted.where(or_(AutomationJob.job_type=='ingest',
+            and_(AutomationJob.job_type=='scrape', AutomationJob.result['public_discovery_v1'].as_boolean()==True)))
         await db.execute(interrupted.values(
             status=Status.paused, error_message='Interrupted by service restart. Review before retrying.',
             current_step='Interrupted; retry required'))
@@ -116,13 +117,18 @@ async def worker():
                     import logging
                     logging.getLogger(__name__).exception('Document source scheduling failed; queued work continues')
             async with AsyncSessionLocal() as db:
-                rows = (await db.execute(select(AutomationJob).where(
+                query = select(AutomationJob).where(
                     AutomationJob.status == Status.queued,
                     AutomationJob.job_type.in_(['scrape', 'renew', 'ingest'] if settings.INGESTION_LOCAL_WORKER_ENABLED else ['scrape', 'renew']),
-                    AutomationJob.result['managed_queue'].as_boolean() == True).order_by(AutomationJob.id).limit(20))).scalars().all()
+                    AutomationJob.result['managed_queue'].as_boolean() == True)
+                from services.migration_safety import held
+                if await held(db):
+                    query = query.where(or_(AutomationJob.job_type=='ingest', and_(
+                        AutomationJob.job_type=='scrape', AutomationJob.result['public_discovery_v1'].as_boolean()==True)))
+                rows = (await db.execute(query.order_by(AutomationJob.id).limit(20))).scalars().all()
                 for row in rows:
-                    from services.migration_safety import held
-                    if row.job_type!='ingest' and await held(db): continue
+                    from services.migration_safety import held, public_discovery
+                    if row.job_type!='ingest' and await held(db) and not public_discovery(row): continue
                     if len(active) >= settings.AUTOMATION_CONCURRENCY:
                         break
                     # Only jobs explicitly created through the persistent queue are dispatched.

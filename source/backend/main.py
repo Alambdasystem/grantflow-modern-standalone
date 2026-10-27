@@ -178,7 +178,8 @@ async def runtime(identity:dict=Depends(get_current_user_token)):
     async with AsyncSessionLocal() as db:
         migration=await db.get(MigrationSafety,1)
         state={'external_jobs_paused':migration.external_jobs_paused,'source_cutoff':migration.source_cutoff} if migration else None
-    return {'authentication':settings.AUTH_MODE,'ai':model,'email_safety_connected':settings.AUTH_MODE=='anthesis','migration':state}
+    return {'authentication':settings.AUTH_MODE,'ai':model,'email_safety_connected':settings.AUTH_MODE=='anthesis','migration':state,
+            'public_discovery':{'enabled':settings.AUTOMATION_WORKER_ENABLED,'mode':'on-demand public HTTP search; imported jobs remain held'}}
 
 
 @app.exception_handler(404)

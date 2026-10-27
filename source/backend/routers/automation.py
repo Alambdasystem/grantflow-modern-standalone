@@ -43,9 +43,10 @@ async def queue_status(db: AsyncSession = Depends(get_db), token: dict = Depends
 async def _run_automation_job(job_id: int):
     """Background task that imports and runs the Playwright orchestrator."""
     from db.database import AsyncSessionLocal
-    from services.migration_safety import held
+    from services.migration_safety import held, public_discovery
     async with AsyncSessionLocal() as safety_db:
-        if await held(safety_db):
+        job = await safety_db.get(AutomationJob, job_id)
+        if await held(safety_db) and not public_discovery(job):
             await safety_db.execute(update(AutomationJob).where(AutomationJob.id==job_id).values(status=AutomationJobStatus.paused))
             await safety_db.commit()
             return
@@ -100,6 +101,8 @@ async def create_job(
             if completed and (completed.result or {}).get('renewal_application_id'):
                 return completed
         query_text = str(payload.params.get('query', '')).strip()[:500]
+        if payload.job_type == 'scrape' and (payload.application_id or payload.portal_key or payload.portal_url):
+            raise HTTPException(422, 'Public discovery cannot use application or portal credentials.')
         dedup = select(AutomationJob).where(
             AutomationJob.created_by_id == token['local_user_id'],
             AutomationJob.application_id == payload.application_id,
@@ -107,6 +110,7 @@ async def create_job(
             AutomationJob.status.in_([AutomationJobStatus.queued, AutomationJobStatus.running, AutomationJobStatus.awaiting_approval]))
         if payload.job_type == 'scrape':
             dedup = dedup.where(AutomationJob.result['query'].as_string() == query_text)
+            dedup = dedup.where(AutomationJob.result['public_discovery_v1'].as_boolean() == True)
         existing = (await db.execute(dedup)).scalars().first()
         if existing:
             return existing
@@ -120,7 +124,8 @@ async def create_job(
             progress_pct=0,
             steps_log=[],
             screenshots=[],
-            result={"managed_queue": True, "query": query_text},
+            result={"managed_queue": True, "query": query_text,
+                    **({'public_discovery_v1': True} if payload.job_type == 'scrape' else {})},
             created_by_id=token["local_user_id"],
         )
         db.add(job)

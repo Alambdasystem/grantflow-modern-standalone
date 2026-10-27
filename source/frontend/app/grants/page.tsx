@@ -112,7 +112,7 @@ export default function GrantsPage() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="outline" className="border-cyan-300/50 bg-cyan-500/10 text-cyan-100">Source Radar</Badge>
-                  <Badge variant="outline" className="border-emerald-300/40 bg-emerald-500/10 text-emerald-100">Live Public Feeds</Badge>
+                  <Badge variant="outline" className="border-emerald-300/40 bg-emerald-500/10 text-emerald-100">On-demand public discovery</Badge>
                 </div>
                 <h1 className="text-3xl font-semibold text-zinc-50">Grant Discovery Engine</h1>
                 {me.data?.role==='admin'&&<Button type="button" onClick={()=>setShowManual(!showManual)}>Add opportunity</Button>}
@@ -128,6 +128,7 @@ export default function GrantsPage() {
                 <p className="text-zinc-200 text-sm max-w-2xl">
                   Search sourced opportunities, queue fresh listings, and compare evidence against your organization profile.
                 </p>
+                <p className="text-zinc-400 text-sm max-w-2xl">Search filters saved listings. Discover New Grants fetches public sources through Automation; it does not submit applications. Source results still need deadline and eligibility verification.</p>
               </div>
               <Button
                 onClick={() => discover.mutate()}

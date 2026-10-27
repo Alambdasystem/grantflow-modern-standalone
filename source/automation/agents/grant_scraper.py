@@ -94,11 +94,12 @@ class GrantScraperAgent:
         query: str,
         max_results: int = 50,
         progress_cb: Optional[Callable] = None,
+        allow_browser: bool = True,
     ) -> list[dict]:
         """Scrape grants from configured sources. Returns list of raw grant dicts."""
         # Prefer the public APIs; avoid a browser process when structured sources work.
         results = await self._scrape_via_http(query, max_results, progress_cb)
-        if results:
+        if results or not allow_browser:
             if progress_cb:
                 await progress_cb(100, f"Found {len(results)} sourced opportunities")
             return _dedupe_results(results)[:max_results]

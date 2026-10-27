@@ -86,7 +86,8 @@ async def _run_scrape(job: AutomationJob, db, events: dict):
             await db.commit()
         _emit(events, job.id, "progress", message, pct or job.progress_pct)
 
-    raw_grants = await scraper.scrape(query, max_results=50, progress_cb=progress)
+    options = {'allow_browser': False} if (job.result or {}).get('public_discovery_v1') else {}
+    raw_grants = await scraper.scrape(query, max_results=50, progress_cb=progress, **options)
 
     added = 0
     for g in raw_grants:
