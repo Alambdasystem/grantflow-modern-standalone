@@ -78,3 +78,34 @@ def test_runner_allows_new_public_job_but_pauses_imported_and_renewal_jobs(clien
             assert (await db.get(MigrationSafety,1)).external_jobs_paused
             for job_id in ids[:2]:assert (await db.get(AutomationJob,job_id)).status==AutomationJobStatus.paused
     asyncio.run(run())
+
+
+def test_actual_orchestrator_completes_only_new_public_search_under_hold(client,monkeypatch):
+    from db import database
+    from models.models import AutomationJob,AutomationJobStatus
+    from models.auth_models import MigrationSafety
+    import sys
+    from pathlib import Path
+    sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'automation'))
+    import orchestrator
+    from agents.grant_scraper import GrantScraperAgent
+    monkeypatch.setattr(orchestrator,'AsyncSessionLocal',database.AsyncSessionLocal)
+    calls=[]
+    async def source(self,query,**kwargs):
+        calls.append(kwargs)
+        return [{'title':'Synthetic HTTP funding record','source_url':'https://funder.example/test'}]
+    monkeypatch.setattr(GrantScraperAgent,'scrape',source)
+    async def run():
+        async with database.AsyncSessionLocal() as db:
+            db.add(MigrationSafety(id=1,external_jobs_paused=True,source_cutoff='synthetic'))
+            old=AutomationJob(job_type='scrape',status=AutomationJobStatus.queued,created_by_id=1,result={'managed_queue':True})
+            new=AutomationJob(job_type='scrape',status=AutomationJobStatus.queued,created_by_id=1,result={'managed_queue':True,'public_discovery_v1':True,'query':'synthetic'})
+            db.add_all([old,new]);await db.commit();ids=[old.id,new.id]
+        for jid in ids:await orchestrator.run_job(jid,{})
+        async with database.AsyncSessionLocal() as db:
+            assert (await db.get(AutomationJob,ids[0])).status==AutomationJobStatus.paused
+            new=await db.get(AutomationJob,ids[1]);assert new.status==AutomationJobStatus.completed
+            assert new.result['grants_added']==1
+            assert (await db.get(MigrationSafety,1)).external_jobs_paused
+        assert len(calls)==1 and calls[0]['allow_browser'] is False
+    asyncio.run(run())
