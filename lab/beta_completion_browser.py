@@ -42,6 +42,10 @@ with sync_playwright()as p:
  else:
   state=json.loads((root/'state.json').read_text());context=browser.new_context(storage_state=str(root/'browser-state.json'));contexts['grant_writer']=context;page=context.new_page();app='/api/applications/'+str(state['application_id'])
   def persistence():
+
+   current=context.request.get(base+'/gfm-app/api/auth/me')
+   if current.status==401:
+    req('POST','/api/auth/refresh');context.storage_state(path=str(root/'browser-state.json'))
    assert req('GET','/api/auth/me')['role']=='grant_writer';a=req('GET',app);assert a['title']==state['title'] and a['proposal_text']=='Synthetic human draft retained across deployment.'
    response=context.request.get(base+f'/gfm-app/api/ingestion/documents/{state["document_id"]}/original');assert response.ok and hashlib.sha256(response.body()).hexdigest()==state['sha256']
    assert req('GET','/api/ingestion/search?q=education')
@@ -119,6 +123,22 @@ with sync_playwright()as p:
    export=writer.request.get(base+'/gfm-app/api/operations/records/'+str(r['id'])+'/export');assert export.ok and result['result']in export.text()
    assert req('GET',app,c=writer)['proposal_text']=='Synthetic human draft retained across deployment.'
   record('Real Alambda generation, validation, candidate persistence/history/export and human-draft preservation',ai)
+  def chat_export():
+   prompt='QA TEST '+data['nonce']+' ? Compute 50.25 + 49.75. Reply with the sum only.'
+   response=req('POST','/api/ai/chat',{'messages':[{'role':'user','content':prompt}],'stream':False},c=writer)
+   assert response['conversation_id'] and '100' in response['reply']
+   assert any(r['id']==response['conversation_id'] for r in req('GET','/api/ai/conversations',c=writer))
+   page.goto(base+'/gfm-app/ai');page.get_by_label('Saved conversations').select_option(str(response['conversation_id']));page.get_by_text(prompt,exact=True).wait_for(timeout=20000)
+   page.reload();page.get_by_text(prompt,exact=True).wait_for(timeout=20000)
+   with page.expect_download()as download:page.get_by_role('button',name='Export conversation',exact=True).click()
+   path=root/'conversation-export.txt';download.value.save_as(str(path));assert prompt in path.read_text() and '100' in path.read_text()
+  record('Real AI chat persisted after reload and visible conversation export',chat_export)
+  def safeguards():
+   assert req('GET','/api/analytics/dashboard',c=writer)['total_applications']==0
+   message=req('GET','/api/email-monitor/decision-dashboard/summary',status=503,c=admin)['detail']
+   assert 'not connected' in message
+  record('QA records excluded from metrics and disconnected email bridge fails closed',safeguards)
+
   def mobile():
    for width in (1440,390):
     page.set_viewport_size({'width':width,'height':900})

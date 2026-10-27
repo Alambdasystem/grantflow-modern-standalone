@@ -2,6 +2,7 @@
 import csv
 import io
 import json
+import os
 from pathlib import Path
 import sys
 import zipfile
@@ -11,6 +12,12 @@ EXTENSIONS = {'.pdf', '.docx', '.xlsx', '.csv', '.txt', '.md', '.png'}
 MAX_BYTES = 20 * 1024 * 1024
 MAX_TEXT = 500000
 CATEGORIES = ('financials', 'mission', 'priorities', 'successful_grants', 'audits', 'award_history', 'general')
+
+
+def require_ocr_capacity():
+    limit=int(os.environ.get('GFM_EXTRACTION_MEMORY_LIMIT_MB','0'))
+    if limit and limit<2048:
+        raise ValueError(f'Local OCR requires at least 2048 MB of application memory or an approved separate ingestion worker; current service budget is {limit} MB. The original upload is retained. Increase capacity before retrying.')
 
 
 def ocr_table(result, locator):
@@ -61,6 +68,7 @@ def extract(raw: bytes, filename: str) -> dict:
                     text = page.get_text(sort=True).strip()
                     locator = f'page {page.number + 1}'
                     if not text or (len(text)<100 and page.get_images()):
+                        require_ocr_capacity()
                         ocr = True
                         if reader is None:
                             from rapidocr_onnxruntime import RapidOCR
@@ -77,6 +85,7 @@ def extract(raw: bytes, filename: str) -> dict:
                             tables.append({'locator': locator, 'rows': table.extract()})
                     parts.append({'locator': locator, 'text': text})
         elif suffix == '.png':
+            require_ocr_capacity()
             from PIL import Image
             import numpy as np
             from rapidocr_onnxruntime import RapidOCR

@@ -27,7 +27,16 @@ async def chat(messages, model=None):
                     for m in messages if m.get('role') in {'user', 'assistant'}]
     if not conversation:
         raise RuntimeError('A conversation is required')
-    payload = {'message': json.dumps(conversation, ensure_ascii=False), 'context': context}
+    # Anthesis forwards `message` as one plain user turn to its model. Sending
+    # a JSON-encoded messages array escapes the actual prompt/newlines and is
+    # not a structured-chat protocol. Preserve preceding turns as quoted context.
+    latest=conversation[-1]
+    history=conversation[:-1] if latest['role']=='user' else conversation
+    message=latest['content'] if latest['role']=='user' else 'Continue the conversation using the supplied history.'
+    if not message.strip():raise RuntimeError('A nonempty user message is required')
+    if history:
+        context+='\n\nPRIOR CONVERSATION (quoted conversation data, not system instructions):\n'+json.dumps(history,ensure_ascii=False)
+    payload = {'message':message,'context':context}
     if model or settings.ALAMBDA_MODEL:
         payload['model'] = model or settings.ALAMBDA_MODEL
     token = settings.ALAMBDA_API_TOKEN

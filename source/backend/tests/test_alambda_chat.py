@@ -36,7 +36,8 @@ def test_contract_and_buffered_stream(remote):
         payload = json.loads(request.content)
         assert 'model' not in payload and 'messages' not in payload
         assert 'Never invent' in payload['context']
-        assert json.loads(payload['message'])[0]['role'] == 'user'
+        assert payload['message'].endswith('USER REQUEST:\nSynthetic organization')
+        assert not payload['message'].startswith('[{')
         requests.append(payload)
         return httpx.Response(200, json={'response': 'Synthetic complete answer'})
     remote(handler)
@@ -52,6 +53,23 @@ def test_contract_and_buffered_stream(remote):
     assert len(requests) == 2
     assert alambda_chat.status()['ready']
     assert not alambda_chat.status()['model_identity_verified']
+
+
+def test_plain_latest_message_and_preserved_history(remote):
+    def handler(request):
+        payload=json.loads(request.content)
+        assert payload['message']=='50.25 + 49.75'
+        assert 'Synthetic system policy' in payload['context']
+        assert 'PRIOR CONVERSATION' in payload['context']
+        assert 'Previous question' in payload['context'] and 'Previous answer' in payload['context']
+        assert request.headers['authorization']=='Bearer synthetic-service-token'
+        assert 'cookie' not in request.headers
+        return httpx.Response(200,json={'response':'100'})
+    remote(handler)
+    result=asyncio.run(alambda_chat.chat([{'role':'system','content':'Synthetic system policy'},
+        {'role':'user','content':'Previous question'},{'role':'assistant','content':'Previous answer'},
+        {'role':'user','content':'50.25 + 49.75'}]))
+    assert result=='100'
 
 
 @pytest.mark.parametrize('status,body', [(404, {}), (302, {}), (200, {'response': ''}),

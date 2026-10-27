@@ -113,3 +113,70 @@ def test_repair_manifest_has_24_explainable_public_source_reviews():
     assert sum(r['status']=='verified'for r in rows)==19
     assert all(r['reason'] and r['retrieved_at'] and r['source_url'] for r in rows)
     assert all(r['requirements']['package_complete'] is False for r in rows if r['status']=='verified')
+
+
+@pytest.mark.parametrize('attempts',[1,3])
+def test_restart_recovers_local_ingestion_under_external_hold_without_unpausing_external_jobs(client,monkeypatch,attempts):
+    from db import database
+    from models.models import IngestionDocument,AutomationJob,AutomationJobStatus
+    from models.auth_models import MigrationSafety
+    from services import job_queue
+    from sqlalchemy import select
+    monkeypatch.setattr(job_queue,'AsyncSessionLocal',database.AsyncSessionLocal)
+    item=ok(client.post('/api/ingestion/upload',files={'file':('synthetic-restart.txt',b'Synthetic restart evidence')},headers=headers()),202)
+    async def run():
+        async with database.AsyncSessionLocal()as db:
+            doc=await db.get(IngestionDocument,item['id']);doc.status='processing';doc.attempts=attempts
+            job=(await db.execute(select(AutomationJob).where(AutomationJob.job_type=='ingest'))).scalars().one();jid=job.id;job.status=AutomationJobStatus.running
+            db.add(MigrationSafety(id=1,external_jobs_paused=True,source_cutoff='synthetic'))
+            external=AutomationJob(created_by_id=1,job_type='renew',status=AutomationJobStatus.paused,result={'managed_queue':True},error_message='Manual external pause')
+            db.add(external);await db.commit();eid=external.id
+        await job_queue.recover();await job_queue.recover()
+        async with database.AsyncSessionLocal()as db:
+            doc=await db.get(IngestionDocument,item['id']);job=await db.get(AutomationJob,jid)
+            assert doc.status==('queued'if attempts<3 else'failed')
+            assert job.status==(AutomationJobStatus.queued if attempts<3 else AutomationJobStatus.failed)
+            assert (await db.get(AutomationJob,eid)).status==AutomationJobStatus.paused
+            assert (await db.get(MigrationSafety,1)).external_jobs_paused
+    asyncio.run(run())
+
+
+def test_local_failed_retry_under_hold_does_not_poll_external_sources_or_duplicate_jobs(client,monkeypatch):
+    from db import database
+    from models.models import IngestionDocument,AutomationJob,AutomationJobStatus
+    from models.auth_models import MigrationSafety
+    from services import job_queue,document_ingestion
+    from sqlalchemy import select
+    monkeypatch.setattr(job_queue,'AsyncSessionLocal',database.AsyncSessionLocal)
+    async def prohibited():raise AssertionError('External source polling is held')
+    monkeypatch.setattr(document_ingestion,'schedule',prohibited)
+    item=ok(client.post('/api/ingestion/upload',files={'file':('synthetic-retry.txt',b'Synthetic retained evidence')},headers=headers()),202)
+    async def run():
+        async with database.AsyncSessionLocal()as db:
+            doc=await db.get(IngestionDocument,item['id']);doc.status='failed';doc.attempts=1;doc.retry_at=datetime.now()-timedelta(seconds=1)
+            job=(await db.execute(select(AutomationJob))).scalars().one();job.status=AutomationJobStatus.failed
+            db.add(MigrationSafety(id=1,external_jobs_paused=True,source_cutoff='synthetic'));await db.commit()
+        await job_queue.scheduled_documents();await job_queue.scheduled_documents()
+        async with database.AsyncSessionLocal()as db:
+            jobs=(await db.execute(select(AutomationJob).where(AutomationJob.status==AutomationJobStatus.queued))).scalars().all()
+            assert len(jobs)==1 and jobs[0].job_type=='ingest'
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize('budget',[512,1024,2048])
+def test_small_full_app_budget_refuses_ocr_before_loading_native_model(monkeypatch,budget):
+    from services.document_extract import extract,require_ocr_capacity
+    monkeypatch.setenv('GFM_EXTRACTION_MEMORY_LIMIT_MB',str(budget))
+    if budget<2048:
+        with pytest.raises(ValueError,match='OCR requires at least 2048 MB'):
+            extract(b'synthetic input','synthetic.png')
+    else:assert require_ocr_capacity()is None
+    assert extract(b'Synthetic plain text','synthetic.txt')['text']
+
+
+def test_extractor_environment_caps_threads_and_omits_service_credentials(monkeypatch):
+    from services.document_ingestion import extraction_env
+    monkeypatch.setenv('OPENBLAS_NUM_THREADS','128');monkeypatch.setenv('ALAMBDA_API_TOKEN','synthetic-secret-not-for-extractors')
+    env=extraction_env()
+    assert all(env[k]=='1'for k in ('OPENBLAS_NUM_THREADS','OMP_NUM_THREADS','MKL_NUM_THREADS','NUMEXPR_NUM_THREADS'))
+    assert 'ALAMBDA_API_TOKEN'not in env and int(env['GFM_EXTRACTION_MEMORY_LIMIT_MB'])>=0

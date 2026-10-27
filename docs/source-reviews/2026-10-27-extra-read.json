@@ -1,0 +1,12 @@
+[
+  {
+    "grant_id": 2,
+    "source_url": "https://example.com",
+    "retrieved_at": "2026-10-27T04:57:07.745613+00:00",
+    "http_status": 200,
+    "sha256": "25ddf2c883e0d1958ea971d279a7e4f0fd446724ee3db7db19dadabd4a62e484",
+    "page_title": "Example Domain",
+    "verification_result": "needs_source_verification",
+    "reason": "Generic Example Domain page supplies no authoritative opportunity identifier, funder, eligibility, deadline or application URL. Package remains withheld."
+  }
+]

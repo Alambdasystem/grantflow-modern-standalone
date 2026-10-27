@@ -14,17 +14,17 @@ with sync_playwright()as pw:
    page.goto(base+'/gfm-app'+route);page.wait_for_load_state('networkidle',timeout=20000);page.wait_for_timeout(300)
    if page.evaluate('document.documentElement.scrollWidth > window.innerWidth+2'):
     page.screenshot(path=str(p/'mobile-failure.png'),full_page=True);print(json.dumps({'result':'FAIL','width':width,'route':route,'scrollWidth':page.evaluate('document.documentElement.scrollWidth')}));sys.exit(1)
-  
+
   if width==390:
    page.get_by_role('button',name='Open navigation',exact=True).click();page.get_by_role('link',name='Renewals',exact=True).click();page.wait_for_url('**/renewals');page.wait_for_load_state('networkidle',timeout=20000);page.get_by_text('No overdue renewals or renewals due in the next 90 days.',exact=True).wait_for();assert page.get_by_role('button',name='Open navigation',exact=True).is_visible()
-  
+
   if width==390:
    assert page.get_by_role('heading',name='Renewals Due',exact=True).bounding_box()['y']>=56,'Mobile toolbar covers heading'
   page.screenshot(path=str(p/f'ui-{width}.png'),full_page=True);out.append({'test':'Route rendering without horizontal overflow','width':width,'routes':8,'result':'PASS'})
  print(json.dumps({'test':'desktop/mobile layouts','result':'PASS','viewports':2,'route_checks':16}))
  print(json.dumps({'test':'browser runtime errors','result':'PASS'if not errors else'FAIL','count':len(errors)}))
  old=next(x['value']for x in c.cookies()if x['name']=='__Host-gfm_session');page.set_viewport_size({'width':1440,'height':900});page.get_by_role('button',name='Sign Out',exact=True).first.click();page.get_by_role('button',name='Sign in',exact=True).wait_for(timeout=20000)
- 
+
  def denied(request):
   for attempt in range(3):
    try:return request.get(base+'/gfm-app/api/auth/me').status

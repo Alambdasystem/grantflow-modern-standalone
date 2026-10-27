@@ -48,21 +48,39 @@ async def schedule_renewals():
 async def recover():
     async with AsyncSessionLocal() as db:
         from services.migration_safety import held
-        if await held(db): return
-        await db.execute(update(AutomationJob).where(AutomationJob.status == Status.running,
-            AutomationJob.result['lease_token'].as_string().is_(None), AutomationJob.result["managed_queue"].as_boolean() == True).values(
+        external_hold=await held(db)
+        interrupted=update(AutomationJob).where(AutomationJob.status == Status.running,
+            AutomationJob.result['lease_token'].as_string().is_(None), AutomationJob.result["managed_queue"].as_boolean() == True)
+        if external_hold:interrupted=interrupted.where(AutomationJob.job_type=='ingest')
+        await db.execute(interrupted.values(
             status=Status.paused, error_message='Interrupted by service restart. Review before retrying.',
             current_step='Interrupted; retry required'))
         await db.commit()
         from models.models import IngestionDocument
         rows = (await db.execute(select(AutomationJob).where(AutomationJob.job_type=='ingest',
+            AutomationJob.result['managed_queue'].as_boolean()==True,
             AutomationJob.status==Status.paused, AutomationJob.error_message=='Interrupted by service restart. Review before retrying.'))).scalars().all()
         for job in rows:
             item=await db.get(IngestionDocument,job.result.get('ingestion_id'))
             if item and item.current and item.status!='deleted':
+                if item.attempts>=3:
+                    job.status=Status.failed;item.status='failed';item.retry_at=None
+                    item.error='Repeated processing interruptions. Check extraction capacity before retrying.'
+                    job.error_message=item.error
+                    continue
                 job.status=Status.queued; item.status='queued'
                 job.error_message=None; job.current_step='Resuming idempotent ingestion after restart'
         await db.commit()
+
+
+async def scheduled_documents():
+    """The external hold does not disable retries of existing local uploads."""
+    from services.document_ingestion import schedule,retry_failed
+    from services.migration_safety import held
+    async with AsyncSessionLocal()as db:
+        external_hold=await held(db)
+    if external_hold:await retry_failed()
+    else:await schedule()
 
 
 async def run(job_id):
@@ -93,9 +111,7 @@ async def worker():
                 from services.document_ingestion import schedule
                 last_schedule = now
                 try:
-                    async with AsyncSessionLocal() as safety_db:
-                        from services.migration_safety import held
-                        if not await held(safety_db): await schedule()
+                    await scheduled_documents()
                 except Exception:
                     import logging
                     logging.getLogger(__name__).exception('Document source scheduling failed; queued work continues')

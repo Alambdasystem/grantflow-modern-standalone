@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 import uuid
 import time
+import os
 from sqlalchemy import select, delete, update
 from fastapi import HTTPException
 from config import settings
@@ -20,6 +21,20 @@ lock = asyncio.Lock()
 
 
 def now(): return datetime.utcnow()
+
+
+def extraction_env():
+    """Bound native threading and keep unrelated service credentials out of parsers."""
+    names=('PATH','PYTHONPATH','HOME','USERPROFILE','SYSTEMROOT','WINDIR','TEMP','TMP','TMPDIR','LANG','LC_ALL','TZ')
+    env={key:os.environ[key]for key in names if key in os.environ}
+    env.update({key:'1'for key in ('OPENBLAS_NUM_THREADS','OMP_NUM_THREADS','MKL_NUM_THREADS','NUMEXPR_NUM_THREADS')})
+    limit=512 if settings.ENVIRONMENT=='render-standalone' else 0
+    try:
+        raw=Path('/sys/fs/cgroup/memory.max').read_text().strip()
+        if raw.isdigit():limit=int(raw)//(1024*1024)
+    except OSError:pass
+    env['GFM_EXTRACTION_MEMORY_LIMIT_MB']=str(limit)
+    return env
 
 
 def event(row, action, **details):
@@ -149,7 +164,7 @@ async def process(job_id):
         proc = None
         try:
             proc = await asyncio.create_subprocess_exec(sys.executable, str(Path(__file__).with_name('document_extract.py')),
-                str(stored_path(doc)), doc.original_filename, stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL)
+                str(stored_path(doc)), doc.original_filename, stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,env=extraction_env())
             stdout,_ = await asyncio.wait_for(proc.communicate(),timeout=180)
             result = json.loads(stdout)
             if proc.returncode or 'error' in result: raise ValueError(result.get('error','Extraction failed.'))
@@ -273,6 +288,12 @@ async def schedule():
                 if isinstance(exc, CloudSourceError): source.error=str(exc)
                 event(source,'poll_failed',error=source.error)
             await db.commit()
+    await retry_failed()
+
+
+async def retry_failed():
+    """Retry only retained local documents; never poll external sources here."""
+    async with database.AsyncSessionLocal()as db:
         retry = (await db.execute(select(Item).where(Item.status=='failed',Item.current==True,
             Item.retry_at<=now(),Item.attempts<3).limit(20))).scalars().all()
         for item in retry:
