@@ -155,7 +155,9 @@ class AIService:
                 f"Amount: ${(g.get('amount') or 0):,.2f}\n"
                 f"Description: {(g.get('description') or '')[:800]}\n"
                 f"Eligibility: {(g.get('eligibility') or '')[:400]}\n"
-                f"Source: {g.get('source_url') or 'not provided'}"
+                f"Source: {g.get('source_url') or 'not provided'}\n"
+                f"Source verification warning: {g.get('source_warning') or 'Verify the original funder notice.'}\n"
+                f"Reviewed requirements (package completeness is separate): {json.dumps(g.get('requirements') or {},default=str)[:16000]}"
             )
         if "application" in context:
             a = context["application"]

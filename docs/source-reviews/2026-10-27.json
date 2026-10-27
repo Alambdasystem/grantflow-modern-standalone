@@ -1,0 +1,1084 @@
+[
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 1,
+    "fingerprint": "e49d10f6da10a326ad56ea7ec614dc418506c2906e30e7ba4da30db117290312",
+    "retrieved_at": "2026-10-27T03:07:34.738662+00:00",
+    "source_url": "https://blog.hcde-texas.org/2023/05/25/2023-county-connections-grant-awardees-announced/",
+    "catalog_title": "County Connections Youth Summer Initiative",
+    "status": "needs_source_verification",
+    "fields": {},
+    "evidence": [
+      {
+        "url": "https://blog.hcde-texas.org/2023/05/25/2023-county-connections-grant-awardees-announced/",
+        "retrieved_at": "2026-10-27T03:07:34.738662+00:00",
+        "sha256": "ad1e8214269f96d3060a1cc49d98f464d358b07e63d235fcbf9ec44f8fee1442",
+        "http_status": 200
+      }
+    ],
+    "reason": "Needs source verification: this is a 2023 HCDE award announcement, not an open application notice. The cached PAS-TUNIS-FY2025 package is unrelated. Current opportunity identifier, eligibility, deadline and application URL are missing."
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 2,
+    "fingerprint": "91840e097e50f25f772da76080105a150ba032c373ec8ef15eaacc4978fa9324",
+    "retrieved_at": "2026-10-27T03:07:34.738662+00:00",
+    "source_url": "https://example.com",
+    "catalog_title": "Sample Community Health Grant",
+    "status": "needs_source_verification",
+    "fields": {},
+    "evidence": [
+      {
+        "url": "https://example.com",
+        "retrieved_at": "2026-10-27T03:07:34.738662+00:00",
+        "sha256": null,
+        "http_status": null
+      }
+    ],
+    "reason": "Needs source verification: example.com is a placeholder, not a funder source. No authoritative opportunity identifier, funder, eligibility, deadline or application URL is available."
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 17,
+    "fingerprint": "e49d10f6da10a326ad56ea7ec614dc418506c2906e30e7ba4da30db117290312",
+    "retrieved_at": "2026-10-27T03:07:34.739660+00:00",
+    "source_url": "https://blog.hcde-texas.org/2023/05/25/2023-county-connections-grant-awardees-announced/",
+    "catalog_title": "County Connections Youth Summer Initiative",
+    "status": "needs_source_verification",
+    "fields": {},
+    "evidence": [
+      {
+        "url": "https://blog.hcde-texas.org/2023/05/25/2023-county-connections-grant-awardees-announced/",
+        "retrieved_at": "2026-10-27T03:07:34.739660+00:00",
+        "sha256": "38298e4273556fb3124813e8388f1790d3bbd540c1757a64e4419e4db43ae256",
+        "http_status": 200
+      }
+    ],
+    "reason": "Needs source verification: this is a 2023 HCDE award announcement, not an open application notice. The cached PAS-TUNIS-FY2025 package is unrelated. Current opportunity identifier, eligibility, deadline and application URL are missing."
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 18,
+    "fingerprint": "bddc044a4f096625fee287f4dbe2d7384d70fd8fb37280e41c709949e9fb102e",
+    "retrieved_at": "2026-10-27T03:14:18.408937+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2023/05/05/2023-09615/applications-for-new-awards-personnel-development-to-improve-services-and-results-for-children-with",
+    "catalog_title": "Applications for New Awards; Personnel Development To Improve Services and Results for Children With Disabilities-Personnel Preparation of Special Education, Early Intervention, and Related Services Personnel at Historically Black Colleges and Universities, Tribally Controlled Colleges and Universities, and Other Minority Serving Institutions",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-050523-001",
+      "funder": "Department of Education",
+      "title": "OSERS: Personnel Development to Improve Services and Results for Children with Disabilities--Personnel Preparation of Special Education, Early Intervention, and Related Services Personnel, ALN 84.325M",
+      "eligibility": "Eligible Applicants: HBCUs, TCCUs, MSIs, and private nonprofit organizations.Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "deadline": "2023-07-14",
+      "application_url": "https://www.grants.gov/search-results-detail/347936"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2023-05-05/html/2023-09615.htm",
+        "retrieved_at": "2026-10-27T03:07:34.739660+00:00",
+        "sha256": "9982a6d7efed0adf853986eb441460e7d79e6adb706cfc0f3552251cc90a2026",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/347936",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 347936,
+        "retrieved_at": "2026-10-27T03:14:18.408937+00:00",
+        "sha256": "422a12ed86d18bd842532bc0d29be7731dc620e1538f89dc41c0171a279faa0e"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 347936,
+      "opp_number": "ED-GRANTS-050523-001",
+      "title": "OSERS: Personnel Development to Improve Services and Results for Children with Disabilities--Personnel Preparation of Special Education, Early Intervention, and Related Services Personnel, ALN 84.325M",
+      "agency": "Department of Education",
+      "deadline": "2023-07-14",
+      "eligibility": "Eligible Applicants: HBCUs, TCCUs, MSIs, and private nonprofit organizations.Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "application_url": "https://www.grants.gov/search-results-detail/347936",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 19,
+    "fingerprint": "1cff408daa36dc8177aa32d3984afed1a8530ebeaca512a0c2460691972a6e6e",
+    "retrieved_at": "2026-10-27T03:14:18.414512+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2025/05/27/2025-09431/personnel-development-to-improve-services-and-results-for-children-with",
+    "catalog_title": "Personnel Development To Improve Services and Results for Children With Disabilities-Interdisciplinary Preparation of Early Intervention, Special Education, and Related Services Personnel Serving Children With Disabilities Who Have High-Intensity Needs",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-052725-003",
+      "funder": "Department of Education",
+      "title": "OSERS-OSEP: Interdisciplinary Preparation of Early Intervention, Special Education, and Related Services Personnel Serving Children with Disabilities who have High-Intensity Needs, ALN: 84.325K FY25 NIA",
+      "eligibility": "Eligible Applicants:Eligible applicants are IHEs and private nonprofit organizations that have legal authority to enter into grants and cooperative agreements with the Federal government on behalf of an IHE.Note:If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant's certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "deadline": "2025-06-26",
+      "application_url": "https://www.grants.gov/search-results-detail/359124"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2025-05-27/html/2025-09431.htm",
+        "retrieved_at": "2026-10-27T03:07:34.899150+00:00",
+        "sha256": "2e2fb818ab9dd32a49259b5cc52482578e508f25ccabaa6a269f15669635b5c0",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/359124",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 359124,
+        "retrieved_at": "2026-10-27T03:14:18.414512+00:00",
+        "sha256": "32b92eaf295b0c1af2e998b81388a3bf135a9a93eff255455f33da93d0f95c4e"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 359124,
+      "opp_number": "ED-GRANTS-052725-003",
+      "title": "OSERS-OSEP: Interdisciplinary Preparation of Early Intervention, Special Education, and Related Services Personnel Serving Children with Disabilities who have High-Intensity Needs, ALN: 84.325K FY25 NIA",
+      "agency": "Department of Education",
+      "deadline": "2025-06-26",
+      "eligibility": "Eligible Applicants:Eligible applicants are IHEs and private nonprofit organizations that have legal authority to enter into grants and cooperative agreements with the Federal government on behalf of an IHE.Note:If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant's certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "application_url": "https://www.grants.gov/search-results-detail/359124",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 20,
+    "fingerprint": "bfc39425bb1c23d48271ac95ba3b826c7d5dfe2bad1a594766572e5967fa9585",
+    "retrieved_at": "2026-10-27T03:14:18.471679+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2025/01/17/2025-01275/applications-for-new-awards-supporting-effective-educator-development-program",
+    "catalog_title": "Applications for New Awards; Supporting Effective Educator Development Program",
+    "status": "needs_source_verification",
+    "fields": {
+      "identifier": "ED-GRANTS-011725-001",
+      "funder": "Department of Education",
+      "title": "Office of Elementary and Secondary Education (OESE): Teacher Preparation Grants: Supporting Effective Educator Development (SEED) Program, Assistance Listing Number (ALN) 84.423A",
+      "eligibility": "1. Eligible Applicants: (a) An IHE that provides course materials or resources that are evidence-based in increasing academic achievement, graduation rates, or rates of postsecondary education matriculation;(b) A national nonprofit entity with a demonstrated record of raising student academic achievement, graduation rates, and rates of higher education attendance, matriculation, or completion, or of effectiveness in providing preparation and professional development activities and programs for teachers, principals, or other school leaders;(c) The Bureau of Indian Education; or(d) A partnership consisting of--(i) One or more entities described in paragraph (a) or (b); and(ii) A for-profit entity.If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "deadline": "2025-03-06",
+      "application_url": "https://www.grants.gov/search-results-detail/358276"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2025-01-17/html/2025-01275.htm",
+        "retrieved_at": "2026-10-27T03:07:35.030075+00:00",
+        "sha256": "58ccce2195c383da6cff22efa4b03ff2c9a35b6964ab0409f134c692acfb7236",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/358276",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 358276,
+        "retrieved_at": "2026-10-27T03:14:18.471679+00:00",
+        "sha256": "87ab3651e76da8cf0a080ce7d48bdb9fbfd0807c7597d24661382649005a9355"
+      }
+    ],
+    "reason": "Needs source verification: original notice closes March 18, 2025; current portal structured field says March 6 and narrative March 7. Obtain an authoritative amendment resolving all three dates. Do not rely on the old cached package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 358276,
+      "opp_number": "ED-GRANTS-011725-001",
+      "title": "Office of Elementary and Secondary Education (OESE): Teacher Preparation Grants: Supporting Effective Educator Development (SEED) Program, Assistance Listing Number (ALN) 84.423A",
+      "agency": "Department of Education",
+      "deadline": "2025-03-06",
+      "eligibility": "1. Eligible Applicants: (a) An IHE that provides course materials or resources that are evidence-based in increasing academic achievement, graduation rates, or rates of postsecondary education matriculation;(b) A national nonprofit entity with a demonstrated record of raising student academic achievement, graduation rates, and rates of higher education attendance, matriculation, or completion, or of effectiveness in providing preparation and professional development activities and programs for teachers, principals, or other school leaders;(c) The Bureau of Indian Education; or(d) A partnership consisting of--(i) One or more entities described in paragraph (a) or (b); and(ii) A for-profit entity.If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "application_url": "https://www.grants.gov/search-results-detail/358276",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Needs source verification: original notice closes March 18, 2025; current portal structured field says March 6 and narrative March 7. Obtain an authoritative amendment resolving all three dates. Do not rely on the old cached package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 21,
+    "fingerprint": "98fdba4335ec37674579266d59023f90e007fdd201d36b0de5f79793b0978fed",
+    "retrieved_at": "2026-10-27T03:14:18.570082+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2024/07/09/2024-15044/applications-for-new-awards-state-personnel-development-grants",
+    "catalog_title": "Applications for New Awards; State Personnel Development Grants",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-070924-002",
+      "funder": "Department of Education",
+      "title": "Office of Special Education and Rehabilitative Services (OSERS): Office of Special Education Programs (OSEP):State Personnel Development Grants (SPDG) Program, Assistance Listing Number (ALN) 84.323A",
+      "eligibility": "1. Eligible Applicants: An SEA of one of the 50 States, the District of Columbia, or the Commonwealth of Puerto Rico or an outlying area (United States Virgin Islands, Guam, American Samoa, and the Commonwealth of the Northern Mariana Islands).Note: Public Law 95-134, which permits the consolidation of grants to the outlying areas, does not apply to funds received under this competition.",
+      "deadline": "2024-08-23",
+      "application_url": "https://www.grants.gov/search-results-detail/355291"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2024-07-09/html/2024-15044.htm",
+        "retrieved_at": "2026-10-27T03:07:35.107896+00:00",
+        "sha256": "1471545c452c147472ca092498c74a3722893a36a0a74920b4908e5d9c687230",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/355291",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 355291,
+        "retrieved_at": "2026-10-27T03:14:18.570082+00:00",
+        "sha256": "13a79abd97d12db2fbb235f7daa6fcb6f7b7947ff7d9bf960aad7294b045f609"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 355291,
+      "opp_number": "ED-GRANTS-070924-002",
+      "title": "Office of Special Education and Rehabilitative Services (OSERS): Office of Special Education Programs (OSEP):State Personnel Development Grants (SPDG) Program, Assistance Listing Number (ALN) 84.323A",
+      "agency": "Department of Education",
+      "deadline": "2024-08-23",
+      "eligibility": "1. Eligible Applicants: An SEA of one of the 50 States, the District of Columbia, or the Commonwealth of Puerto Rico or an outlying area (United States Virgin Islands, Guam, American Samoa, and the Commonwealth of the Northern Mariana Islands).Note: Public Law 95-134, which permits the consolidation of grants to the outlying areas, does not apply to funds received under this competition.",
+      "application_url": "https://www.grants.gov/search-results-detail/355291",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 22,
+    "fingerprint": "78f690d64b3da0ef017e181fa1755a11a9c052d4b4681cf836c2acc3c2ca799d",
+    "retrieved_at": "2026-10-27T03:14:18.575082+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2024/03/08/2024-04914/applications-for-new-awards-gaining-early-awareness-and-readiness-for-undergraduate-programs-state",
+    "catalog_title": "Applications for New Awards; Gaining Early Awareness and Readiness for Undergraduate Programs (State Grants)",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-030824-002",
+      "funder": "Department of Education",
+      "title": "Office of Postsecondary Education (OPE) Student Service: Gaining Early Awareness and Readiness for Undergraduate Programs (GEAR UP) State Grants, Assistance Listing Number 84.334S",
+      "eligibility": "Eligible Applicants: States (as defined in section 103(20) of the HEA (20 U.S.C. 1003(20)), which includes the Commonwealth of Puerto Rico, the District of Columbia, Guam, American Samoa, the United States Virgin Islands, the Commonwealth of the Northern Mariana Islands, and the Freely Associated States. Per congressional direction in House Report 117-403 2023 (Pub. L. 117-328), only States without an active State GEAR UP grant, or States that have an active State GEAR UP grant that is scheduled to end prior to October 1, 2024, are eligible to receive a new State GEAR UP award in this competition. States with grants remaining open beyond October 1, 2024, for a no-cost extension period or for the sole purpose of data collection and analysis activities are not considered active for purposes of implementing this directive.",
+      "deadline": "2024-05-07",
+      "application_url": "https://www.grants.gov/search-results-detail/352789"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2024-03-08/html/2024-04914.htm",
+        "retrieved_at": "2026-10-27T03:07:35.145534+00:00",
+        "sha256": "5cea7cbe58203bcb88da7f1f82d5c50cb38f2130f6c9b547a08d3b5c28915611",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/352789",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 352789,
+        "retrieved_at": "2026-10-27T03:14:18.575082+00:00",
+        "sha256": "85614c88d7ebb6d7ce7e4a7cc66f031c3c723e3c783395a6f509684015f450d1"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 352789,
+      "opp_number": "ED-GRANTS-030824-002",
+      "title": "Office of Postsecondary Education (OPE) Student Service: Gaining Early Awareness and Readiness for Undergraduate Programs (GEAR UP) State Grants, Assistance Listing Number 84.334S",
+      "agency": "Department of Education",
+      "deadline": "2024-05-07",
+      "eligibility": "Eligible Applicants: States (as defined in section 103(20) of the HEA (20 U.S.C. 1003(20)), which includes the Commonwealth of Puerto Rico, the District of Columbia, Guam, American Samoa, the United States Virgin Islands, the Commonwealth of the Northern Mariana Islands, and the Freely Associated States. Per congressional direction in House Report 117-403 2023 (Pub. L. 117-328), only States without an active State GEAR UP grant, or States that have an active State GEAR UP grant that is scheduled to end prior to October 1, 2024, are eligible to receive a new State GEAR UP award in this competition. States with grants remaining open beyond October 1, 2024, for a no-cost extension period or for the sole purpose of data collection and analysis activities are not considered active for purposes of implementing this directive.",
+      "application_url": "https://www.grants.gov/search-results-detail/352789",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 23,
+    "fingerprint": "24b773fa45ffaf1d809946d710500a17fb70dcb7c1ff0b17315da43edd5c3446",
+    "retrieved_at": "2026-10-27T03:14:18.643672+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2024/03/08/2024-04913/applications-for-new-awards-gaining-early-awareness-and-readiness-for-undergraduate-programs",
+    "catalog_title": "Applications for New Awards; Gaining Early Awareness and Readiness for Undergraduate Programs (Partnership Grants)",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-030824-001",
+      "funder": "Department of Education",
+      "title": "Office of Postsecondary Education (OPE): Student Support Service: Gaining Early Awareness and Readiness for Undergraduate Programs (GEAR UP) Partnership Grants, Assistance Listing Number 84.334A",
+      "eligibility": "1. Eligible Applicants: Partnerships consisting of (a) at least one degree-granting IHE and (b) at least one LEA. Partnerships may include not less than two other community organizations or entities, such as businesses, professional organizations, State agencies, institutions or agencies sponsoring programs authorized under the Leveraging Educational Assistance Partnership Program authorized in part A, subpart 4, of title IV of the HEA (20 U.S.C. 1070c et seq.), or other public or private agencies or organizations (20 U.S.C. 1070a-21(c)(2)). Note: A Partnership under this competition must follow the procedures under 34 CFR 75.127 \u2013 75.129 in developing a group application. This includes developing an agreement that details the activities that each member of the group plans to perform and binds each member of the group to every statement and assurance made by the applicant in the application. This agreement must be submitted with the application.Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant's certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "deadline": "2024-05-07",
+      "application_url": "https://www.grants.gov/search-results-detail/352788"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2024-03-08/html/2024-04913.htm",
+        "retrieved_at": "2026-10-27T03:07:35.221996+00:00",
+        "sha256": "b6fcbd4ba090f05abff0c693fdab89389072c53bac5898361727b9a800e7b6df",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/352788",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 352788,
+        "retrieved_at": "2026-10-27T03:14:18.643672+00:00",
+        "sha256": "cd0a45ed14d715343b2b8023a6aa0baf174be59974e6a72f2bd29be84b803f37"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 352788,
+      "opp_number": "ED-GRANTS-030824-001",
+      "title": "Office of Postsecondary Education (OPE): Student Support Service: Gaining Early Awareness and Readiness for Undergraduate Programs (GEAR UP) Partnership Grants, Assistance Listing Number 84.334A",
+      "agency": "Department of Education",
+      "deadline": "2024-05-07",
+      "eligibility": "1. Eligible Applicants: Partnerships consisting of (a) at least one degree-granting IHE and (b) at least one LEA. Partnerships may include not less than two other community organizations or entities, such as businesses, professional organizations, State agencies, institutions or agencies sponsoring programs authorized under the Leveraging Educational Assistance Partnership Program authorized in part A, subpart 4, of title IV of the HEA (20 U.S.C. 1070c et seq.), or other public or private agencies or organizations (20 U.S.C. 1070a-21(c)(2)). Note: A Partnership under this competition must follow the procedures under 34 CFR 75.127 \u2013 75.129 in developing a group application. This includes developing an agreement that details the activities that each member of the group plans to perform and binds each member of the group to every statement and assurance made by the applicant in the application. This agreement must be submitted with the application.Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant's certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "application_url": "https://www.grants.gov/search-results-detail/352788",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 24,
+    "fingerprint": "d3c66c54750e7236269a221e7a9156a5d3a51219c2af84c4cd766be5bd2d1ecc",
+    "retrieved_at": "2026-10-27T03:14:18.751567+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2024/10/08/2024-23033/personnel-development-to-improve-services-and-results-for-children-with-disabilities-preparation-of",
+    "catalog_title": "Personnel Development To Improve Services and Results for Children With Disabilities-Preparation of Early Intervention and Special Education Personnel Serving Children With Disabilities Who Have High-Intensity Needs",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-100824-003",
+      "funder": "Department of Education",
+      "title": "OSERS-OSEP: Personnel Development to Improve Services and Results for Children with Disabilities--Preparation of Early Intervention and Special Education Personnel Serving Children with Disabilities who have High-Intensity Needs, ALN 84.325K",
+      "eligibility": "1. Eligible Applicants: Eligible applicants are IHEs and private nonprofit organizations that have legal authority to enter into grants and cooperative agreements with the Federal government on behalf of an IHE. Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "deadline": "2024-12-03",
+      "application_url": "https://www.grants.gov/search-results-detail/356648"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2024-10-08/html/2024-23033.htm",
+        "retrieved_at": "2026-10-27T03:07:35.239432+00:00",
+        "sha256": "262f0a36f9332c6918123b2a26095f0d107088f0aecc6f90c0379db7656ffd46",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/356648",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 356648,
+        "retrieved_at": "2026-10-27T03:14:18.751567+00:00",
+        "sha256": "99e943a2545797ecaff3872e5923c0abb054fd3545530db8cc3388e63e054b45"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 356648,
+      "opp_number": "ED-GRANTS-100824-003",
+      "title": "OSERS-OSEP: Personnel Development to Improve Services and Results for Children with Disabilities--Preparation of Early Intervention and Special Education Personnel Serving Children with Disabilities who have High-Intensity Needs, ALN 84.325K",
+      "agency": "Department of Education",
+      "deadline": "2024-12-03",
+      "eligibility": "1. Eligible Applicants: Eligible applicants are IHEs and private nonprofit organizations that have legal authority to enter into grants and cooperative agreements with the Federal government on behalf of an IHE. Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "application_url": "https://www.grants.gov/search-results-detail/356648",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 25,
+    "fingerprint": "392b43d8edcec93ddafe9171068f4b3f2cc8645a03deb63c9301aedb4453e850",
+    "retrieved_at": "2026-10-27T03:14:18.790139+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2024/04/09/2024-07502/applications-for-new-awards-disability-innovation-fund-creating-a-21st-century-workforce-of-youth",
+    "catalog_title": "Applications for New Awards; Disability Innovation Fund-Creating a 21st Century Workforce of Youth and Adults With Disabilities Through the Transformation of Education, Career, and Competitive Integrated Employment Model Demonstration Project",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-040924-001",
+      "funder": "Department of Education",
+      "title": "OSERS: RSA: Disability Innovation Fund (DIF)--Creating a 21st Century Workforce of Youth and Adults with Disabilities Through the Transformation of Education, Career, and Competitive Integrated Employment Model Demonstration Project, ALN 84.421F",
+      "eligibility": "1. Eligible Applicants: \u2022 State agencies or their equivalents under State law: (1) State Educational Agency; (2) State Juvenile Justice agency; (3) State Developmental Disabilities agency; (4) State Department of Health; (5) State Department of Human Services; or (6) Designated State unit for Vocational Rehabilitation Services. \u2022 Public, Private and Nonprofit Entities, including Indian Tribes and Institutions of Higher Education.Note: The regulations in 34 CFR part 79 apply to all applicants except federally recognized Indian Tribes. Note: The regulations in 34 CFR part 86 apply to Institutions of Higher Education only. Note: The regulation 34 CFR \u00a7 75.51 How to prove nonprofit status applies to nonprofits and requires documentation to prove its nonprofit status. (a) Under some programs, an applicant must show that it is a nonprofit organization. (See the definition of nonprofit in 34 CFR 77.1.) (b) An applicant may show that it is a nonprofit organization by any of the following means: (1) Proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) A statement from a State taxing body or the State attorney general certifying that: (i) The organization is a nonprofit organization operating within the State; and (ii) No part of its net earnings may lawfully benefit any private shareholder or individual; (3) A certified copy of the applicant's certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; (4) Any item described in paragraphs (b)(1) through (3) of this section if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate; or (5) For an entity that holds a sincerely held religious belief that it cannot apply for a determination as an entity that is tax-exempt under section 501(c)(3) of the Internal Revenue Code, evidence sufficient to establish that the entity would otherwise qualify as a nonprofit organization under paragraphs (b)(1) through (4) of this section.",
+      "deadline": "2024-07-08",
+      "application_url": "https://www.grants.gov/search-results-detail/353411"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2024-04-09/html/2024-07502.htm",
+        "retrieved_at": "2026-10-27T03:07:35.293880+00:00",
+        "sha256": "768001935f2b7b28dc567f7c3261db7969048c3779bd574cd92692c74edef029",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/353411",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 353411,
+        "retrieved_at": "2026-10-27T03:14:18.790139+00:00",
+        "sha256": "87dd8d2c9d45022a704c316dc1705eb66e7c329409cda69a094563f8b4a6165f"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 353411,
+      "opp_number": "ED-GRANTS-040924-001",
+      "title": "OSERS: RSA: Disability Innovation Fund (DIF)--Creating a 21st Century Workforce of Youth and Adults with Disabilities Through the Transformation of Education, Career, and Competitive Integrated Employment Model Demonstration Project, ALN 84.421F",
+      "agency": "Department of Education",
+      "deadline": "2024-07-08",
+      "eligibility": "1. Eligible Applicants: \u2022 State agencies or their equivalents under State law: (1) State Educational Agency; (2) State Juvenile Justice agency; (3) State Developmental Disabilities agency; (4) State Department of Health; (5) State Department of Human Services; or (6) Designated State unit for Vocational Rehabilitation Services. \u2022 Public, Private and Nonprofit Entities, including Indian Tribes and Institutions of Higher Education.Note: The regulations in 34 CFR part 79 apply to all applicants except federally recognized Indian Tribes. Note: The regulations in 34 CFR part 86 apply to Institutions of Higher Education only. Note: The regulation 34 CFR \u00a7 75.51 How to prove nonprofit status applies to nonprofits and requires documentation to prove its nonprofit status. (a) Under some programs, an applicant must show that it is a nonprofit organization. (See the definition of nonprofit in 34 CFR 77.1.) (b) An applicant may show that it is a nonprofit organization by any of the following means: (1) Proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) A statement from a State taxing body or the State attorney general certifying that: (i) The organization is a nonprofit organization operating within the State; and (ii) No part of its net earnings may lawfully benefit any private shareholder or individual; (3) A certified copy of the applicant's certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; (4) Any item described in paragraphs (b)(1) through (3) of this section if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate; or (5) For an entity that holds a sincerely held religious belief that it cannot apply for a determination as an entity that is tax-exempt under section 501(c)(3) of the Internal Revenue Code, evidence sufficient to establish that the entity would otherwise qualify as a nonprofit organization under paragraphs (b)(1) through (4) of this section.",
+      "application_url": "https://www.grants.gov/search-results-detail/353411",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 26,
+    "fingerprint": "c5bc7401488038234d37b0f9c767452ae21ab745d05b4dfc0501f554919bd47c",
+    "retrieved_at": "2026-10-27T03:14:18.820335+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2024/04/04/2024-07183/applications-for-new-awards-teacher-quality-partnership-grant-program",
+    "catalog_title": "Applications for New Awards; Teacher Quality Partnership Grant Program",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-040424-001",
+      "funder": "Department of Education",
+      "title": "Office of Elementary and Secondary Education (OESE): Effective Educator Development Programs: Teacher Quality Partnership (TQP) Grant Program, Assistance Listing Number (ALN) 84.336S",
+      "eligibility": "1. Eligible Applicants: An eligible applicant must be an \u201celigible partnership\u201d as defined in section 200(6) of the HEA. The term \u201celigible partnership\u201d means an entity that\u2014 (1) Must include\u2014 (i) A high-need LEA; (ii)(A) A high-need school or a consortium of high-need schools served by the high-need LEA; or (B) As applicable, a high-need ECE program; (iii) A partner institution; (iv) A school, department, or program of education within such partner institution, which may include an existing teacher professional development program with proven outcomes within a four-year IHE that provides intensive and sustained collaboration between faculty and LEAs consistent with the requirements of title II of the HEA; and (v) A school or department of arts and sciences within such partner institution; and (2) May include any of the following: (i) The Governor of the State. (ii) The State educational agency (SEA). (iii) The State board of education. (iv) The State agency for higher education. (v) A business. (vi) A public or private nonprofit educational organization. (vii) An educational service agency. (viii) A teacher organization. (ix) A high-performing LEA, or a consortium of such LEAs, that can serve as a resource to the partnership. (x) A charter school. (xi) A school or department within the partner institution that focuses on psychology and human development. (xii) A school or department within the partner institution with comparable expertise in the disciplines of teaching, learning, and child and adolescent development. (xiii) An entity operating a program that provides alternative routes to State certification of teachers. Note: So that the Department can confirm the eligibility of the LEA(s) that an applicant proposes to serve, applicants must include information in their applications that demonstrates that each LEA to potentially be served by the project is a \u201chigh-need LEA\u201d (as defined in this notice). Applicants should review the application package for additional information on determining whether an LEA meets the definition of \u201chigh-need LEA.\u201d Note: An LEA includes a public charter school that operates as an LEA. Note: As required by HEA section 203(a)(2), an eligible partnership may not receive more than one grant during a five-year period. More information on eligible partnerships can be found in the TQP FAQ document on the program website at https://oese.ed.gov/offices/office-of discretionary-grants-support-services/ effective-educator-development programs/teacher-quality-partnership/ applicant-info-and-eligibility/.",
+      "deadline": "2024-06-03",
+      "application_url": "https://www.grants.gov/search-results-detail/353333"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2024-04-04/html/2024-07183.htm",
+        "retrieved_at": "2026-10-27T03:07:35.330516+00:00",
+        "sha256": "fe203f609773594533870e9a70e112c0d2b28e4fbf4ef62d1ccdb3911b6317a5",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/353333",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 353333,
+        "retrieved_at": "2026-10-27T03:14:18.820335+00:00",
+        "sha256": "11b96ba7315bc0a926f5a419b35060702f656e0e16b8b335d93fbbd38607b2c9"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 353333,
+      "opp_number": "ED-GRANTS-040424-001",
+      "title": "Office of Elementary and Secondary Education (OESE): Effective Educator Development Programs: Teacher Quality Partnership (TQP) Grant Program, Assistance Listing Number (ALN) 84.336S",
+      "agency": "Department of Education",
+      "deadline": "2024-06-03",
+      "eligibility": "1. Eligible Applicants: An eligible applicant must be an \u201celigible partnership\u201d as defined in section 200(6) of the HEA. The term \u201celigible partnership\u201d means an entity that\u2014 (1) Must include\u2014 (i) A high-need LEA; (ii)(A) A high-need school or a consortium of high-need schools served by the high-need LEA; or (B) As applicable, a high-need ECE program; (iii) A partner institution; (iv) A school, department, or program of education within such partner institution, which may include an existing teacher professional development program with proven outcomes within a four-year IHE that provides intensive and sustained collaboration between faculty and LEAs consistent with the requirements of title II of the HEA; and (v) A school or department of arts and sciences within such partner institution; and (2) May include any of the following: (i) The Governor of the State. (ii) The State educational agency (SEA). (iii) The State board of education. (iv) The State agency for higher education. (v) A business. (vi) A public or private nonprofit educational organization. (vii) An educational service agency. (viii) A teacher organization. (ix) A high-performing LEA, or a consortium of such LEAs, that can serve as a resource to the partnership. (x) A charter school. (xi) A school or department within the partner institution that focuses on psychology and human development. (xii) A school or department within the partner institution with comparable expertise in the disciplines of teaching, learning, and child and adolescent development. (xiii) An entity operating a program that provides alternative routes to State certification of teachers. Note: So that the Department can confirm the eligibility of the LEA(s) that an applicant proposes to serve, applicants must include information in their applications that demonstrates that each LEA to potentially be served by the project is a \u201chigh-need LEA\u201d (as defined in this notice). Applicants should review the application package for additional information on determining whether an LEA meets the definition of \u201chigh-need LEA.\u201d Note: An LEA includes a public charter school that operates as an LEA. Note: As required by HEA section 203(a)(2), an eligible partnership may not receive more than one grant during a five-year period. More information on eligible partnerships can be found in the TQP FAQ document on the program website at https://oese.ed.gov/offices/office-of discretionary-grants-support-services/ effective-educator-development programs/teacher-quality-partnership/ applicant-info-and-eligibility/.",
+      "application_url": "https://www.grants.gov/search-results-detail/353333",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 27,
+    "fingerprint": "96482db986068cc24910947bce4b18c7d4a3053edbb667c1c93032b73f5675de",
+    "retrieved_at": "2026-10-27T03:14:18.923540+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2024/01/03/2023-28896/applications-for-new-awards-personnel-development-to-improve-services-and-results-for-children-with",
+    "catalog_title": "Applications for New Awards; Personnel Development To Improve Services and Results for Children With Disabilities-Doctoral Training Consortia Associated With High-Intensity Needs",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-0103243-002",
+      "funder": "Department of Education",
+      "title": "Personnel Development to Improve Services and Results for Children with Disabilities--Doctoral Training Consortia Associated with High-Intensity Needs, Assistance Listing Number (ALN) 84.325H",
+      "eligibility": "1. Eligible Applicants: IHEs and private nonprofit organizations that have legal authority to enter into grants and cooperative agreements with the Federal government on behalf of an IHE. Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant's certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "deadline": "2024-03-04",
+      "application_url": "https://www.grants.gov/search-results-detail/351682"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2024-01-03/html/2023-28896.htm",
+        "retrieved_at": "2026-10-27T03:07:35.397364+00:00",
+        "sha256": "f121a07a98349a144ae8d74f8755a04f38412efea5e0b2b9f3bf0e5fd3cdb91d",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/351682",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 351682,
+        "retrieved_at": "2026-10-27T03:14:18.923540+00:00",
+        "sha256": "62cfcce6235068bc92cdca3763fabaa7b1356a8c4d8ce660b9f1e5a6857d33fa"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 351682,
+      "opp_number": "ED-GRANTS-0103243-002",
+      "title": "Personnel Development to Improve Services and Results for Children with Disabilities--Doctoral Training Consortia Associated with High-Intensity Needs, Assistance Listing Number (ALN) 84.325H",
+      "agency": "Department of Education",
+      "deadline": "2024-03-04",
+      "eligibility": "1. Eligible Applicants: IHEs and private nonprofit organizations that have legal authority to enter into grants and cooperative agreements with the Federal government on behalf of an IHE. Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant's certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "application_url": "https://www.grants.gov/search-results-detail/351682",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 28,
+    "fingerprint": "1aadfa630c81392d6569a3913824aa3d19d3dfbdb45e67898fcb6bf237bef800",
+    "retrieved_at": "2026-10-27T03:14:19.006494+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2023/11/16/2023-25307/applications-for-new-awards-personnel-development-to-improve-services-and-results-for-children-with",
+    "catalog_title": "Applications for New Awards; Personnel Development To Improve Services and Results for Children With Disabilities-Preparation of Related Services Personnel Serving Children With Disabilities Who Have High-Intensity Needs",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-111623-001",
+      "funder": "Department of Education",
+      "title": "OSERS: OSEP: Personnel Development to Improve Services and Results for Children with Disabilities--Preparation of Related Services Personnel Serving Children with Disabilities who have High-Intensity Needs, Assistance Listing Number (ALN) 84.325R",
+      "eligibility": "1. Eligible Applicants: Eligible applicants are IHEs and private nonprofit organizations.Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "deadline": "2024-01-31",
+      "application_url": "https://www.grants.gov/search-results-detail/351010"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2023-11-16/html/2023-25307.htm",
+        "retrieved_at": "2026-10-27T03:07:35.446521+00:00",
+        "sha256": "e0f1afed2c27284b16f70e0da7b40bad71efa46b70583d9556f1fe3abda17a65",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/351010",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 351010,
+        "retrieved_at": "2026-10-27T03:14:19.006494+00:00",
+        "sha256": "c2d8fa355412b2de0341132884f1ff11802e79182e4b9e2435271e88826bb68d"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package. Portal current deadline January 31, 2024 supersedes its original January 16 date; current narrative and package closing date agree.",
+    "requirements": {
+      "success": true,
+      "opp_id": 351010,
+      "opp_number": "ED-GRANTS-111623-001",
+      "title": "OSERS: OSEP: Personnel Development to Improve Services and Results for Children with Disabilities--Preparation of Related Services Personnel Serving Children with Disabilities who have High-Intensity Needs, Assistance Listing Number (ALN) 84.325R",
+      "agency": "Department of Education",
+      "deadline": "2024-01-31",
+      "eligibility": "1. Eligible Applicants: Eligible applicants are IHEs and private nonprofit organizations.Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "application_url": "https://www.grants.gov/search-results-detail/351010",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package. Portal current deadline January 31, 2024 supersedes its original January 16 date; current narrative and package closing date agree."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 29,
+    "fingerprint": "cc667f06e46748bcebca75730b96b13ffeb4b0f37694ba68d273d2895153cb05",
+    "retrieved_at": "2026-10-27T03:14:19.027493+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2023/06/07/2023-12145/applications-for-new-awards-full-service-community-schools-program",
+    "catalog_title": "Applications for New Awards; Full-Service Community Schools Program",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-060723-002",
+      "funder": "Department of Education",
+      "title": "Office of Elementary and Secondary Education (OESE): School Choice & Improvement Program (SCIP)Full-Service Community Schools (FSCS) Program, Assistance Listing Number 84.215J",
+      "eligibility": "1. Eligible Applicants: A consortium of--(a)(i) One or more LEAs; or(ii) The BIE; and (b) One or more community-based organizations, nonprofit organizations, or other public or private entities. A consortium must comply with the provisions governing group applications in 34 CFR 75.127 through 75.129.Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "deadline": "2023-08-16",
+      "application_url": "https://www.grants.gov/search-results-detail/348573",
+      "conditional_deadlines": [
+        {
+          "deadline": "2023-08-08",
+          "scope": "Original deadline, all applicants"
+        },
+        {
+          "deadline": "2023-08-16",
+          "scope": "Only disaster-affected applicants named in official extension 2023-16704"
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2023-06-07/html/2023-12145.htm",
+        "retrieved_at": "2026-10-27T03:07:35.485071+00:00",
+        "sha256": "873dcc635243fedfc2ede25b80838beb911eef5c929c71b2c844a8a4ecbd5871",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/348573",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 348573,
+        "retrieved_at": "2026-10-27T03:14:19.027493+00:00",
+        "sha256": "d1435cd211a53b44be2a5546db10f16c88426f98a95f7bb7d7efb7436339397c"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package. Original deadline August 8, 2023; August 16 extension applies only to disaster-affected applicants described in notice 2023-16704. Confirm applicant location; do not treat the extension as universal.",
+    "requirements": {
+      "success": true,
+      "opp_id": 348573,
+      "opp_number": "ED-GRANTS-060723-002",
+      "title": "Office of Elementary and Secondary Education (OESE): School Choice & Improvement Program (SCIP)Full-Service Community Schools (FSCS) Program, Assistance Listing Number 84.215J",
+      "agency": "Department of Education",
+      "deadline": "2023-08-16",
+      "eligibility": "1. Eligible Applicants: A consortium of--(a)(i) One or more LEAs; or(ii) The BIE; and (b) One or more community-based organizations, nonprofit organizations, or other public or private entities. A consortium must comply with the provisions governing group applications in 34 CFR 75.127 through 75.129.Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "application_url": "https://www.grants.gov/search-results-detail/348573",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package. Original deadline August 8, 2023; August 16 extension applies only to disaster-affected applicants described in notice 2023-16704. Confirm applicant location; do not treat the extension as universal."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 30,
+    "fingerprint": "abb15373b5e745cb5762cfc1b0e4e8f3d8d065abc5de15dc938340046c2bf38a",
+    "retrieved_at": "2026-10-27T03:14:19.094656+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2023/05/10/2023-09954/applications-for-new-awards-personnel-development-to-improve-services-and-results-for-children-with",
+    "catalog_title": "Applications for New Awards; Personnel Development To Improve Services and Results for Children With Disabilities-Preparation of Related Services Personnel Serving Children With Disabilities who Have High-Intensity Needs",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-051023-001",
+      "funder": "Department of Education",
+      "title": "OSERS: OSEP: Personnel Development to Improve Services and Results for Children with Disabilities--Preparation of Related Services Personnel Serving Children with Disabilities who have High-Intensity Needs, Assistance Listing Number (ALN) 84.325R",
+      "eligibility": "1. Eligible Applicants: Eligible applicants are IHEs and private nonprofit organizations.Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "deadline": "2023-06-29",
+      "application_url": "https://www.grants.gov/search-results-detail/348027"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2023-05-10/html/2023-09954.htm",
+        "retrieved_at": "2026-10-27T03:07:35.548344+00:00",
+        "sha256": "e81af470c3214e21621eb42a8a1ea952b663f4fdaa795d851721b550a5ecff11",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/348027",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 348027,
+        "retrieved_at": "2026-10-27T03:14:19.094656+00:00",
+        "sha256": "3120bbde12681c211c3a45fda4a3b24d4d57fe733d75a440fbb2c3d268c282bb"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 348027,
+      "opp_number": "ED-GRANTS-051023-001",
+      "title": "OSERS: OSEP: Personnel Development to Improve Services and Results for Children with Disabilities--Preparation of Related Services Personnel Serving Children with Disabilities who have High-Intensity Needs, Assistance Listing Number (ALN) 84.325R",
+      "agency": "Department of Education",
+      "deadline": "2023-06-29",
+      "eligibility": "1. Eligible Applicants: Eligible applicants are IHEs and private nonprofit organizations.Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "application_url": "https://www.grants.gov/search-results-detail/348027",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 31,
+    "fingerprint": "1978d4f5d3223ac04d8be3606e79d5093fa11217047f109c54b1d388f2a8145d",
+    "retrieved_at": "2026-10-27T03:14:19.177892+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2023/04/19/2023-08249/applications-for-new-awards-personnel-development-to-improve-services-and-results-for-children-with",
+    "catalog_title": "Applications for New Awards; Personnel Development To Improve Services and Results for Children With Disabilities-Preparation of Early Intervention and Special Education Personnel Serving Children With Disabilities Who Have High-Intensity Needs",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-041923-001",
+      "funder": "Department of Education",
+      "title": "OSERS: OSEP: Personnel Development to Improve Services and Results for Children with Disabilities--Preparation of Early Intervention and Special Education Personnel Serving Children with Disabilities who have High-Intensity Needs, ALN 84.325K",
+      "eligibility": "1. Eligible Applicants: Eligible applicants are IHEs and private nonprofit organizations.Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "deadline": "2023-06-13",
+      "application_url": "https://www.grants.gov/search-results-detail/347593"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2023-04-19/html/2023-08249.htm",
+        "retrieved_at": "2026-10-27T03:07:35.585987+00:00",
+        "sha256": "fb715eec2c192b2c4154d8160af46aef416de27106b30ce330dd642eaa3038b1",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/347593",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 347593,
+        "retrieved_at": "2026-10-27T03:14:19.177892+00:00",
+        "sha256": "50c98ba2001f0438ec2ce9d382a84eb1713706e1e89430e7bcd279d5d51c86ff"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 347593,
+      "opp_number": "ED-GRANTS-041923-001",
+      "title": "OSERS: OSEP: Personnel Development to Improve Services and Results for Children with Disabilities--Preparation of Early Intervention and Special Education Personnel Serving Children with Disabilities who have High-Intensity Needs, ALN 84.325K",
+      "agency": "Department of Education",
+      "deadline": "2023-06-13",
+      "eligibility": "1. Eligible Applicants: Eligible applicants are IHEs and private nonprofit organizations.Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "application_url": "https://www.grants.gov/search-results-detail/347593",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 32,
+    "fingerprint": "c062ac976f67eab6384635ad20fd1bbfdb46469df1906e0da97b384e6284bdad",
+    "retrieved_at": "2026-10-27T03:14:19.203063+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2025/05/09/2025-08092/application-for-new-awards-expanding-opportunity-through-quality-charter-schools-program-csp-grants",
+    "catalog_title": "Application for New Awards; Expanding Opportunity Through Quality Charter Schools Program (CSP)-Grants to State Entities (State Entity Grants)",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-050925-001",
+      "funder": "Department of Education",
+      "title": "Office of Elementary and Secondary Education (OESE): Expanding Opportunity Through Quality Charter Schools Program (CSP)--Grants to State Entities (State Entity Grants), Assistance Listing Number 84.282A",
+      "eligibility": "State entities with a State statute specifically authorizing the establishment of charter schools are eligible to apply. \u201cState entity\u201d means--a) A State educational agency; b) A State charter school board; c) A Governor of a State; or d) A charter school support organization. State entities with a State statute specifically authorizing the establishment of charter schools are eligible to apply. \u201cState entity\u201d means--a) A State educational agency; b) A State charter school board; c) A Governor of a State; or d) A charter school support organization.",
+      "deadline": "2025-06-09",
+      "application_url": "https://www.grants.gov/search-results-detail/358876"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2025-05-09/html/2025-08092.htm",
+        "retrieved_at": "2026-10-27T03:07:35.644985+00:00",
+        "sha256": "bdc28b56addb764904fb0fda644e49dd77d668f6bee79863d04618fbe8dd3369",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/358876",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 358876,
+        "retrieved_at": "2026-10-27T03:14:19.203063+00:00",
+        "sha256": "a9d24b402a5ccc0406ae7054e43b5bd3768efba0bfbedbe961f3dbd7e6c03458"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 358876,
+      "opp_number": "ED-GRANTS-050925-001",
+      "title": "Office of Elementary and Secondary Education (OESE): Expanding Opportunity Through Quality Charter Schools Program (CSP)--Grants to State Entities (State Entity Grants), Assistance Listing Number 84.282A",
+      "agency": "Department of Education",
+      "deadline": "2025-06-09",
+      "eligibility": "State entities with a State statute specifically authorizing the establishment of charter schools are eligible to apply. \u201cState entity\u201d means--a) A State educational agency; b) A State charter school board; c) A Governor of a State; or d) A charter school support organization. State entities with a State statute specifically authorizing the establishment of charter schools are eligible to apply. \u201cState entity\u201d means--a) A State educational agency; b) A State charter school board; c) A Governor of a State; or d) A charter school support organization.",
+      "application_url": "https://www.grants.gov/search-results-detail/358876",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 33,
+    "fingerprint": "7eb81c56082e943384627fde2c7f5805d6d86addeffa01ff17ed1b5d24cb8fb1",
+    "retrieved_at": "2026-10-27T03:14:19.269654+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2026/05/18/2026-09927/notice-announcing-promise-neighborhoods-program-competition",
+    "catalog_title": "Notice Announcing Promise Neighborhoods Program Competition",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANT-26-054",
+      "funder": "Office of Elementary and Secondary Education",
+      "title": "Promise Neighborhoods-84.215N",
+      "eligibility": "Under section 4622 of the ESEA, an eligible entity must be one of the following:(a) An institution of higher education (IHE), as defined in section 102 of the Higher Education Act of 1965, as amended (HEA) (20 U.S.C. 1002);(b)An Indian Tribe or Tribal organization, as defined in section 4 of the Indian Self-Determination and Education Assistance Act (25 U.S.C. 5304); or (c) One or more nonprofit entities working in formal partnership with not less than one of the following entities:(i) A high-need local educational agency (LEA).(ii) An IHE, as defined in section 102 of the HEA (20 U.S.C. 1002). (iii) The office of a chief elected official of a unit of local government. (iv) An Indian Tribe or Tribal organization, as defined under section 4 of the Indian Self-Determination and Education Assistance Act (25 U.S.C. 5304).",
+      "deadline": "2026-08-06",
+      "application_url": "https://www.grants.gov/search-results-detail/362347"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2026-05-18/html/2026-09927.htm",
+        "retrieved_at": "2026-10-27T03:07:35.690159+00:00",
+        "sha256": "3efc038cec6025006e80762a0117d43bd20e582ed5fead734a40eced356dab06",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/362347",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 362347,
+        "retrieved_at": "2026-10-27T03:14:19.269654+00:00",
+        "sha256": "79c21cb006094989f9538bb8d339b7b6ce636c67a70b151d8f37c6746b8bcd24"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 362347,
+      "opp_number": "ED-GRANT-26-054",
+      "title": "Promise Neighborhoods-84.215N",
+      "agency": "Office of Elementary and Secondary Education",
+      "deadline": "2026-08-06",
+      "eligibility": "Under section 4622 of the ESEA, an eligible entity must be one of the following:(a) An institution of higher education (IHE), as defined in section 102 of the Higher Education Act of 1965, as amended (HEA) (20 U.S.C. 1002);(b)An Indian Tribe or Tribal organization, as defined in section 4 of the Indian Self-Determination and Education Assistance Act (25 U.S.C. 5304); or (c) One or more nonprofit entities working in formal partnership with not less than one of the following entities:(i) A high-need local educational agency (LEA).(ii) An IHE, as defined in section 102 of the HEA (20 U.S.C. 1002). (iii) The office of a chief elected official of a unit of local government. (iv) An Indian Tribe or Tribal organization, as defined under section 4 of the Indian Self-Determination and Education Assistance Act (25 U.S.C. 5304).",
+      "application_url": "https://www.grants.gov/search-results-detail/362347",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 34,
+    "fingerprint": "ed1d57021c98400577db74b512d9e1b38d74b6053e85dffe9affac97c2cb2b0a",
+    "retrieved_at": "2026-10-27T03:07:35.749900+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2026/02/03/2026-02188/request-for-information-related-to-the-financial-literacy-and-education-commission-flec-update-to",
+    "catalog_title": "Request for Information Related to the Financial Literacy and Education Commission (FLEC) Update to the U.S. National Strategy for Financial Literacy",
+    "status": "needs_source_verification",
+    "fields": {},
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2026-02-03/html/2026-02188.htm",
+        "retrieved_at": "2026-10-27T03:07:35.749900+00:00",
+        "sha256": "dad33115f3cf201f183837db1ab2f246996ce7e2f57334f1ea065ce9e2f5ad36",
+        "http_status": 200
+      }
+    ],
+    "reason": "Needs source verification: Federal Register 2026-02188 is a Treasury FLEC request for information, not a grant competition. Its public-comment deadline and regulations.gov link cannot establish grant eligibility or an application package."
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 35,
+    "fingerprint": "798bf9137b8904ac2d461d65611e692cd2c8e6501d45f1221c2adec055bddd0f",
+    "retrieved_at": "2026-10-27T03:14:19.364711+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2025/11/12/2025-19843/applications-for-new-awards-fund-for-the-improvement-of-postsecondary-education-special-projects",
+    "catalog_title": "Applications for New Awards; Fund for the Improvement of Postsecondary Education-Special Projects (FIPSE-SP)",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-111225-001",
+      "funder": "Department of Education",
+      "title": "Office of Postsecondary Education (OPE): Fund for the Improvement of Postsecondary Education (FIPSE): Special Projects; Assistance Listing Number (ALN) 84.116J",
+      "eligibility": "Institutions of higher education (as defined in section 101 of the HEA), consortia of such institutions, and other public and private nonprofit institutions and agencies including State higher education agencies as defined in 20 U.S.C. 1003(22). An eligible entity may submit only one (1) grant application under an area of national need as the lead applicant. An entity can be included as a partner in multiple applications.Note: The eligible entity may apply to all four (4) areas of national need as the lead applicant but must submit a separate grant application for each area of national need.Note: An applicant that is a nonprofit organization may, under 34 CFR 75.51, demonstrate its nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant's certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "deadline": "2025-12-03",
+      "application_url": "https://www.grants.gov/search-results-detail/360851"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2025-11-12/html/2025-19843.htm",
+        "retrieved_at": "2026-10-27T03:07:35.755106+00:00",
+        "sha256": "40229836666c249ed89308f2cc0845dbbdf0e59dd66216e18e07dc0606d75728",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/360851",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 360851,
+        "retrieved_at": "2026-10-27T03:14:19.364711+00:00",
+        "sha256": "693e019f5fbdb0ed1fda2b7bfa91f8eb60317c52c8e5924fb9ae24c6400119c4"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 360851,
+      "opp_number": "ED-GRANTS-111225-001",
+      "title": "Office of Postsecondary Education (OPE): Fund for the Improvement of Postsecondary Education (FIPSE): Special Projects; Assistance Listing Number (ALN) 84.116J",
+      "agency": "Department of Education",
+      "deadline": "2025-12-03",
+      "eligibility": "Institutions of higher education (as defined in section 101 of the HEA), consortia of such institutions, and other public and private nonprofit institutions and agencies including State higher education agencies as defined in 20 U.S.C. 1003(22). An eligible entity may submit only one (1) grant application under an area of national need as the lead applicant. An entity can be included as a partner in multiple applications.Note: The eligible entity may apply to all four (4) areas of national need as the lead applicant but must submit a separate grant application for each area of national need.Note: An applicant that is a nonprofit organization may, under 34 CFR 75.51, demonstrate its nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant's certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "application_url": "https://www.grants.gov/search-results-detail/360851",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 36,
+    "fingerprint": "fcc6241773e9ee28798a733b20fe5840ddf4355a5fa548442622fd89f7e8134c",
+    "retrieved_at": "2026-10-27T03:14:19.376713+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2026/06/30/2026-13199/funding-opportunities-bank-enterprise-award-program-bea-program-fy-2026-funding-round",
+    "catalog_title": "Funding Opportunities: Bank Enterprise Award Program (BEA) Program: FY 2026 Funding Round",
+    "status": "verified",
+    "fields": {
+      "identifier": "CDFI-2026-BEA",
+      "funder": "Community Development Financial Institutions",
+      "title": "FY 2026 Bank Enterprise Award Program Application",
+      "eligibility": "Applicants must be FDIC-Insured Depository Institutions (banks and thrifts).",
+      "deadline": "2026-07-31",
+      "application_url": "https://www.grants.gov/search-results-detail/362985",
+      "deadlines": [
+        {
+          "deadline": "2026-07-24",
+          "stage": "Grants.gov SF-424 Mandatory; AMIS account and EIN/UEI"
+        },
+        {
+          "deadline": "2026-07-31",
+          "stage": "AMIS BEA application and required documents"
+        }
+      ]
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2026-06-30/html/2026-13199.htm",
+        "retrieved_at": "2026-10-27T03:07:35.763419+00:00",
+        "sha256": "2d7230189d87838a05ac5c9e141c6ac6c26744f1fc2836227c4bbb7f607c60fa",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/362985",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 362985,
+        "retrieved_at": "2026-10-27T03:14:19.376713+00:00",
+        "sha256": "cf6264a0bd1273e026529bf85e841282879e81872b55a1c136b20bc1d58b7660"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package. FDIC-insured banks/thrifts only. Grants.gov SF-424 is due July 24, 2026; final AMIS application July 31, 2026. Nonprofit status alone does not qualify.",
+    "requirements": {
+      "success": true,
+      "opp_id": 362985,
+      "opp_number": "CDFI-2026-BEA",
+      "title": "FY 2026 Bank Enterprise Award Program Application",
+      "agency": "Community Development Financial Institutions",
+      "deadline": "2026-07-31",
+      "eligibility": "Applicants must be FDIC-Insured Depository Institutions (banks and thrifts).",
+      "application_url": "https://www.grants.gov/search-results-detail/362985",
+      "source": "official-source-review",
+      "required_forms": [
+        {
+          "name": "SF-424 Mandatory Form (Application for Federal Assistance)",
+          "is_mandatory": true,
+          "source_url": "https://www.govinfo.gov/content/pkg/FR-2026-06-30/html/2026-13199.htm"
+        }
+      ],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package. FDIC-insured banks/thrifts only. Grants.gov SF-424 is due July 24, 2026; final AMIS application July 31, 2026. Nonprofit status alone does not qualify."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 37,
+    "fingerprint": "71ca42b4678fc064fb464af24a99a29e93cdf243d5a456fce76a7f2904e571f3",
+    "retrieved_at": "2026-10-27T03:14:19.442850+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2025/06/25/2025-11614/applications-for-new-awards-educational-technology-media-and-materials-for-individuals-with",
+    "catalog_title": "Applications for New Awards; Educational Technology, Media, and Materials for Individuals With Disabilities Program-Stepping-Up Technology Implementation",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-062525-001",
+      "funder": "Department of Education",
+      "title": "OSERS: OSEP: Educational Technology, Media, and Materials for Individuals with Disabilities Program\u2013-Stepping-up Technology Implementation, Assistance Listing Number (ALN) 84.327S",
+      "eligibility": "State educational agencies (SEAs); local educational agencies (LEAs), including public charter schools that operate as LEAs under State law; institutions of higher education (IHEs); other public agencies; private nonprofit organizations; freely associated States and outlying areas; Indian Tribes or Tribal organizations; and for-profit organizations.",
+      "deadline": "2025-07-25",
+      "application_url": "https://www.grants.gov/search-results-detail/359808"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2025-06-25/html/2025-11614.htm",
+        "retrieved_at": "2026-10-27T03:07:35.822096+00:00",
+        "sha256": "3bb6ac260e73d5946b92274dbcfc45d809e9ce1de31158d069a3be7fe841c5f0",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/359808",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 359808,
+        "retrieved_at": "2026-10-27T03:14:19.442850+00:00",
+        "sha256": "078ec2ccb646cb32eb18be07fcd45bc408e51693c490b52c37a668c17f6b34dc"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 359808,
+      "opp_number": "ED-GRANTS-062525-001",
+      "title": "OSERS: OSEP: Educational Technology, Media, and Materials for Individuals with Disabilities Program\u2013-Stepping-up Technology Implementation, Assistance Listing Number (ALN) 84.327S",
+      "agency": "Department of Education",
+      "deadline": "2025-07-25",
+      "eligibility": "State educational agencies (SEAs); local educational agencies (LEAs), including public charter schools that operate as LEAs under State law; institutions of higher education (IHEs); other public agencies; private nonprofit organizations; freely associated States and outlying areas; Indian Tribes or Tribal organizations; and for-profit organizations.",
+      "application_url": "https://www.grants.gov/search-results-detail/359808",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  },
+  {
+    "schema": "gfm.source-review.v1",
+    "grant_id": 38,
+    "fingerprint": "468e226bd068db37275604230d2b984da4cea876846d3d9de7defea420f65dcb",
+    "retrieved_at": "2026-10-27T03:14:19.538096+00:00",
+    "source_url": "https://www.federalregister.gov/documents/2025/06/25/2025-11612/applications-for-new-awards-educational-technology-media-and-materials-for-individuals-with",
+    "catalog_title": "Applications for New Awards; Educational Technology, Media, and Materials for Individuals With Disabilities-National Center To Improve Faculty Capacity To Use Educational Technology in Special Education Personnel and Leadership Preparation Programs",
+    "status": "verified",
+    "fields": {
+      "identifier": "ED-GRANTS-062525-002",
+      "funder": "Department of Education",
+      "title": "OSERS: OSEP: National Center to Improve Faculty Capacity to Use Educational Technology in Special Education Personnel and Leadership Preparation Programs; Assistance Listing Number 84.327F",
+      "eligibility": "Eligible Applicants: State educational agencies; local educational agencies (LEAs), including public charter schools that are considered LEAs under State law; IHEs; other public agencies; private nonprofit organizations; freely associated States and outlying areas; Indian Tribes or Tribal organizations; and for-profit organizations.Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "deadline": "2025-07-25",
+      "application_url": "https://www.grants.gov/search-results-detail/359809"
+    },
+    "evidence": [
+      {
+        "url": "https://www.govinfo.gov/content/pkg/FR-2025-06-25/html/2025-11612.htm",
+        "retrieved_at": "2026-10-27T03:07:35.871734+00:00",
+        "sha256": "b56bba5310f3d1707e7995997ec864534331f1b65debfa34ed5a038e4ee6f717",
+        "http_status": 200
+      },
+      {
+        "url": "https://www.grants.gov/search-results-detail/359809",
+        "api_url": "https://api.grants.gov/v1/api/fetchOpportunity",
+        "opportunity_id": 359809,
+        "retrieved_at": "2026-10-27T03:14:19.538096+00:00",
+        "sha256": "a6ab32752dafb9dffea4d31c70eda270602c8dc69326ffe7fbb3bc32c241c69b"
+      }
+    ],
+    "reason": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package.",
+    "requirements": {
+      "success": true,
+      "opp_id": 359809,
+      "opp_number": "ED-GRANTS-062525-002",
+      "title": "OSERS: OSEP: National Center to Improve Faculty Capacity to Use Educational Technology in Special Education Personnel and Leadership Preparation Programs; Assistance Listing Number 84.327F",
+      "agency": "Department of Education",
+      "deadline": "2025-07-25",
+      "eligibility": "Eligible Applicants: State educational agencies; local educational agencies (LEAs), including public charter schools that are considered LEAs under State law; IHEs; other public agencies; private nonprofit organizations; freely associated States and outlying areas; Indian Tribes or Tribal organizations; and for-profit organizations.Note: If you are a nonprofit organization, under 34 CFR 75.51, you may demonstrate your nonprofit status by providing: (1) proof that the Internal Revenue Service currently recognizes the applicant as an organization to which contributions are tax deductible under section 501(c)(3) of the Internal Revenue Code; (2) a statement from a State taxing body or the State attorney general certifying that the organization is a nonprofit organization operating within the State and that no part of its net earnings may lawfully benefit any private shareholder or individual; (3) a certified copy of the applicant\u2019s certificate of incorporation or similar document if it clearly establishes the nonprofit status of the applicant; or (4) any item described above if that item applies to a State or national parent organization, together with a statement by the State or parent organization that the applicant is a local nonprofit affiliate.",
+      "application_url": "https://www.grants.gov/search-results-detail/359809",
+      "source": "official-source-review",
+      "required_forms": [],
+      "required_attachments": [],
+      "package_complete": false,
+      "package_instructions": "Read the cited authoritative notice and exact opportunity package. Mandatory forms and attachments require human package review; an empty list does not mean none are required.",
+      "verification_note": "Exact official publication and Grants.gov opportunity association verified. Historical/closed opportunity: this review does not reopen funding, certify applicant eligibility, or certify a complete submission package."
+    }
+  }
+]

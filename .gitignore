@@ -45,7 +45,6 @@
 /source/_e2e*.py
 /source/_test.ps1
 /source/backend/_inspect_gfm_db.py
-/source/backend/tests/test_all_fixes.py
 /source/scripts/start.ps1
 /source/scripts/audit_browser.py
 /source/scripts/verify_*.py

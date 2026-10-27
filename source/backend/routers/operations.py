@@ -100,7 +100,15 @@ async def records(kind: Kind | None = None, db: AsyncSession = Depends(get_db), 
     if kind:
         q = q.where(OrganizationRecord.kind == kind)
     rows = (await db.execute(q.order_by(OrganizationRecord.id.desc()))).scalars().all()
-    return [output(row) for row in rows]
+    result=[]
+    for row in rows:
+        item=output(row)
+        if row.kind=='draft':
+            from services.candidate_quality import assess
+            application=await db.get(GrantApplication,row.data.get('application_id')) if row.data.get('application_id') else None
+            item['data']={**row.data,'quality_review':await assess(db,application,row.body,row.data.get('category','proposal'))}
+        result.append(item)
+    return result
 
 
 @router.post('/knowledge/upload', status_code=202)
@@ -165,6 +173,14 @@ async def save_record(payload: RecordInput, record_id: int | None = None,
     elif payload.revision:
         raise HTTPException(409, 'New records start at revision zero')
     data = payload.model_dump(exclude={'kind', 'title', 'body', 'revision'})
+    if row:
+        # Provenance is server-owned and survives ordinary editor saves.
+        for key in ('corrected_from','source_deleted','source_review_reference'):
+            if key in row.data:data[key]=row.data[key]
+    if payload.kind=='draft':
+        from services.candidate_quality import require_valid_content
+        application=await db.get(GrantApplication,payload.application_id) if payload.application_id else None
+        data['quality_review']=await require_valid_content(db,application,payload.body,payload.category or 'proposal',acceptance=payload.status=='accepted')
     event = {'actor': token['username'], 'at': datetime.now(timezone.utc).isoformat(),
              'revision': (row.revision + 1) if row else 1, 'title': payload.title,
              'body': payload.body, 'data': data,

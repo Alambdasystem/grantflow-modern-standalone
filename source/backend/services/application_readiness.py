@@ -38,7 +38,9 @@ async def readiness(db,app):
         add('deadline','Application deadline',deadline>=datetime.now(timezone.utc),f'Saved deadline: {deadline.isoformat()}. Verify against the funder source.')
     else:add('deadline','Application deadline confirmed',False,'No structured deadline is saved. Confirm rolling applications or the actual due date.')
     requirements=[]
-    for requirement in (grant.requirements or []) if grant and not requirement_error(grant) else []:
+    from services.grant_integrity import source_review
+    reviewed=source_review(grant) if grant else None
+    for requirement in (grant.requirements or []) if grant and not requirement_error(grant) and not reviewed else []:
         label=requirement if isinstance(requirement,str) else requirement.get('name') or requirement.get('title') if isinstance(requirement,dict) else None
         if label:requirements.append(label)
     if grant:
@@ -49,7 +51,8 @@ async def readiness(db,app):
         for r in records if r.kind=='audit' and r.data.get('application_id')==app.id and r.data.get('status')=='accepted'
         and (not r.data.get('due_date') or r.data['due_date']>=datetime.now(timezone.utc).date().isoformat())
         for c in r.data.get('checklist',[]) if c.get('done') and c.get('evidence') and c.get('owner')}
-    add('requirements_known','Funder requirements available',bool(requirements),requirement_error(grant) if grant and requirement_error(grant) else 'Saved requirements are a checklist, not proof that the funder package is complete.')
+    package_complete=not reviewed or safe_requirements(grant).get('package_complete') is True
+    add('requirements_known','Funder requirements available',bool(requirements) and package_complete,requirement_error(grant) if grant and requirement_error(grant) else 'The source association is separate from a complete submission package. Review mandatory forms and attachments; missing lists do not mean none are required.')
     for index,label in enumerate(dict.fromkeys(requirements)):
         evidence=accepted_checklist.get(label.strip().casefold())
         add(f'requirement_{index}',label,bool(evidence),evidence or 'Record an accepted application audit checklist item with this label, evidence and owner in Organization Workspace.')

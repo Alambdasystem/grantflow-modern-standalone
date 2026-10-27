@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field, HttpUrl
 from automation.agents.grant_scraper import GrantScraperAgent
 
 router = APIRouter(prefix="/api/grants", tags=["grants"])
-from services.grant_integrity import deduplicate, catalog_state, requirement_error, safe_requirements, opportunity_id
+from services.grant_integrity import deduplicate, catalog_state, requirement_error, safe_requirements, opportunity_id, source_review
 
 
 async def personalized(db, token, grants):
@@ -29,6 +29,9 @@ async def personalized(db, token, grants):
         item = GrantOut.model_validate(grant)
         item.catalog_state = catalog_state(grant)
         item.requirements_warning = requirement_error(grant)
+        item.source_review = source_review(grant)
+        if item.source_review and item.source_review['status']=='verified':
+            item.eligibility=item.source_review['fields']['eligibility']
         if item.requirements_warning:
             item.eligibility = None
         match = alignment(org, grant, records, documents) if org else None
@@ -73,6 +76,7 @@ async def grant_workspace(grant_id: int, db: AsyncSession = Depends(get_db), tok
     return {'grant':(await personalized(db,token,[grant]))[0], 'alignment':alignment(org,grant,records,documents),
         'requirements':safe_requirements(grant) or ([] if requirement_error(grant) else grant.requirements or []),
         'requirements_warning':requirement_error(grant),
+        'source_review':source_review(grant),
         'requirements_fetched_at':grant.requirements_fetched_at,
         'applications':[{'id':a.id,'title':a.title,'status':a.status.value,'updated_at':a.updated_at,
                          'renewal_due_date':a.renewal_due_date} for a in apps],
@@ -309,7 +313,9 @@ async def scan_all_requirements(
     queued_ids = []
     for grant in unscanned:
         status = (grant.meta or {}).get("requirements_status")
-        if status == "running":
+        if status in {"queued","running"}:
+            continue
+        if not opportunity_id(grant.source_url):
             continue
         meta = dict(grant.meta or {})
         meta["requirements_status"] = "queued"
@@ -418,9 +424,11 @@ async def fetch_grant_requirements(
     if not opportunity_id(grant.source_url):
         raise HTTPException(422, 'No exact Grants.gov opportunity ID is available for this funder source. Open the original funder page; a keyword search cannot verify its requirements.')
     status = (grant.meta or {}).get("requirements_status")
-    if status == "running":
+    if status in {"queued","running"}:
         return {"status": "running", "message": "Requirements fetch already in progress"}
 
+    grant.meta={**(grant.meta or {}),'requirements_status':'queued'}
+    await db.commit()
     background_tasks.add_task(_run_requirements_job, grant_id)
     return {
         "status": "queued",
@@ -443,7 +451,8 @@ async def get_grant_requirements(
     status = (grant.meta or {}).get("requirements_status", "none")
     return {
         "grant_id": grant_id,
-        "status": "error" if requirement_error(grant) else status,
+        "status": "error" if requirement_error(grant) else 'done' if source_review(grant) else status,
+        "source_review":source_review(grant),
         "fetched_at": grant.requirements_fetched_at.isoformat() if grant.requirements_fetched_at else None,
         "requirements": safe_requirements(grant),
         "error": requirement_error(grant) or (grant.meta or {}).get("requirements_error"),

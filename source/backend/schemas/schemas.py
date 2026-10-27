@@ -135,6 +135,7 @@ class GrantOut(BaseModel):
     ai_match_score: Optional[float]
     catalog_state: str = 'deadline_unconfirmed'
     requirements_warning: Optional[str] = None
+    source_review: Optional[dict] = None
     tags: list[str]
     created_at: Optional[datetime]
 

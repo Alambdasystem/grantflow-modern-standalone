@@ -49,7 +49,7 @@ function normalizeRenewalsResponse(payload: unknown): RenewalApplication[] {
       const status = String(item.status || "").toLowerCase();
       return (
         (status === "approved" || status === "renewal_due") &&
-        due >= today &&
+
         due <= cutoff
       );
     })
@@ -92,6 +92,7 @@ export default function RenewalsPage() {
     retry: 1,
   });
 
+  const manualDraft=useMutation({mutationFn:(id:number)=>api.post(`/api/renewals/${id}/draft`),onSuccess:r=>{toast.success("Internal renewal draft ready; nothing submitted");window.location.href=`/gfm-app/applications/${r.data.id}`;},onError:()=>toast.error("Unable to prepare renewal draft")});
   const autoRenew = useMutation({
     mutationFn: (id: number) =>
       api.post(`/api/renewals/${id}/auto-renew`),
@@ -155,7 +156,7 @@ export default function RenewalsPage() {
           <CardContent className="py-12 text-center">
             <AlertCircle className="mx-auto text-cyan-300/70 mb-3" size={40} />
             <p className="text-zinc-200">
-              No renewals due in the next 90 days.
+              No overdue renewals or renewals due in the next 90 days.
             </p>
             <p className="text-zinc-400 text-xs mt-1">
               Approve an application and set its renewal date to see it here.
@@ -217,7 +218,7 @@ export default function RenewalsPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between gap-2 pt-1">
+                  <Button disabled={manualDraft.isPending} onClick={()=>manualDraft.mutate(app.id)}>Prepare internal renewal draft</Button><p className="text-xs text-zinc-400">Draft preparation does not contact the funder. Review the new round before submitting.</p><div className="flex items-center justify-between gap-2 pt-1">
                     <Badge
                       variant="outline"
                       className="border-cyan-700/50 bg-[#0d2635]/80 text-zinc-100 text-[10px]"

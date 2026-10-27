@@ -19,7 +19,7 @@ def draft_issues(text, context, task):
         if TOTAL.search(line):
             if re.search(r'\brequest(?:ed|ing)?\b', line, re.I):
                 requests.append(amounts[-1])
-            else:
+            if re.search(r'\btotal\b',line,re.I) or not re.search(r'\brequest(?:ed|ing)?\b',line,re.I):
                 totals.append(amounts[-1])
         elif re.match(r'^\s*(?:[-*•]|\d+[.)]|\|)', line) and not re.search(r'\b(unit cost|per unit|subtotal)\b', line, re.I):
             items.append(amounts[-1])

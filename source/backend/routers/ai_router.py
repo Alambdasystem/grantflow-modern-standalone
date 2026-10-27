@@ -22,7 +22,7 @@ from models.models import (
 from schemas.schemas import AIGenerateRequest, AIChatRequest
 from auth.jwt_handler import get_current_user_token
 from services.ai_service import AIService, AIUnavailable
-from services.grant_integrity import requirement_error
+from services.grant_integrity import requirement_error, source_review, safe_requirements
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
 _ai = AIService()
@@ -58,10 +58,13 @@ async def _build_rag_context(
     if grant_id:
         grant = await db.get(Grant, grant_id)
         if grant:
+            reviewed=source_review(grant)
             context_data["grant"] = {
                 "title": grant.title,
                 "description": grant.description,
-                "eligibility": None if requirement_error(grant) else grant.eligibility,
+                "eligibility": None if requirement_error(grant) else (reviewed['fields']['eligibility'] if reviewed else grant.eligibility),
+                "requirements":safe_requirements(grant),
+                "source_warning":requirement_error(grant) or 'Human verification of eligibility and the full application package is required.',
                 "amount": grant.amount,
                 "funding_agency": grant.funding_agency,
                 "source_url": grant.source_url,

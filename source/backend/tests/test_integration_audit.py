@@ -29,6 +29,7 @@ from main import app
 from db.database import Base, get_db
 from models.models import Organization, User, UserRole, Grant, GrantStatus
 from auth.jwt_handler import hash_password, create_access_token, verify_password
+from models.auth_models import MigrationSafety  # Register before every disposable schema.
 from config import settings
 
 PASSWORD = "Isolated-test-only-2026!"
@@ -48,7 +49,7 @@ def template_db(tmp_path_factory):
                         Organization(id=2, name="Other organization")])
             await db.flush()
             for i, role in enumerate(UserRole, 1):
-                db.add(User(id=i, username=role.value, email=role.value+"@example.com",
+                db.add(User(id=i, identity_id='synthetic-'+role.value, username=role.value, email=role.value+"@example.com",
                             hashed_password=HASH, role=role, organization_id=1,
                             is_active=True, is_approved=True))
             db.add(Grant(id=1, title="Audit youth education grant", amount=1000,
@@ -67,6 +68,25 @@ def client(tmp_path, monkeypatch, template_db):
     async def override():
         async with factory() as session:
             yield session
+            await session.commit()  # Match get_db's transaction lifecycle, including flush-only routers.
+    from db import database
+    from db.database import get_public_db
+    from auth import jwt_handler
+    monkeypatch.setattr(database,'engine',engine)
+    monkeypatch.setattr(database,'AsyncSessionLocal',factory)
+    monkeypatch.setattr(settings,'AUTH_MODE','anthesis')
+    monkeypatch.setattr(settings,'AUTOMATION_WORKER_ENABLED',False)  # No lifespan/dispatcher in this API fixture.
+    async def central_identity(token):
+        # The local signature is a fixture transport only, never a production login.
+        try:data=jwt_handler.decode_token(token)
+        except Exception:
+            from fastapi import HTTPException
+            raise HTTPException(401,'Synthetic identity rejected the token')
+        role=data['role']
+        return {'identity_id':'synthetic-'+role,'username':data['username'],'role':role,
+                'local_user_id':data['user_id'],'grantflow_access':['read'] if role=='viewer' else ['read','write']}
+    monkeypatch.setattr(jwt_handler,'validate_anthesis_identity',central_identity)
+    app.dependency_overrides[get_public_db]=override
     app.dependency_overrides[get_db] = override
     monkeypatch.setattr(settings, "UPLOAD_DIR", str(tmp_path / "uploads"))
     def blocked(*args, **kwargs):
@@ -106,6 +126,16 @@ PROTECTED = [(method, route.path) for route in app.routes
 def test_every_private_route_requires_auth(client, method, path):
     path = re.sub(r"\{[^}]+\}", "99999", path)
     response = client.request(method, path, json={})
+    if path in ('/api/auth/setup','/api/auth/accept'):
+        # Valid payload reaches the central-mode gate rather than schema validation.
+        body={'username':'synthetic_user','password':PASSWORD,'email':'synthetic@example.com','organization':'Synthetic','bootstrap_token':'x'*40,'token':'x'*40}
+        response=client.request(method,path,json=body)
+    if path=='/api/auth/status':
+        assert response.status_code==200 and response.json()['mode']=='anthesis'
+        return
+    if path.startswith(('/api/auth/setup','/api/auth/refresh','/api/auth/invitations','/api/auth/accept','/api/auth/accounts/')):
+        assert response.status_code==404  # Standalone routes are disabled in central mode.
+        return
     assert response.status_code in (401, 403), f"{method} {path}: {response.status_code}"
 
 
@@ -128,13 +158,14 @@ def test_missing_records(client, path):
 
 @pytest.mark.parametrize("role", [r.value for r in UserRole])
 def test_login_and_identity(client, role):
-    data = ok(client.post("/api/auth/login", json={"username": role, "password": PASSWORD}))
-    user = ok(client.get("/api/auth/me", headers={"Authorization": "Bearer " + data["access_token"]}))
-    assert user["username"] == role and user["role"] == role
+    ok(client.post('/api/auth/login',json={'username':role,'password':PASSWORD}),410)
+    user=ok(client.get('/api/auth/me',headers=headers(role)))
+    assert user['username']==role and user['role']==role
+    ok(client.get('/api/auth/me',headers={'Authorization':'Bearer invalid'}),401)
 
 
 def test_invalid_credentials(client):
-    ok(client.post("/api/auth/login", json={"username": "admin", "password": "wrong"}), 401)
+    ok(client.post("/api/auth/login", json={"username": "admin", "password": "wrong"}), 410)
     ok(client.get("/api/auth/me", headers={"Authorization": "Bearer invalid"}), 401)
 
 
@@ -159,7 +190,7 @@ def test_application_workflow_and_documents(client):
     assert ok(client.post(path + "/workflow/advance", headers=headers()))[0]["status"] == "completed"
     ok(client.patch(path + f"/workflow/{stages[0]['id']}", json={"status": "invalid"}, headers=headers()), 422)
     upload = ok(client.post(path + "/documents", files={"file": ("audit.txt", b"Youth education audit", "text/plain")}, headers=headers()))
-    assert upload["text_extracted"]
+    assert upload['id'] and upload['status']=='queued' and upload['application_id']==item['id']
     assert len(ok(client.get(path + "/documents", headers=headers()))) == 1
 
 
@@ -190,7 +221,10 @@ def test_ai_generation_contract_and_persistence(client, monkeypatch, task):
     assert data["result"] == "Synthetic audit narrative"
     if task in ("proposal", "budget"):
         saved = ok(client.get(f"/api/applications/{item['id']}", headers=headers()))
-        assert saved["proposal_text" if task == "proposal" else "budget_narrative"] == data["result"]
+        assert saved['proposal_text' if task=='proposal' else 'budget_narrative'] is None
+        assert data['saved_to_application'] is False and data['draft_id']
+        candidate=ok(client.get('/api/operations/records?kind=draft',headers=headers()))
+        assert next(r for r in candidate if r['id']==data['draft_id'])['body']==data['result']
 
 
 def test_ai_chat(client, monkeypatch):
@@ -210,7 +244,8 @@ def test_ai_matching_signature(client, monkeypatch):
 
 def test_jobs_renewal_and_workspace_precondition(client):
     item = create_application(client)
-    job = ok(client.post("/api/automation/jobs", json={"job_type": "monitor", "application_id": item["id"]}, headers=headers()), 201)
+    ok(client.post('/api/automation/jobs',json={'job_type':'monitor','application_id':item['id']},headers=headers()),422)
+    job = ok(client.post("/api/automation/jobs", json={"job_type": "renew", "application_id": item["id"]}, headers=headers()), 201)
     assert ok(client.get(f"/api/automation/jobs/{job['id']}", headers=headers()))["status"] == "queued"
     renewal = ok(client.post(f"/api/renewals/{item['id']}/auto-renew", headers=headers()), 202)
     assert renewal["job_id"]
@@ -282,7 +317,8 @@ def test_discovery_deduplicates_and_enrichment_persists(client, monkeypatch):
     grant_id = first["grants"][0]["id"]
     enriched = ok(client.post(f"/api/grants/{grant_id}/enrich", headers=headers()))
     assert "Audit letter" in enriched["requirements"]
-    ok(client.post(f"/api/grants/{grant_id}/requirements", headers=headers()))
+    rejected=ok(client.post(f"/api/grants/{grant_id}/requirements", headers=headers()),422)
+    assert 'exact Grants.gov opportunity ID' in rejected['detail']
     ok(client.post("/api/grants/scan-all-requirements", headers=headers()))
 
 
@@ -293,8 +329,8 @@ def test_organization_update_and_user_creation(client, monkeypatch):
     assert data["mission"] == "Literacy"
     body = {"username": "new-auditor", "email": "new@example.com", "password": PASSWORD, "role": "reviewer"}
     ok(client.post("/api/users/", json=body, headers=headers("viewer")), 403)
-    ok(client.post("/api/users/", json=body, headers=headers()), 201)
-    ok(client.post("/api/users/", json=body, headers=headers()), 409)
+    ok(client.post("/api/users/", json=body, headers=headers()), 410)
+    assert all(u['username']!='new-auditor' for u in ok(client.get('/api/users/',headers=headers())))
 
 
 def test_foundation_grant_creation(client):

@@ -1,5 +1,7 @@
 """Catalog identity and source checks; never rewrite historical ownership."""
 import re
+import hashlib
+import json
 from datetime import datetime, timezone
 from urllib.parse import urlsplit, parse_qsl, urlencode
 
@@ -26,6 +28,9 @@ def opportunity_id(url):
 
 
 def requirement_error(grant):
+    review = source_review(grant)
+    if review:
+        return None if review['status'] == 'verified' else 'Needs source verification. ' + review.get('reason','')
     detail = grant.requirements_detail or {}
     if not detail:
         return None
@@ -39,10 +44,33 @@ def requirement_error(grant):
 
 
 def safe_requirements(grant):
+    review = source_review(grant)
+    if review:
+        return review.get('requirements', {}) if review['status'] == 'verified' else {}
     return {} if requirement_error(grant) else (grant.requirements_detail or {})
 
 
+def source_fingerprint(grant):
+    return hashlib.sha256(json.dumps([grant.title,grant.funding_agency,grant.source_url],ensure_ascii=True,separators=(',',':')).encode()).hexdigest()
+
+
+def source_review(grant):
+    review = (getattr(grant,'meta',None) or {}).get('source_review') or {}
+    if not review:
+        return None
+    if review.get('fingerprint') != source_fingerprint(grant):
+        return {'status':'needs_source_verification','reason':'The opportunity changed after its source review.','retrieved_at':review.get('retrieved_at')}
+    needed = ['identifier','funder','title','eligibility','deadline','application_url']
+    if review.get('status') == 'verified' and (not all((review.get('fields')or{}).get(k) for k in needed) or not review.get('evidence')):
+        return {'status':'needs_source_verification','reason':'Source review is incomplete.','retrieved_at':review.get('retrieved_at')}
+    return review
+
+
 def catalog_state(grant):
+    review = source_review(grant)
+    if review and review.get('fields',{}).get('deadline'):
+        if review['fields']['deadline'] < datetime.now(timezone.utc).date().isoformat():
+            return 'expired'
     if grant.deadline:
         deadline = grant.deadline.replace(tzinfo=timezone.utc) if grant.deadline.tzinfo is None else grant.deadline
         if deadline < datetime.now(timezone.utc):

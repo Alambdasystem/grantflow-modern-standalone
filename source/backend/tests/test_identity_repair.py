@@ -82,6 +82,10 @@ def test_bulk_organization_link_preserves_tenant_boundaries(mismatch):
     path,c,d=mismatch
     reconcile(path,d,True)
     r=c.post('/api/applications/bulk-link-org',headers=h(),json={'org_id':1,'application_ids':list(range(1,10))})
-    assert r.status_code==200 and r.json()['updated']==9
-    assert c.post('/api/applications/bulk-link-org',headers=h(),json={'org_id':2,'application_ids':[1]}).status_code==404
+    # Organization reassignment now requires an explicit administrator role,
+    # including requests that would leave the organization unchanged.
+    assert r.status_code==403
+    assert c.post('/api/applications/bulk-link-org',headers=h(),json={'org_id':2,'application_ids':[1]}).status_code==403
+    assert c.get('/api/applications/1',headers=h()).json()['organization_id']==1
+    assert c.get('/api/applications/99',headers=h()).status_code==404
     assert c.post('/api/applications/bulk-link-org',headers=h('viewer'),json={'org_id':1,'application_ids':[1]}).status_code==403

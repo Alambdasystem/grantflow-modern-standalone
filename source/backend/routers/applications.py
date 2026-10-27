@@ -70,11 +70,13 @@ async def create_application(
         title=payload.title or grant.title,
         proposal_text=payload.proposal_text,
         budget_narrative=payload.budget_narrative,
-        amount_requested=payload.amount_requested or grant.amount,
+        amount_requested=payload.amount_requested if payload.amount_requested is not None else grant.amount,
         form_data=payload.form_data,
         notes=payload.notes,
         status=ApplicationStatus.draft,
     )
+    from services.candidate_quality import require_valid_content
+    await require_valid_content(db,app,(app.proposal_text or '')+'\n'+(app.budget_narrative or ''))
     db.add(app)
     await db.flush()
 
@@ -104,9 +106,11 @@ class BulkLinkOrgPayload(BaseModel):
 async def bulk_link_org(
     payload: BulkLinkOrgPayload,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(get_current_user_token),
+    token: dict = Depends(get_current_user_token),
 ):
     """Set organization_id on a batch of applications at once."""
+    if token.get('role')!='admin':
+        raise HTTPException(403,'Administrator required to reassign application organizations')
     org = await db.get(Organization, payload.org_id)
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
@@ -148,6 +152,13 @@ async def update_application(
         raise HTTPException(status_code=404, detail="Application not found")
 
     changes = payload.model_dump(exclude_unset=True)
+    if any(key in changes for key in ('proposal_text','budget_narrative','amount_requested')):
+        from services.candidate_quality import context_for
+        from services.draft_validation import draft_issues
+        context=await context_for(db,app)
+        context['application']['amount_requested']=changes.get('amount_requested',app.amount_requested)
+        issues=draft_issues((changes.get('proposal_text',app.proposal_text) or '')+'\n'+(changes.get('budget_narrative',app.budget_narrative) or ''),context,'proposal')
+        if issues:raise HTTPException(422,'Saved draft validation failed; reconcile figures or use information-needed placeholders. '+' '.join(issues))
     source_draft_id=changes.pop('source_draft_id',None)
     if 'amount_awarded' in changes and token.get('role') not in {'admin','reviewer'}:
         raise HTTPException(403,'Reviewer or administrator required to record award amounts')
@@ -217,6 +228,9 @@ async def accept_draft(app_id: int, payload: AcceptanceInput, db: AsyncSession =
         raise HTTPException(422, 'Choose accepted or changes_requested and enter review evidence')
     if payload.decision == 'accepted' and not (app.proposal_text or '').strip():
         raise HTTPException(422, 'Cannot accept an empty draft')
+    if payload.decision=='accepted':
+        from services.candidate_quality import require_valid_content
+        await require_valid_content(db,app,(app.proposal_text or '')+'\n'+(app.budget_narrative or ''))
     import hashlib
     from services.application_readiness import draft_revision
     revision=draft_revision(app)
