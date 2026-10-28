@@ -4,6 +4,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {refreshApplicationViews} from "@/lib/application-cache";
 import {applicationError} from "@/lib/form-feedback";
+import {HondaOnboardingPanel} from "@/components/HondaOnboardingPanel";
+import {HondaOnboardingData,isHondaOnboarding,hondaSources} from "@/lib/honda-onboarding";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -54,6 +56,7 @@ interface ApplicationDetail {
   budget_narrative?: string | null;
   amount_requested?: number | null;
   form_data?: {
+    honda_2027_onboarding?: HondaOnboardingData;
     grant_planning?: {
       strategic_fit?: {
         north_star?: string;
@@ -208,6 +211,7 @@ export default function ApplicationDetailPage() {
   const [proposalDirty, setProposalDirty] = useState(false);
   const [sourceDraftId,setSourceDraftId]=useState<number|null>(null);
   const [copyDone, setCopyDone] = useState(false);
+  const [showOnboardingEditor,setShowOnboardingEditor]=useState(false);
 
   const application = useQuery<ApplicationDetail>({
     queryKey: ["application", appId],
@@ -423,6 +427,7 @@ export default function ApplicationDetailPage() {
 
   const app = application.data;
   const planning = app.form_data?.grant_planning;
+  const hondaOnboarding=isHondaOnboarding(app);
   const transitions = STATUS_FLOW.filter((t) => t.from === app.status);
   const stages = workflow.data ?? [];
   const activeStage = stages.find((s) => s.status === "active");
@@ -431,8 +436,7 @@ export default function ApplicationDetailPage() {
 
   return (
     <div className="p-4 sm:p-6 space-y-6">
-      <ApplicationReadiness appId={Number(appId)} />
-      <DraftReview appId={Number(appId)} />
+      {!hondaOnboarding&&<><ApplicationReadiness appId={Number(appId)} /><DraftReview appId={Number(appId)} /></>}
       <div className="flex items-center justify-between gap-3">
         <Link href="/applications" className="inline-flex items-center gap-2 text-sm text-zinc-300 hover:text-cyan-200">
           <ArrowLeft className="w-4 h-4" /> Back to pipeline
@@ -494,9 +498,11 @@ export default function ApplicationDetailPage() {
         </div>
       </motion.section>
 
+      {hondaOnboarding&&<><HondaOnboardingPanel appId={appId} request={app.amount_requested} data={app.form_data!.honda_2027_onboarding!}/><ApplicationReadiness appId={appId} onboarding/><DraftReview appId={appId}/></>}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Proposal editor */}
-        <Card className="lg:col-span-2 border border-cyan-900/40 bg-[#0a1f2d]/85">
+        {hondaOnboarding&&!showOnboardingEditor&&!proposal&&!proposalDirty&&<div className="lg:col-span-2 glass rounded-xl border border-cyan-900/40 p-5"><h2 className="text-xl text-white">Proposal intentionally blank</h2><p className="text-sm text-zinc-300 my-3">This record captures source onboarding only. No proposal has been generated.</p><Button variant="outline" onClick={()=>setShowOnboardingEditor(true)}>Open blank proposal editor</Button></div>}
+        {(!hondaOnboarding||showOnboardingEditor||!!proposal||proposalDirty)&&<Card className="lg:col-span-2 border border-cyan-900/40 bg-[#0a1f2d]/85">
           <CardHeader className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
             <div>
               <CardTitle className="text-white flex items-center gap-2">
@@ -567,7 +573,7 @@ export default function ApplicationDetailPage() {
               className="min-h-[420px] bg-[#0d2635]/80 border-cyan-900/40 text-zinc-100 leading-relaxed"
             />
           </CardContent>
-        </Card>
+        </Card>}
 
         {/* Sidebar */}
         <div className="space-y-4">
@@ -692,7 +698,7 @@ export default function ApplicationDetailPage() {
 
           {/* ── Submission Package Requirements ───────────────────────────── */}
           {application.data?.grant_id && (
-            <Card className="border border-violet-900/40 bg-[#0a1f2d]/85">
+            hondaOnboarding?<Card className="border border-cyan-900/40 bg-[#0a1f2d]/85"><CardHeader><CardTitle className="text-white text-base">Honda application guidance</CardTitle></CardHeader><CardContent className="space-y-3 text-sm"><p>Official guidance available — complete portal questions and required uploads pending confirmation.</p><p>Submission platform: CyberGrants.</p><a className="text-cyan-200 underline" href={hondaSources.portal} target="_blank" rel="noopener noreferrer">Verified eligibility quiz / portal entry</a></CardContent></Card>:(<Card className="border border-violet-900/40 bg-[#0a1f2d]/85">
               <CardHeader className="flex flex-row items-start justify-between pb-2 gap-2">
                 <CardTitle className="text-white text-base flex items-center gap-1.5">
                   <Package className="w-4 h-4 text-violet-300" /> Package Requirements
@@ -839,7 +845,7 @@ export default function ApplicationDetailPage() {
                   );
                 })()}
               </CardContent>
-            </Card>
+            </Card>)
           )}
 
           {/* Workspace sync info — shown when application came from grants.gov Workspace */}
