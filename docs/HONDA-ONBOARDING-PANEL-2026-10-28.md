@@ -31,3 +31,22 @@ inventory, tax-status and operating-budget evidence, Pacific Time/PST wording,
 credential-target definitions and human review of over-length draft sections.
 No proposal is generated, rewritten or saved, no extraction is approved, and
 no grant or message is submitted.
+
+## Live verification
+
+Render deploy `dep-dbh350nf3r2c73ep6a40` reached live at 2026-10-28
+17:38:05 UTC with commit `5761dcfdc5baef7c820f258a12eb50314979a91d`.
+Authenticated desktop (1440px) and mobile (390px) checks passed. The panel
+shows two Ready official PDFs and two Awaiting extraction review documents;
+all four originals downloaded with matching SHA-256 hashes. Funding reconciles
+and the scoped completeness display retains the existing 4/15 saved-data count.
+The Grants.gov scan control is absent and the blank editor starts collapsed;
+opening it leaves the text empty and does not generate or save content.
+
+Before/after comparison verified the complete application, canonical grant
+fields, organization profile, attachment metadata and file hashes unchanged.
+Application 47 remains a draft owned by WYF's existing data owner in organization
+1. A final read after UI interactions again matched the original application.
+Desktop and mobile screenshots were inspected and retained privately. The live
+test did not approve extractions, edit checklist entries or change application
+status. Private evidence and account credentials are excluded from Git.
