@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from sqlalchemy.orm import DeclarativeBase
 from config import settings
 import os
-from fastapi import Depends
+from fastapi import Depends, Request
 from auth.jwt_handler import get_current_user_token
 
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
@@ -33,11 +33,18 @@ async def get_public_db():
             await session.close()
 
 
-async def get_db(identity: dict = Depends(get_current_user_token)):
+async def get_db(request: Request, identity: dict = Depends(get_current_user_token)):
     from auth.ownership import bind_identity
     async with AsyncSessionLocal() as session:
         try:
             await bind_identity(session, identity)
+            if identity.get('actor_user_id') and request.method.upper() in {'POST','PUT','PATCH','DELETE'}:
+                from sqlalchemy import insert
+                from models.models import AuditLog
+                await session.execute(insert(AuditLog).values(user_id=identity['actor_user_id'],
+                    action='delegated_request',resource_type='data_owner',resource_id=identity['local_user_id'],
+                    details={'actor_user_id':identity['actor_user_id'],'owner_user_id':identity['local_user_id'],
+                             'method':request.method,'path':request.url.path}))
             yield session
             await session.commit()
         except Exception:

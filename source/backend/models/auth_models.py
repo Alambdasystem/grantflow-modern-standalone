@@ -58,3 +58,13 @@ class MigrationSafety(Base):
     id = Column(Integer, primary_key=True)
     external_jobs_paused = Column(Boolean, nullable=False, default=True)
     source_cutoff = Column(String(100), nullable=False)
+
+
+class AuthDelegation(Base):
+    """Operator-approved, expiring data-owner delegation; never email linking."""
+    __tablename__ = 'auth_delegations'
+    delegate_user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    owner_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=False)
+    expires_at = Column(Integer, nullable=False)
+    reason = Column(String(500), nullable=False)
