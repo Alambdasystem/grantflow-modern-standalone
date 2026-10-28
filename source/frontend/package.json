@@ -8,7 +8,7 @@
     "start": "next start --port 3002",
     "lint": "next lint",
     "test:auth": "node --experimental-strip-types --experimental-specifier-resolution=node --test tests/auth-session.test.ts",
-    "test:unit": "node --experimental-strip-types --loader ./tests/resolve-ts.mjs --test tests/auth-session.test.ts tests/dashboard.test.ts tests/email-decision-dashboard.test.ts tests/grants.test.ts",
+    "test:unit": "node --experimental-strip-types --loader ./tests/resolve-ts.mjs --test tests/auth-session.test.ts tests/dashboard.test.ts tests/email-decision-dashboard.test.ts tests/grants.test.ts tests/workflow-feedback.test.ts",
     "type-check": "tsc --noEmit",
     "ui:flash:init": "npx shadcn@latest init -d",
     "ui:flash:add-core": "npx shadcn@latest add button card input textarea badge tabs table select dialog sheet"

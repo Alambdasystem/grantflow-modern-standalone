@@ -2,9 +2,11 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { fetchGrantFlowQuery } from "@/lib/query";
 import { parseApplicationList, ApplicationListItem } from "@/lib/applications";
+import {applicationError, requestedAmountError} from '@/lib/form-feedback';
+import {refreshApplicationViews} from '@/lib/application-cache';
 import { parseGrantOptions, GrantOption } from "@/lib/grants";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -28,6 +30,9 @@ export default function ApplicationsPage() {
   const qc = useQueryClient();
   const [showNew, setShowNew] = useState(false);
   const [form, setForm] = useState({ grant_id: "", title: "", amount_requested: "" });
+  const [fieldErrors,setFieldErrors]=useState<Record<string,string>>({});
+  const [formError,setFormError]=useState('');
+  const amountInput=useRef<HTMLInputElement>(null);
 
   const {
     data: apps = [],
@@ -40,6 +45,8 @@ export default function ApplicationsPage() {
     queryKey: ["applications"],
     queryFn: () => fetchGrantFlowQuery("/api/applications/", parseApplicationList),
     retry: 1,
+    refetchInterval: 5000,
+    refetchOnWindowFocus: 'always',
   });
 
   const {
@@ -57,17 +64,19 @@ export default function ApplicationsPage() {
     mutationFn: (payload: object) => api.post("/api/applications/", payload),
     onSuccess: () => {
       toast.success("Application created");
-      qc.invalidateQueries({ queryKey: ["applications"] });
+      refreshApplicationViews(qc);
+      setFieldErrors({});setFormError('');
       setShowNew(false);
       setForm({ grant_id: "", title: "", amount_requested: "" });
     },
-    onError: () => toast.error("Failed to create application"),
+    onError: (error:unknown) => {const feedback=applicationError(error);setFieldErrors(feedback.fields);setFormError(feedback.message);toast.error(feedback.message);},
   });
 
   const patchStatus = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) =>
       api.patch(`/api/applications/${id}`, { status }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["applications"] }),
+    onSuccess: (res,{id}) => {qc.setQueryData(['application',id],res.data);return refreshApplicationViews(qc,id);},
+    onError: (error:unknown) => toast.error(applicationError(error).message),
   });
 
   const byStatus = (key: string) => apps.filter(a => a.status === key);
@@ -102,6 +111,7 @@ export default function ApplicationsPage() {
           <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <select
+              aria-label="Grant" aria-invalid={!!fieldErrors.grant_id} aria-describedby={fieldErrors.grant_id?'grant-error':undefined}
               value={form.grant_id}
               onChange={e => setForm(f => ({ ...f, grant_id: e.target.value }))}
               disabled={grantsLoading || grantsError}
@@ -115,12 +125,15 @@ export default function ApplicationsPage() {
               ))}
             </select>
             <Input
+              aria-label="Application title" aria-invalid={!!fieldErrors.title} aria-describedby={fieldErrors.title?'title-error':undefined}
               placeholder="Application Title"
               value={form.title}
               onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
               className="h-10 bg-[#0d2635]/80 border-cyan-900/40 text-white"
             />
             <Input
+              aria-label="Requested amount" min="0" step="0.01" aria-invalid={!!fieldErrors.amount_requested} aria-describedby={fieldErrors.amount_requested?'amount-error':undefined}
+              ref={amountInput}
               placeholder="Requested Amount ($)"
               type="number"
               value={form.amount_requested}
@@ -128,13 +141,17 @@ export default function ApplicationsPage() {
               className="h-10 bg-[#0d2635]/80 border-cyan-900/40 text-white"
             />
           </div>
+          {fieldErrors.grant_id&&<p id="grant-error" role="alert" className="text-rose-200 text-sm">Grant: {fieldErrors.grant_id}</p>}
+          {fieldErrors.title&&<p id="title-error" role="alert" className="text-rose-200 text-sm">Application title: {fieldErrors.title}</p>}
+          {fieldErrors.amount_requested&&<p id="amount-error" role="alert" className="text-rose-200 text-sm">Requested amount: {fieldErrors.amount_requested}</p>}
+          {formError&&<p role="alert" className="text-rose-200 text-sm mt-2">{formError}</p>}
           <div className="flex gap-3 mt-4">
             <Button
-              onClick={() => createApp.mutate({
+              onClick={() => {const amountError=amountInput.current?.validity.badInput?'Enter a valid requested amount.':requestedAmountError(form.amount_requested);if(amountError){setFieldErrors({amount_requested:amountError});setFormError('Check the highlighted application fields.');amountInput.current?.focus();return;}setFieldErrors({});setFormError('');createApp.mutate({
                 grant_id: Number(form.grant_id),
                 title: form.title || undefined,
                 amount_requested: form.amount_requested ? Number(form.amount_requested) : undefined,
-              })}
+              });}}
               disabled={!form.grant_id || createApp.isPending}
               className="h-10 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-[#03141c] font-semibold disabled:opacity-50"
             >

@@ -26,7 +26,8 @@ export default function DashboardPage() {
     queryKey: ["dashboard-stats"],
     queryFn: () =>
       fetchGrantFlowQuery("/api/analytics/dashboard", parseDashboardStats),
-    refetchInterval: 30_000,
+    refetchInterval: 10_000,
+    refetchOnWindowFocus: 'always',
     retry: 1,
   });
 

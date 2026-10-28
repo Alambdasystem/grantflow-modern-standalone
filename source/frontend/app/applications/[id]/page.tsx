@@ -2,6 +2,8 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {refreshApplicationViews} from "@/lib/application-cache";
+import {applicationError} from "@/lib/form-feedback";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -211,6 +213,8 @@ export default function ApplicationDetailPage() {
     queryKey: ["application", appId],
     queryFn: () => api.get(`/api/applications/${appId}`).then((r) => r.data),
     enabled: Number.isFinite(appId),
+    refetchInterval: 5000,
+    refetchOnWindowFocus: 'always',
   });
 
   const grant = useQuery<GrantDetail>({
@@ -223,6 +227,8 @@ export default function ApplicationDetailPage() {
     queryKey: ["workflow", appId],
     queryFn: () => api.get(`/api/applications/${appId}/workflow`).then((r) => r.data),
     enabled: Number.isFinite(appId),
+    refetchInterval: 5000,
+    refetchOnWindowFocus: 'always',
   });
 
   useEffect(() => {
@@ -253,6 +259,7 @@ export default function ApplicationDetailPage() {
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["application-readiness", Number(appId)] });
       toast.success("Proposal saved");
+      refreshApplicationViews(qc,appId);
       // Update the cache before clearing dirty state; otherwise the sync effect
       // restores the old proposal while refetch is pending, corrupting exports.
       qc.setQueryData(["application", appId], res.data);
@@ -260,12 +267,14 @@ export default function ApplicationDetailPage() {
       setProposalDirty(false);
       qc.invalidateQueries({ queryKey: ["application", appId] });
     },
-    onError: () => toast.error("Save failed"),
+    onError: (error:unknown) => toast.error(applicationError(error).message),
   });
 
   const setStatus = useMutation({
     mutationFn: (status: string) => api.patch(`/api/applications/${appId}`, { status }),
-    onSuccess: (_res, status) => {
+    onSuccess: (res, status) => {
+      qc.setQueryData(["application",appId],res.data);
+      refreshApplicationViews(qc,appId);
       toast.success(`Status set to ${status.replace("_", " ")}`);
       qc.invalidateQueries({ queryKey: ["application", appId] });
       qc.invalidateQueries({ queryKey: ["applications"] });
@@ -276,6 +285,7 @@ export default function ApplicationDetailPage() {
   const advancePipeline = useMutation({
     mutationFn: () => api.post(`/api/applications/${appId}/workflow/advance`),
     onSuccess: () => {
+      refreshApplicationViews(qc,appId);
       toast.success("Pipeline advanced to next stage");
       qc.invalidateQueries({ queryKey: ["workflow", appId] });
     },
@@ -286,6 +296,7 @@ export default function ApplicationDetailPage() {
     mutationFn: ({ stageId, status }: { stageId: number; status: string }) =>
       api.patch(`/api/applications/${appId}/workflow/${stageId}`, { status }),
     onSuccess: () => {
+      refreshApplicationViews(qc,appId);
       qc.invalidateQueries({ queryKey: ["workflow", appId] });
     },
     onError: (error: unknown) => toast.error((error as {response?:{data?:{detail?:string}}}).response?.data?.detail || "Stage update failed"),
