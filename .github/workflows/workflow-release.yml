@@ -1,0 +1,57 @@
+name: GrantFlow workflow release verification
+on:
+  push:
+    branches: [feat/document-application-workflow, feat/render-staging]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: workflow-release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  linux-backend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the pinned application and Linux verification image
+        run: |
+          docker build -f Dockerfile.backend -t grantflow-lab-backend:local .
+          docker build -f Dockerfile.verify -t grantflow-verify:release .
+          mkdir -p ci-results
+      - name: Eight previously environment-blocked regressions
+        run: |
+          docker run --rm -v "$PWD/ci-results:/test-results" grantflow-verify:release python -m pytest -q \
+            tests/test_identity_repair.py::test_reproduce_then_explicit_link_and_persistence \
+            tests/test_identity_repair.py::test_bulk_organization_link_preserves_tenant_boundaries \
+            tests/test_ingestion.py::test_scanned_pdf_ocr \
+            tests/test_ingestion.py::test_png_ocr_and_invalid_image \
+            tests/test_standalone_readiness.py::test_offline_backup_restore_and_refuse_overwrite \
+            tests/test_standalone_readiness.py::test_corrupt_archive_refused \
+            tests/test_standalone_readiness.py::test_archive_traversal_refused \
+            tests/test_transport_tls.py::test_verified_tls_and_remote_model_client_certificate \
+            --junitxml=/test-results/environment-regressions.xml
+      - name: Complete current backend suite
+        run: docker run --rm -v "$PWD/ci-results:/test-results" grantflow-verify:release python -m pytest tests -q --junitxml=/test-results/backend.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-backend-results
+          path: ci-results/*.xml
+  frontend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: source/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: source/frontend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - run: npm run type-check
+      - run: npm run test:unit

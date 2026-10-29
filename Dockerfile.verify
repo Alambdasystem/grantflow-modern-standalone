@@ -1,6 +1,9 @@
 ARG BACKEND_IMAGE=grantflow-lab-backend:local
 FROM ${BACKEND_IMAGE}
 USER root
-RUN pip install --no-cache-dir pytest==8.4.2 pytest-asyncio==1.2.0 pytest-cov==7.0.0 requests==2.32.5
-ENV PYTHONPATH=/app/backend:/app/backend/tests PYTHONDONTWRITEBYTECODE=1
+RUN apt-get update && apt-get install -y --no-install-recommends openssl \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir pytest==8.4.2 pytest-asyncio==1.2.0 pytest-cov==7.0.0 requests==2.32.5
+COPY deploy /ops
+ENV PYTHONPATH=/app/backend:/app/backend/tests:/ops PYTHONDONTWRITEBYTECODE=1
 WORKDIR /app/backend
