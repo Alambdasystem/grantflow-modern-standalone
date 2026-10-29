@@ -20,11 +20,24 @@ The separate native lab journey previously called the configured Alambda service
 
 Target: existing `feat/render-staging` Render beta; existing single API/worker, persistent disk and 512 MB plan. No original installation, production account permissions, external submission automation, email or provider plan is changed.
 
-Before deploying: create a quiesced database/files backup using [the deployment runbook](RENDER-STANDALONE-DEPLOYMENT.md), retain it privately outside the application instance, verify checksums and restore/integrity in isolation, then resume service. Backup export needs explicit private-data handling authorization in the current execution environment. Rollout remains pending until that gate closes.
+Before deploying: create a quiesced database/files backup using [the deployment runbook](RENDER-STANDALONE-DEPLOYMENT.md), retain it privately outside the application instance, verify checksums and restore/integrity in isolation, then resume service. Private-data export and brief maintenance were explicitly approved. The encrypted backup was completed and restore-verified on October 29; rollout is complete as recorded below.
 
 Deploy the reviewed branch explicitly: the existing Render service has automatic deployment disabled. Confirm the deployed commit and additive schema version 3, then use authenticated read-only checks of the reference application and attachment hashes. Do not create analysis/review runs, modify sources or populate its blank main proposal during this preservation check.
 
 For rollback, retain the previous deployed commit and restorable backup. The two new tables are additive and old code can ignore them. Code rollback does not restore disk/database contents. Restore only through the runbook's isolated-target process and reconcile newer data before switching paths; never overwrite a running database.
+
+## Verified staging rollout — October 29, 2026
+
+- Render deployment `dep-dbhl7fgu01pc73bk8b9g` reached **live** at 14:12:16 UTC (9:12 a.m. America/Chicago), running commit `ab95e3e57fa85c479e099fde5f4ad30714499fc6` on `feat/render-staging`. The service remains on its existing 512 MB plan and 1 GB disk. Automatic deployment remains off.
+- The exact staging branch passed [CI run 40818952800](https://github.com/Alambdasystem/grantflow-modern-standalone/actions/runs/40818952800), including all eight environment regressions, the full backend suite, frontend tests, type-check and production build.
+- The database/files backup was encrypted with AES-256-GCM before leaving Render. Its key is protected by the operator's Windows current-user DPAPI. Decryption from that protected key and restoration of all **70 files** were verified; SQLite integrity was `ok`, with **zero foreign-key violations**. Temporary plaintext verification files were removed. Keep the protected key and encrypted archive together in private retention; they are not in Git. A current-user DPAPI key requires the same Windows account/profile for recovery.
+- The first local verification completed restoration but held a SQLite connection open during Windows temporary-directory cleanup. The verifier was corrected to close that connection explicitly; protected-key decryption, full restoration and cleanup then passed without taking another maintenance outage.
+- Live native sign-in, the new workbench and processing-state API passed. Desktop 1440 px and mobile 390 px showed the workbench without horizontal overflow or browser exceptions. Clearing authentication cookies caused the protected workbench API to return 401.
+- A fresh before/after comparison found the reference application's complete API record and source metadata unchanged. All four originals downloaded successfully with identical SHA-256 hashes; ownership, funding scopes, draft status and blank main proposal were preserved. No source analysis, generation or review run was created for that application.
+- Read-only runtime inspection confirmed schema versions 2 and 3, both new workflow tables, configured Alambda AI enabled, and automatic analysis enabled for future successful associated extractions. The running reference application still has zero source-workflow runs. Existing uploads are not retroactively processed or approved just by viewing the workbench.
+- Actual AI generation remains evidenced by the separate synthetic native lab journey, not by this read-only staging smoke test. This rollout did not generate a real applicant's proposal, approve held evidence, submit an application or enable external automation. OCR still needs the separately approved memory capacity/worker; passing OCR in Linux CI does not make it available on a 512 MB service.
+
+Previous live code retained for compatible rollback: `5761dcfdc5baef7c820f258a12eb50314979a91d`. This documentation update does not change the deployed application code.
 
 ## Application readiness gates
 
