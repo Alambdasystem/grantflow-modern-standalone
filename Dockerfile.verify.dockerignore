@@ -1,0 +1,8 @@
+**
+!Dockerfile.verify
+!source
+!source/backend
+!source/backend/tests
+!source/backend/tests/*.py
+!deploy
+!deploy/*.py
