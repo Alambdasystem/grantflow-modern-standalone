@@ -6,5 +6,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl \
     && pip install --no-cache-dir pytest==8.4.2 pytest-asyncio==1.2.0 pytest-cov==7.0.0 requests==2.32.5
 COPY deploy /ops
 COPY source/backend/tests /app/backend/tests
+COPY docs/source-reviews /reviews
 ENV PYTHONPATH=/app/backend:/app/backend/tests:/ops PYTHONDONTWRITEBYTECODE=1
 WORKDIR /app/backend

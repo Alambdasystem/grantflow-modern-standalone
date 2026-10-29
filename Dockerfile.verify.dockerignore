@@ -6,3 +6,6 @@
 !source/backend/tests/*.py
 !deploy
 !deploy/*.py
+!docs
+!docs/source-reviews
+!docs/source-reviews/*.json

@@ -169,6 +169,37 @@ def test_real_provider_participant_scope_regression():
     assert any('in total' in issue for issue in service.draft_validation(output))
     assert service.draft_validation({**output,'body':'Four workshops for twenty students in total. [source ID: 3, locator: text]'})==[]
 
+@pytest.mark.parametrize('bad,corrected,issue',[
+    ('A synthetic program narrative.', 'A synthetic program narrative. [source 1, paragraph 1]', 'No source references'),
+    ('Each workshop serves twenty students. [source 1, paragraph 1]', 'Workshops serve twenty students in total. [source 1, paragraph 1]', 'in total'),
+    ('Delivery costs: [information needed]. [source 1, paragraph 1]', 'Synthetic delivery costs: $100,000. [source 1, paragraph 1]', 'placeholders'),
+])
+def test_observed_ai_errors_block_approval_and_corrected_versions_pass(api,monkeypatch,bad,corrected,issue):
+    # Labelled synthetic evidence, not invented Honda costs or portal verification.
+    async def evidence():
+        async with database.AsyncSessionLocal() as db:
+            source=await db.get(IngestionDocument,1)
+            source.extracted={'text':'Please describe your program. Under 2,000 Characters. Synthetic workshops serve twenty students in total. Synthetic delivery costs: $100,000.',
+                'parts':[{'locator':'paragraph 1','text':'Please describe your program. Under 2,000 Characters. Synthetic workshops serve twenty students in total. Synthetic delivery costs: $100,000.'}]}
+            await db.commit()
+    asyncio.run(evidence())
+    inv=inventory(api,monkeypatch);req=inv['output']['items'][0]
+    monkeypatch.setattr(service.AIService,'chat',AsyncMock(return_value=bad))
+    created=api.post('/api/applications/1/sources/draft',headers=headers(),json={'inventory_id':inv['id'],'requirement_id':req['id']}).json()
+    asyncio.run(service.process(created['id']))
+    run=next(r for r in api.get('/api/applications/1/sources',headers=headers()).json()['runs'] if r['id']==created['id'])
+    assert any(issue in problem for problem in run['output']['validation'])
+    decision={'item_key':'draft','decision':'accepted','notes':'Synthetic reviewer regression','output_hash':run['output_hash']}
+    assert api.post(f'/api/applications/1/sources/runs/{run["id"]}/review',headers=headers('admin'),json=decision).status_code==422
+    revision=api.post(f'/api/applications/1/sources/runs/{run["id"]}/revision',headers=headers(),json={'body':corrected,'output_hash':run['output_hash']})
+    assert revision.status_code==201
+    child=next(r for r in api.get('/api/applications/1/sources',headers=headers()).json()['runs'] if r['id']==revision.json()['id'])
+    assert child['output']['validation']==[]
+    decision['output_hash']=child['output_hash']
+    assert api.post(f'/api/applications/1/sources/runs/{child["id"]}/review',headers=headers('admin'),json=decision).status_code==201
+    original=next(r for r in api.get('/api/applications/1/sources',headers=headers()).json()['runs'] if r['id']==run['id'])
+    assert original['output']['body']==bad and original['reviews'].get('draft',{}).get('decision')!='accepted'
+
 def test_reviewed_package_requires_explicit_source_portal_and_answer_reviews(api,monkeypatch):
     from routers.ingestion import router
     api.app.include_router(router)
