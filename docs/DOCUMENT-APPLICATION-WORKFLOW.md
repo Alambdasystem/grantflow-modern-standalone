@@ -1,6 +1,6 @@
 # Document-to-application workbench
 
-Implementation is prepared in the isolated lab. No Render deployment is part of this change. Do not push the connected deployment branch until review and deployment authorization.
+Implementation is prepared in the isolated lab and software deployment to the existing Render beta is authorized. See [release verification](WORKFLOW-RELEASE-2026-10-28.md) for test and rollout status. Application/source approval remains a separate human decision; deploying this feature does not make an application submission-ready.
 
 ## Flow
 
