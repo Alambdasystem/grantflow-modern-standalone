@@ -45,6 +45,10 @@ def test_inventory_provenance_dedup_unverified_and_main_preserved(api,monkeypatc
     item=row['output']['items'][0]
     assert item['authority']=='supplied_outline' and item['verification']=='needs_review' and item['unverified_draft']
     assert item['limit']=={'value':2000,'unit':'characters','operator':'lt'}
+    transport={k:item[k] for k in ('kind','wording','source_id','locator','source_quote','required','human_supplied')}
+    batch=[{'source_id':1,'locator':'paragraph 1','text':item['source_quote']}]
+    for raw in [json.dumps([transport]),json.dumps([{'items':[transport]}])]:
+        assert service.parse_items(raw,batch,row['sources'])[0]['id']==item['id']
     again=api.post('/api/applications/1/sources/analyze',json={'source_ids':[1]},headers=headers()).json();assert again['id']==row['id']
     assert not api.get('/api/applications/1',headers=headers()).json()['proposal_text']
     assert api.get('/api/applications/2/sources',headers=headers()).status_code==404
@@ -55,8 +59,105 @@ def test_fabricated_questions_and_citations_are_withheld(api,monkeypatch):
     monkeypatch.setattr(service.AIService,'chat',AsyncMock(return_value=json.dumps({'items':[{'kind':'question','wording':'Invented official question','source_id':1,'locator':'paragraph 1','source_quote':'Please describe your program.','required':True,'human_supplied':False}]})))
     r=api.post('/api/applications/1/sources/analyze',json={'source_ids':[1]},headers=headers()).json();asyncio.run(service.process(r['id']))
     run=api.get('/api/applications/1/sources',headers=headers()).json()['runs'][0]
-    assert run['status']=='failed' and 'Inferred question' in run['error'] and not run['output']
+    assert run['status']=='failed' and 'Inferred question' in run['error']
+    assert not run['output'].get('items') and not run['output']['checkpoint']['items']
+    assert len(run['output']['calls'])==2 and run['output']['checkpoint']['withheld']
     assert api.post(f'/api/applications/1/sources/runs/{r["id"]}/retry',headers=headers()).status_code==202
+
+def test_checkpoint_retry_keeps_valid_items_and_does_not_repeat_completed_batch(api,monkeypatch):
+    raw=json.dumps({'items':[{'kind':'question','wording':'Please describe your program.','source_id':1,'locator':'paragraph 1','source_quote':'Please describe your program.','required':None,'human_supplied':False}]})
+    real_batches=service.batches
+    monkeypatch.setattr(service,'batches',lambda parts:[real_batches(parts)[0],real_batches(parts)[0]])
+    chat=AsyncMock(side_effect=[raw,RuntimeError('private provider detail')])
+    monkeypatch.setattr(service.AIService,'chat',chat)
+    row=api.post('/api/applications/1/sources/analyze',json={'source_ids':[1]},headers=headers()).json()
+    asyncio.run(service.process(row['id']))
+    failed=api.get('/api/applications/1/sources',headers=headers()).json()['runs'][0]
+    assert failed['status']=='failed'
+    assert failed['output']['checkpoint']['completed_batches']==[0]
+    assert len(failed['output']['checkpoint']['items'])==1
+    assert failed['output']['calls'][-1]['status']=='failed'
+    assert 'private provider detail' not in failed['error']
+    assert api.post(f'/api/applications/1/sources/runs/{row["id"]}/retry',headers=headers()).status_code==202
+    chat=AsyncMock(return_value='{"items":[]}')
+    monkeypatch.setattr(service.AIService,'chat',chat)
+    asyncio.run(service.process(row['id']))
+    final=api.get('/api/applications/1/sources',headers=headers()).json()['runs'][0]
+    assert final['status']=='completed' and final['attempts']==2
+    assert len(final['output']['items'])==1 and not final['output']['inventory_complete']
+    assert chat.await_count==1
+
+def test_bounded_draft_context_retains_budget_table_and_reports_omissions():
+    parts=[{'source_id':22,'locator':f'paragraph {i}','text':'unrelated '*600} for i in range(20)]
+    parts += [{'source_id':23,'locator':'xl/worksheets/sheet1.xml','text':'Personnel $30,000; training $6,000.'},
+              {'source_id':22,'locator':'paragraph 25','text':'Budget question'}]
+    selected,coverage=service.draft_context(parts,{'source_id':22,'locator':'paragraph 25','wording':'Budget question'},'budget_narrative')
+    assert coverage['selected_characters']<=4800 and coverage['omitted']
+    assert not coverage['complete_source_coverage']
+    assert any(p['source_id']==23 for p in selected)
+    assert any(p['locator']=='paragraph 25' for p in selected)
+
+def test_validation_repair_retains_failed_candidate_and_does_not_approve(api,monkeypatch):
+    inv=inventory(api,monkeypatch)
+    chat=AsyncMock(side_effect=['Invented 999 participants.',
+        'Proposed pilot [information needed: dates] [source 1, paragraph 1]'])
+    monkeypatch.setattr(service.AIService,'chat',chat)
+    row=api.post('/api/applications/1/sources/draft',json={'inventory_id':inv['id'],'requirement_id':inv['output']['items'][0]['id']},headers=headers()).json()
+    asyncio.run(service.process(row['id']))
+    draft=api.get('/api/applications/1/sources',headers=headers()).json()['runs'][0]
+    assert draft['status']=='completed' and len(draft['output']['generation_candidates'])==2
+    assert draft['output']['generation_candidates'][0]['body']=='Invented 999 participants.'
+    assert draft['output']['validation']==['Missing information placeholders remain.']
+    assert not draft['reviews'] and chat.await_count==2
+    decision={'item_key':'draft','decision':'accepted','notes':'Fixture validation check','output_hash':draft['output_hash']}
+    assert api.post(f'/api/applications/1/sources/runs/{draft["id"]}/review',json=decision,headers=headers('admin')).status_code==422
+    revised=api.post(f'/api/applications/1/sources/runs/{draft["id"]}/revision',json={'body':'Proposed pilot [source 1, paragraph 1]','output_hash':draft['output_hash']},headers=headers()).json()
+    assert revised['validation']==[]
+    final=api.get('/api/applications/1/sources',headers=headers()).json()['runs'][0]
+    decision['output_hash']=final['output_hash']
+    assert api.post(f'/api/applications/1/sources/runs/{final["id"]}/review',json=decision,headers=headers('admin')).status_code==201
+
+def test_review_bundle_includes_labelled_drafts_without_approval(api,monkeypatch):
+    inv=inventory(api,monkeypatch)
+    monkeypatch.setattr(service.AIService,'chat',AsyncMock(return_value='Proposed pilot [information needed: dates] [source 1, paragraph 1]'))
+    row=api.post('/api/applications/1/sources/draft',json={'inventory_id':inv['id'],'requirement_id':inv['output']['items'][0]['id']},headers=headers()).json()
+    asyncio.run(service.process(row['id']))
+    normal=api.get('/api/applications/1/sources/export',headers=headers())
+    with zipfile.ZipFile(io.BytesIO(normal.content)) as z:assert not any(n.startswith('unapproved/') for n in z.namelist())
+    response=api.get('/api/applications/1/sources/export?include_unapproved=true',headers=headers())
+    with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+        manifest=json.loads(z.read('manifest.json'))
+        assert manifest['package_status']=='INCOMPLETE' and manifest['include_unapproved']
+        name=next(n for n in z.namelist() if n.startswith('unapproved/') and n.endswith('.docx'))
+        from docx import Document as WordDocument
+        text='\n'.join(p.text for p in WordDocument(io.BytesIO(z.read(name))).paragraphs)
+        assert 'UNAPPROVED' in text and 'information needed: dates' in text
+        assert 'VALIDATION.json' in z.namelist() and 'PORTAL-ENTRY.txt' in z.namelist()
+    runs=api.get('/api/applications/1/sources',headers=headers()).json()['runs']
+    draft=next(r for r in runs if r['id']==row['id'])
+    assert not draft['reviews'] and 'Missing information placeholders remain.' in draft['output']['validation']
+    # A newer inventory must not hide existing work or imply it answers new questions.
+    newer=inventory(api,monkeypatch,authorities={'1':'official_guidance'})
+    assert newer['id']!=inv['id']
+    response=api.get('/api/applications/1/sources/export?include_unapproved=true',headers=headers())
+    with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+        manifest=json.loads(z.read('manifest.json'))
+        assert any(d['inventory_id']==inv['id'] and d['run_id']==row['id'] for d in manifest['review_drafts'])
+        assert manifest['package_status']=='INCOMPLETE'
+    async def withhold():
+        async with database.AsyncSessionLocal() as db:
+            r=await db.get(Run,newer['id'])
+            r.output={**r.output,'withheld_batches':[{'batch':0,'reason':'Unsupported source quotation'}]}
+            await db.commit()
+    asyncio.run(withhold())
+    newer=next(r for r in api.get('/api/applications/1/sources',headers=headers()).json()['runs'] if r['id']==newer['id'])
+    response=api.post(f'/api/applications/1/sources/runs/{newer["id"]}/review',
+        json={'item_key':'inventory_complete','decision':'accepted','notes':'Fixture checks cannot override withheld batches','source_url':'https://example.test/form','output_hash':newer['output_hash']},headers=headers('admin'))
+    assert response.status_code==422 and 'Withheld source batches' in response.json()['detail']
+    recovery=api.post(f'/api/applications/1/sources/runs/{newer["id"]}/retry',headers=headers())
+    assert recovery.status_code==202 and recovery.json()['id']!=newer['id']
+    old=next(r for r in api.get('/api/applications/1/sources',headers=headers()).json()['runs'] if r['id']==newer['id'])
+    assert old['output']['withheld_batches'] and old['status']=='completed'
 
 def test_review_cannot_approve_held_source_or_bypass_role(api,monkeypatch):
     run=inventory(api,monkeypatch);item=run['output']['items'][0]

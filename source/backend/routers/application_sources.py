@@ -69,6 +69,7 @@ class Draft(Match):
     requirement_id:str=Field(min_length=1,max_length=100)
     document_type:Literal['answer','narrative','budget_narrative','work_plan','evaluation_plan']='answer'
     missing_inputs:str=Field(default='',max_length=4000)
+    revises:int|None=None
 
 @router.post('/draft',status_code=202)
 async def draft(app_id:int,payload:Draft,db:AsyncSession=Depends(get_db),token:dict=Depends(get_current_user_token)):
@@ -79,6 +80,11 @@ async def draft(app_id:int,payload:Draft,db:AsyncSession=Depends(get_db),token:d
     decisions=await service.latest_reviews(db,parent)
     if decisions.get(payload.requirement_id,{}).get('decision')=='rejected':raise HTTPException(422,'This requirement was excluded by reviewer decision. Review its applicability before drafting.')
     if not req or not service.draftable(req):raise HTTPException(422,'A person must supply this item or confirm it in the portal; select a draftable answer/narrative/work-plan requirement.')
+    if payload.revises is not None:
+        previous=await run_for(db,app,payload.revises)
+        if previous.kind!='draft' or previous.status!='completed' or previous.inputs.get('inventory_id')!=parent.id or previous.inputs.get('requirement_id')!=req['id'] or previous.output.get('document_type')!=payload.document_type:
+            raise HTTPException(409,'Select a completed draft of this requirement and document type; previous work is retained.')
+        await fresh(db,previous)
     evidence=await service.source_snapshot(db,app,payload.evidence_ids,{str(i):'organization_evidence' for i in payload.evidence_ids})
     refs={r['id']:r for r in parent.sources}
     refs.update({r['id']:r for r in evidence})
@@ -91,6 +97,16 @@ class RetryRequest(BaseModel):
 @router.post('/runs/{id}/retry',status_code=202)
 async def retry(app_id:int,id:int,payload:RetryRequest|None=None,db:AsyncSession=Depends(get_db),token:dict=Depends(get_current_user_token)):
     app,user=await application(db,token,app_id,True);run=await run_for(db,app,id)
+    if run.status=='completed' and run.kind=='inventory' and run.output.get('withheld_batches'):
+        await fresh(db,run)
+        recovery=await service.enqueue(db,app,user.id,'inventory',{**run.inputs,'revises':run.id,'retry_withheld':True},run.sources)
+        if recovery.status=='queued' and not recovery.output:
+            bad={r['batch'] for r in run.output['withheld_batches']}
+            checkpoint=run.output.get('checkpoint',{})
+            recovery.output={'checkpoint':{**checkpoint,'completed_batches':[i for i in checkpoint.get('completed_batches',[]) if i not in bad],'withheld':[]},
+                             'checkpoint_from':run.id}
+            await db.commit()
+        return {'id':recovery.id,'status':recovery.status,'previous_inventory':run.id}
     if run.status!='failed':raise HTTPException(409,'Only failed/interrupted runs can be retried; completed outputs are immutable')
     await fresh(db,run)
     if run.attempts>=3:
@@ -175,6 +191,8 @@ async def review(app_id:int,id:int,payload:Decision,db:AsyncSession=Depends(get_
                 if decisions.get('conflict:'+conflict['key'],{}).get('decision')!='accepted':issues.append(conflict['detail'])
             if issues:raise HTTPException(422,'Cannot approve: '+' '.join(issues))
         if payload.item_key=='inventory_complete':
+            if run.output.get('withheld_batches'):
+                raise HTTPException(422,'Withheld source batches remain unresolved. Reanalyze or create a source-reviewed inventory revision before confirming completeness.')
             prior=await service.latest_reviews(db,run)
             active=[r for r in run.output.get('items',[]) if prior.get(r['id'],{}).get('decision')!='rejected']
             if not payload.source_url.startswith('https://') or not active:raise HTTPException(422,'Complete portal inventory requires a verified HTTPS source, active requirements and explicit review notes')
@@ -198,9 +216,9 @@ async def review(app_id:int,id:int,payload:Decision,db:AsyncSession=Depends(get_
     await db.commit();return {'recorded':True,'note':'Decision applies only to this immutable output version. It does not submit the application.'}
 
 @router.get('/export')
-async def export(app_id:int,db:AsyncSession=Depends(get_db),token:dict=Depends(get_current_user_token)):
+async def export(app_id:int,include_unapproved:bool=False,db:AsyncSession=Depends(get_db),token:dict=Depends(get_current_user_token)):
     app,_=await application(db,token,app_id)
-    raw,result=await service.package(db,app)
+    raw,result=await service.package(db,app,include_unapproved=include_unapproved)
     return Response(raw,media_type='application/zip',headers={'Content-Disposition':f'attachment; filename="application-{app_id}-{result["package_status"].lower().replace(" ","-")}.zip"'})
 
 @router.get('/runs/{id}/download')

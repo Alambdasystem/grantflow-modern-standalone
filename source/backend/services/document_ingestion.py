@@ -197,7 +197,7 @@ async def process(job_id):
             await db.commit()
             if settings.AI_ENABLED and settings.APPLICATION_SOURCE_AUTO_ANALYZE and doc.application_id:
                 from services.application_sources import auto_enqueue
-                try:await auto_enqueue(db,doc.application_id,item.created_by_id)
+                try:await auto_enqueue(db,doc.application_id,job.created_by_id)
                 except Exception:
                     # A full/unavailable AI queue must not turn successful extraction into a parser failure.
                     await db.rollback();item=await db.get(Item,item_id)
