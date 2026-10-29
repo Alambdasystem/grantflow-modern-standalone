@@ -50,6 +50,7 @@ def test_secret_file_rotation_and_missing_fail_closed(tmp_path, monkeypatch):
     (False,False,'a'*64,'model_missing'), (True,False,'a'*64,'model_not_loaded'),
     (True,True,'b'*64,'model_digest_mismatch'), (True,True,'a'*64,'ready')])
 def test_model_availability_is_not_server_health(monkeypatch,available,loaded,digest,reason):
+    monkeypatch.setattr(settings,'AI_PROVIDER','ollama')
     monkeypatch.setattr(settings,'DEFAULT_MODEL','llama3.2:latest')
     monkeypatch.setattr(settings,'EXPECTED_MODEL_DIGEST','a'*64)
     def handler(request):
@@ -61,7 +62,9 @@ def test_model_availability_is_not_server_health(monkeypatch,available,loaded,di
 
 
 def storage_module():
-    spec = importlib.util.spec_from_file_location('storage', '/ops/storage.py')
+    path=next((parent/'deploy/storage.py' for parent in Path(__file__).resolve().parents
+               if (parent/'deploy/storage.py').is_file()),Path('/ops/storage.py'))
+    spec = importlib.util.spec_from_file_location('storage', path)
     module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
     return module
 
