@@ -171,6 +171,17 @@ async def process(job_id):
             await db.refresh(item)
             if item.status=='deleted' or not item.current:
                 job.status=Status.paused; await db.commit(); return
+            previous=item.extracted or {}
+            if previous.get('text') and previous.get('text')!=result.get('text'):
+                from models.models import IngestionCorrection
+                from services.ingestion_review import revision
+                before_revision=revision(item)
+                # Keep a transcription snapshot when an extractor update recovers content.
+                # This is automated reprocessing, never a reviewer approval.
+                db.add(IngestionCorrection(ingestion_id=item.id,organization_id=item.organization_id,
+                    actor_id=job.created_by_id,reason='Automated extractor reprocessing; source retained and human review still required.',
+                    before_text=previous['text'],after_text=result['text'],before_revision=before_revision,
+                    after_revision=hashlib.sha256(json.dumps(result,sort_keys=True,ensure_ascii=True).encode()).hexdigest()))
             item.extracted=result
             if item.category=='general': item.category=result['category']
             if item.category=='financials' and not result['needs_review']:
@@ -184,6 +195,15 @@ async def process(job_id):
             job.status=Status.completed; job.progress_pct=100; job.completed_at=now(); job.error_message=None
             job.current_step='Extracted; review required' if item.status=='needs_review' else 'Indexed'
             await db.commit()
+            if settings.AI_ENABLED and settings.APPLICATION_SOURCE_AUTO_ANALYZE and doc.application_id:
+                from services.application_sources import auto_enqueue
+                try:await auto_enqueue(db,doc.application_id,item.created_by_id)
+                except Exception:
+                    # A full/unavailable AI queue must not turn successful extraction into a parser failure.
+                    await db.rollback();item=await db.get(Item,item_id)
+                    item.error='Extraction succeeded; automatic AI analysis could not be queued. Use Analyze selected sources after checking queue/provider readiness.'
+                    event(item,'analysis_enqueue_failed',error=item.error)
+                    await db.commit()
         except asyncio.CancelledError:
             await db.rollback()
             interrupted=await db.get(Item,item_id)

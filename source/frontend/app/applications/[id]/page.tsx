@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {refreshApplicationViews} from "@/lib/application-cache";
 import {applicationError} from "@/lib/form-feedback";
 import {HondaOnboardingPanel} from "@/components/HondaOnboardingPanel";
+import {ApplicationSourceWorkbench} from "@/components/ApplicationSourceWorkbench";
 import {HondaOnboardingData,isHondaOnboarding,hondaSources} from "@/lib/honda-onboarding";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -499,6 +500,7 @@ export default function ApplicationDetailPage() {
       </motion.section>
 
       {hondaOnboarding&&<><HondaOnboardingPanel appId={appId} request={app.amount_requested} data={app.form_data!.honda_2027_onboarding!}/><ApplicationReadiness appId={appId} onboarding/><DraftReview appId={appId}/></>}
+      <ApplicationSourceWorkbench appId={appId}/>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Proposal editor */}
         {hondaOnboarding&&!showOnboardingEditor&&!proposal&&!proposalDirty&&<div className="lg:col-span-2 glass rounded-xl border border-cyan-900/40 p-5"><h2 className="text-xl text-white">Proposal intentionally blank</h2><p className="text-sm text-zinc-300 my-3">This record captures source onboarding only. No proposal has been generated.</p><Button variant="outline" onClick={()=>setShowOnboardingEditor(true)}>Open blank proposal editor</Button></div>}

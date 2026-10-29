@@ -48,7 +48,7 @@ def extract(raw: bytes, filename: str) -> dict:
         raise ValueError('Use a nonempty PDF, PNG, DOCX, XLSX, CSV or text file under 20 MB.')
     parts, tables, warnings = [], [], []
     ocr = False
-    metadata = {'format': suffix[1:], 'extractor_version': 'gfm-2'}
+    metadata = {'format': suffix[1:], 'extractor_version': 'gfm-3'}
     try:
         if suffix in {'.docx', '.xlsx'}:
             with zipfile.ZipFile(io.BytesIO(raw)) as archive:
@@ -67,6 +67,8 @@ def extract(raw: bytes, filename: str) -> dict:
                 for page in pdf:
                     text = page.get_text(sort=True).strip()
                     locator = f'page {page.number + 1}'
+                    for link in page.get_links():
+                        if link.get('uri'):metadata.setdefault('hyperlinks',[]).append({'locator':locator,'target':link['uri']})
                     if not text or (len(text)<100 and page.get_images()):
                         require_ocr_capacity()
                         ocr = True
@@ -107,9 +109,23 @@ def extract(raw: bytes, filename: str) -> dict:
         elif suffix == '.docx':
             from docx import Document
             doc = Document(io.BytesIO(raw))
-            parts = [{'locator': f'paragraph {i+1}', 'text': p.text} for i,p in enumerate(doc.paragraphs) if p.text.strip()]
+            # Include hyperlink runs even on python-docx 0.8.11, without following links.
+            def paragraph_text(p):
+                return ''.join('\t' if n.tag.endswith('}tab') else '\n' if n.tag.endswith(('}br','}cr')) else n.text or ''
+                               for n in p._p.iter() if n.tag.endswith(('}t','}tab','}br','}cr')))
+            def links(p,locator):
+                for link in p._p.iter('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}hyperlink'):
+                    rid=link.get('{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id')
+                    rel=doc.part.rels.get(rid)
+                    if rel:metadata.setdefault('hyperlinks',[]).append({'locator':locator,'target':str(rel.target_ref),
+                        'label':''.join(n.text or '' for n in link.iter() if n.tag.endswith('}t'))})
+            for i,p in enumerate(doc.paragraphs):links(p,f'paragraph {i+1}')
+            parts = [{'locator': f'paragraph {i+1}', 'text': paragraph_text(p)} for i,p in enumerate(doc.paragraphs) if paragraph_text(p).strip()]
             for i, table in enumerate(doc.tables):
-                rows = [[c.text for c in r.cells] for r in table.rows]
+                rows = [['\n'.join(paragraph_text(p) for p in c.paragraphs) for c in r.cells] for r in table.rows]
+                for ri,row in enumerate(table.rows):
+                    for ci,cell in enumerate(row.cells):
+                        for p in cell.paragraphs:links(p,f'table {i+1} row {ri+1} cell {ci+1}')
                 tables.append({'locator': f'table {i+1}', 'rows': rows})
         elif suffix == '.xlsx':
             # Read literal OOXML values, not binary floats; never evaluate formulas or external links.

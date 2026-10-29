@@ -10,16 +10,17 @@ import httpx
 from config import settings
 
 _last_success = 0.0
+_last_failure = None
 
 
 def status():
     verified = _last_success > 0 and time.monotonic() - _last_success < 300
     return {'ready': verified, 'reason': 'ready' if verified else 'remote_chat_not_verified',
-            'provider': 'alambda', 'streaming': False, 'model_identity_verified': False}
+            'provider': 'alambda', 'streaming': False, 'model_identity_verified': False,'failure':_last_failure}
 
 
 async def chat(messages, model=None):
-    global _last_success
+    global _last_success,_last_failure
     if not settings.AI_ENABLED:
         raise RuntimeError('AI is not configured')
     context = '\n\n'.join(m['content'] for m in messages if m.get('role') == 'system')
@@ -59,7 +60,10 @@ async def chat(messages, model=None):
                 or content.strip() == 'I had trouble processing that. Please try rephrasing your question.'):
             raise RuntimeError('Remote chat did not return a usable answer')
         _last_success = time.monotonic()
+        _last_failure = None
         return content
-    except Exception:
+    except Exception as exc:
         _last_success = 0.0
+        # Safe operational classification only: never expose tokens, URLs or response bodies.
+        _last_failure = ('http_'+str(exc.response.status_code)) if isinstance(exc,httpx.HTTPStatusError) else type(exc).__name__
         raise RuntimeError('Alambda chat unavailable; existing drafts have not been changed') from None

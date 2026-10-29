@@ -51,7 +51,7 @@ async def readiness(db,app):
         for r in records if r.kind=='audit' and r.data.get('application_id')==app.id and r.data.get('status')=='accepted'
         and (not r.data.get('due_date') or r.data['due_date']>=datetime.now(timezone.utc).date().isoformat())
         for c in r.data.get('checklist',[]) if c.get('done') and c.get('evidence') and c.get('owner')}
-    package_complete=not reviewed or safe_requirements(grant).get('package_complete') is True
+    package_complete=bool(reviewed and safe_requirements(grant).get('package_complete') is True)
     add('requirements_known','Funder requirements available',bool(requirements) and package_complete,requirement_error(grant) if grant and requirement_error(grant) else 'The source association is separate from a complete submission package. Review mandatory forms and attachments; missing lists do not mean none are required.')
     for index,label in enumerate(dict.fromkeys(requirements)):
         evidence=accepted_checklist.get(label.strip().casefold())
@@ -76,6 +76,11 @@ async def readiness(db,app):
         except InvalidOperation:warnings.append('Saved budget total is not a valid number; review the planning data.')
     if any(i.status!='ready' for i,d in docs):warnings.append('Some associated evidence is still processing, failed, or awaiting extraction approval.')
     if any(freshness(i)['stale'] for i,d in docs):warnings.append('Associated evidence is overdue for review; confirm that figures are still current.')
+    from services.application_sources import workflow_checks
+    source_workflow=await workflow_checks(db,app)
+    if source_workflow['present']:
+        add('source_workflow','Reviewed source-to-application package',not source_workflow['outstanding'],
+            '; '.join(source_workflow['outstanding']) or 'Tracked requirements and documents reviewed; final funder validation remains required.')
     return {'application_id':app.id,'revision':draft_revision(app),'ready':all(c['passed'] for c in checks) and not warnings,
         'review_snapshot':{'proposal_text':app.proposal_text or '', 'budget_narrative':app.budget_narrative or '',
                            'amount_requested':app.amount_requested,'form_data':app.form_data or {}},

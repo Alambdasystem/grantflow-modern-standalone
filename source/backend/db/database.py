@@ -85,6 +85,8 @@ async def init_db():
         from sqlalchemy.dialects.sqlite import insert
         if engine.dialect.name == 'sqlite':
             await conn.execute(insert(SchemaVersion).values(version=2,applied_at=int(time.time())).on_conflict_do_nothing())
+            # v3 adds application_source_runs/reviews through create_all above.
+            await conn.execute(insert(SchemaVersion).values(version=3,applied_at=int(time.time())).on_conflict_do_nothing())
             if settings.AUTH_MODE == 'standalone':
                 await conn.execute(insert(AuthControl).values(id=1,bootstrapped=False).on_conflict_do_nothing())
 

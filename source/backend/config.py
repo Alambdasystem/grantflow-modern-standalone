@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     GFM_DATA_ROOT: str = "/var/data"
     GFM_REQUIRE_PERSISTENT_STORAGE: bool = True
     AI_ENABLED: bool = False
+    APPLICATION_SOURCE_AUTO_ANALYZE: bool = True
     AI_PROVIDER: str = 'ollama'
     ALAMBDA_CHAT_URL: str = 'https://api.alambda.com/api/chat'
     ALAMBDA_API_TOKEN: str = ''

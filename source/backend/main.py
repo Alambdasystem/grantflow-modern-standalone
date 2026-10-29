@@ -43,6 +43,7 @@ from routers.donors import router as donors_router, public_router as give_router
 from routers.admin import router as admin_router
 from routers.operations import router as operations_router
 from routers.ingestion import router as ingestion_router
+from routers.application_sources import router as application_sources_router
 from routers.ingestion_workers import router as ingestion_workers_router
 from routers.email_safety import router as email_safety_router
 
@@ -86,7 +87,13 @@ async def lifespan(app: FastAPI):
         await job_queue.recover()
         worker = asyncio.create_task(job_queue.worker())
     app.state.automation_worker = worker
+    from services import application_sources
+    await application_sources.recover()
+    source_worker=asyncio.create_task(application_sources.worker())
     yield
+    source_worker.cancel()
+    try:await source_worker
+    except asyncio.CancelledError:pass
     if worker:
         await job_queue.shutdown(worker)
     # ── Shutdown ─────────────────────────────────────────────────────────────
@@ -134,6 +141,7 @@ app.include_router(give_router)
 app.include_router(admin_router)
 app.include_router(operations_router)
 app.include_router(ingestion_router)
+app.include_router(application_sources_router)
 app.include_router(ingestion_workers_router)
 app.include_router(email_safety_router)
 

@@ -244,6 +244,44 @@ class Document(Base):
     organization = relationship("Organization", back_populates="documents")
 
 
+class ApplicationSourceRun(Base):
+    """Immutable successful outputs; retries only replace failed attempts."""
+    __tablename__ = 'application_source_runs'
+    id = Column(Integer, primary_key=True)
+    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=False, index=True)
+    application_id = Column(Integer, ForeignKey('grant_applications.id'), nullable=False, index=True)
+    created_by_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    request_key = Column(String(64), nullable=False, unique=True)
+    kind = Column(String(30), nullable=False)
+    status = Column(String(30), nullable=False, default='queued')
+    inputs = Column(JSON, default=dict)
+    sources = Column(JSON, default=list)
+    output = Column(JSON, default=dict)
+    provider = Column(String(100))
+    model = Column(String(255))
+    error = Column(Text)
+    attempts = Column(Integer, default=0)
+    progress = Column(Integer, default=0)
+    created_at = Column(DateTime, server_default=func.now())
+    started_at = Column(DateTime)
+    finished_at = Column(DateTime)
+
+
+class ApplicationSourceReview(Base):
+    __tablename__ = 'application_source_reviews'
+    id = Column(Integer, primary_key=True)
+    organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=False, index=True)
+    run_id = Column(Integer, ForeignKey('application_source_runs.id'), nullable=False, index=True)
+    item_key = Column(String(100), nullable=False)
+    actor_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    decision = Column(String(30), nullable=False)
+    notes = Column(Text, nullable=False)
+    source_url = Column(String(2000), default='')
+    output_hash = Column(String(64), nullable=False)
+    details = Column(JSON, default=dict)
+    created_at = Column(DateTime, server_default=func.now())
+
+
 class IngestionSource(Base):
     __tablename__ = 'ingestion_sources'
     id = Column(Integer, primary_key=True)

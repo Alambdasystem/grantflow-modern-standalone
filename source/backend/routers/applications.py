@@ -34,6 +34,8 @@ def configured_stages(config):
 
 
 async def require_current_acceptance(db, app):
+    from services.application_sources import require_reviewed_workflow
+    await require_reviewed_workflow(db,app)
     from services.application_readiness import latest_acceptance
     _,valid=await latest_acceptance(db,app)
     if not valid:
@@ -231,6 +233,8 @@ async def accept_draft(app_id: int, payload: AcceptanceInput, db: AsyncSession =
     if payload.decision=='accepted':
         from services.candidate_quality import require_valid_content
         await require_valid_content(db,app,(app.proposal_text or '')+'\n'+(app.budget_narrative or ''))
+        from services.application_sources import require_reviewed_workflow
+        await require_reviewed_workflow(db,app)
     import hashlib
     from services.application_readiness import draft_revision
     revision=draft_revision(app)
